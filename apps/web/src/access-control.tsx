@@ -72,9 +72,10 @@ function Loading({text}: {text: string}) {
 export function AdminLogin() {
   const nav = useNavigate(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [mfaCode, setMfaCode] = useState(''); const [devToken, setDevToken] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   useEffect(() => {
-    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, '')); const privateToken = fragment.get('dev') ?? '';
-    if (privateToken) { setDevToken(privateToken); window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`); }
+    const readPrivateFragment = () => { const fragment = new URLSearchParams(window.location.hash.replace(/^#/, '')); const privateToken = fragment.get('dev') ?? ''; if (privateToken) { setDevToken(privateToken); window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`); } };
+    readPrivateFragment(); window.addEventListener('hashchange', readPrivateFragment);
     api<{authenticated: boolean}>('/admin/session').then(() => nav('/admin', {replace: true})).catch(() => {});
+    return () => window.removeEventListener('hashchange', readPrivateFragment);
   }, []);
   const submit = async (event: FormEvent) => { event.preventDefault(); setBusy(true); setError(''); try { await api('/admin/login', {method: 'POST', body: JSON.stringify({email, password, mfaCode})}); nav('/admin', {replace: true}); } catch { setError('The credentials or verification code are incorrect.'); } finally { setBusy(false); } };
   const devLogin = async () => { setBusy(true); setError(''); try { await api('/admin/dev-login', {method: 'POST', body: JSON.stringify({token: devToken})}); setDevToken(''); nav('/admin', {replace: true}); } catch { setDevToken(''); setError('The temporary private access is invalid, expired or already disabled.'); } finally { setBusy(false); } };
