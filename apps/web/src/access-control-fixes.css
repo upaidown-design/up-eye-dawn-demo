@@ -204,6 +204,32 @@
   align-items: start;
 }
 
+.dev-account-helper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px dashed rgba(241, 197, 106, .5);
+  background: rgba(241, 197, 106, .06);
+  color: var(--text);
+}
+.dev-account-helper b { color: var(--warning); font: 750 9px var(--mono); letter-spacing: .12em; }
+.dev-account-helper span { font: 650 9px var(--mono); color: var(--muted); }
+.nda-form textarea,.portal-form textarea,.portal-form select {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #0d1916;
+  color: var(--text);
+  padding: 14px;
+  border-radius: 6px;
+  outline: none;
+  resize: vertical;
+}
+.nda-form textarea:focus,.portal-form textarea:focus,.portal-form select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(82,217,194,.1); }
+.nda-jurisdiction { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.nda-jurisdiction span { border: 1px solid var(--border); padding: 7px 9px; color: var(--cyan); font: 700 8px var(--mono); letter-spacing: .08em; }
+
 .portal-form {
   display: grid;
   gap: 15px;

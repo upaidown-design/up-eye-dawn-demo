@@ -3,14 +3,14 @@
   "as_of": "2026-08-16",
   "meeting": "New York 2026",
   "company": {
-    "legal_name": "UP-EYE-DAWN SL",
-    "display_name": "UP-EYE-DAWN",
+    "legal_name": "UP AI DOWN SL",
+    "display_name": "UP AI DOWN",
     "country": "Spain",
     "stage": "Early-stage / pre-industrialization",
     "pending": ["shareholder percentages", "cap table", "historical contributions", "signed IP assignments", "corporate diligence"]
   },
   "terminology": {
-    "platform": "UP-EYE-DAWN PLATFORM",
+    "platform": "UP AI DOWN PLATFORM",
     "sentinel": "SENTINEL",
     "rover": "ROVER_001",
     "rover_commercial_name": null,
@@ -37,7 +37,7 @@
   "ndvi": {
     "related_technology":{"name":"INSECE Red/NIR NDVI engine","classification":"REAL","relationship":"EXISTING EXTERNAL/RELATED TECHNOLOGY","rights":"REUSE RIGHTS TO CONFIRM"},
     "demo":{"classification":"DEMO_SIMULATION","data":"SYNTHETIC PRECOMPUTED NDVI","live_red_nir_processing":false},
-    "investor_wording":"NDVI processing capability exists in related technology; UP-EYE-DAWN integration is planned, subject to reuse rights and technical integration."
+    "investor_wording":"NDVI processing capability exists in related technology; UP AI DOWN integration is planned, subject to reuse rights and technical integration."
   },
   "financial": {
     "model_status":"MODELLED_NOT_APPROVED","model_version":"financial/model-v1.json","currency":"EUR","period":"M0-M15 monthly; M24-ready","runway":null,"revenue_series":null,"arr":null,"cac":null,"ltv":null,
@@ -79,9 +79,9 @@
     {"period":"M0-M2","name":"Corporate and IP baseline","maturity":"PLANNED"},{"period":"M1-M3","name":"Rover sourcing and prototype sprint","maturity":"PLANNED"},{"period":"M2-M5","name":"Instrumented Sentinel iteration","maturity":"PLANNED"},{"period":"M3-M7","name":"Ground-air data pipeline v1","maturity":"PLANNED"},{"period":"M5-M9","name":"Design-partner validation","maturity":"PLANNED"},{"period":"M7-M11","name":"AI benchmark","maturity":"PLANNED"},{"period":"M9-M12","name":"Unit economics and repeatable offer","maturity":"PLANNED"}
   ],
   "claims": [
-    {"id":"CLM-001","claim":"UP-EYE-DAWN has an autonomous rover prototype","classification":"NOT_SUPPORTED","evidence":[],"allowed_externally":false,"required_wording":"Do not use"},
+    {"id":"CLM-001","claim":"UP AI DOWN has an autonomous rover prototype","classification":"NOT_SUPPORTED","evidence":[],"allowed_externally":false,"required_wording":"Do not use"},
     {"id":"CLM-002","claim":"The demo simulates a complete autonomous mission","classification":"SUPPORTED","evidence":["simulation-engine tests","critical Playwright"],"allowed_externally":true,"required_wording":"Deterministic digital prototype"},
-    {"id":"CLM-003","claim":"INSECE contains a Red/NIR NDVI engine","classification":"SUPPORTED_WITH_CONTEXT","evidence":["INSECE documentation audit"],"allowed_externally":true,"required_wording":"Related existing technology; UP-EYE-DAWN integration pending rights and technical integration"},
+    {"id":"CLM-003","claim":"INSECE contains a Red/NIR NDVI engine","classification":"SUPPORTED_WITH_CONTEXT","evidence":["INSECE documentation audit"],"allowed_externally":true,"required_wording":"Related existing technology; UP AI DOWN integration pending rights and technical integration"},
     {"id":"CLM-004","claim":"A physical Sentinel prototype exists","classification":"NOT_SUPPORTED","evidence":["Owner verbal statement only"],"allowed_externally":false,"required_wording":"Prototype evidence required before classification"},
     {"id":"CLM-005","claim":"The software demo is functional and deterministic","classification":"SUPPORTED","evidence":["runtime preflight","API tests","Playwright tests"],"allowed_externally":true,"required_wording":"Working deterministic demo environment"},
     {"id":"CLM-006","claim":"The demo performs live Red/NIR NDVI processing","classification":"NOT_SUPPORTED","evidence":["synthetic fallback JSON"],"allowed_externally":false,"required_wording":"Precomputed synthetic NDVI in the demo"},
@@ -89,9 +89,9 @@
     {"id":"CLM-008","claim":"The 12-month EBITDA target is an approved forecast","classification":"NOT_SUPPORTED","evidence":["assumptions.json"],"allowed_externally":false,"required_wording":"Target to validate"}
   ],
   "language_matrix": {
-    "ndvi":{"internal":"Synthetic NDVI fallback.","investor":"Deterministic NDVI demonstration using synthetic data.","technical":"Precomputed synthetic raster and statistics; production pipeline not integrated.","diligence":"No claim of live Red/NIR processing in the UP-EYE-DAWN demo."},
+    "ndvi":{"internal":"Synthetic NDVI fallback.","investor":"Deterministic NDVI demonstration using synthetic data.","technical":"Precomputed synthetic raster and statistics; production pipeline not integrated.","diligence":"No claim of live Red/NIR processing in the UP AI DOWN demo."},
     "demo":{"internal":"Deterministic simulation runtime.","investor":"A deterministic digital prototype of the operating system we are building.","technical":"Replayable state machine, API, WebSocket and synthetic domain data.","diligence":"Hardware actors and agronomic outputs are simulated; software workflow is functional."},
-    "sentinel":{"internal":"Configuration decision pending; evidence insufficient to classify physical prototype.","investor":"Autonomous fixed field node concept within the UP-EYE-DAWN architecture.","technical":"Candidate configurations conflict and remain unselected.","diligence":"No approved dimensions, energy system, drone model or test record."}
+    "sentinel":{"internal":"Configuration decision pending; evidence insufficient to classify physical prototype.","investor":"Autonomous fixed field node concept within the UP AI DOWN architecture.","technical":"Candidate configurations conflict and remain unselected.","diligence":"No approved dimensions, energy system, drone model or test record."}
   },
   "what_exists_today": [
     {"capability":"Software platform","today":"SOFTWARE_WORKING","new_york_demo":"SOFTWARE_WORKING","objective_12m":"Production hardening"},

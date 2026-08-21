@@ -1,0 +1,20 @@
+{
+  "version": "NDA-EU-LEGAL-REVIEW-2026-08-21",
+  "status": "LEGAL_REVIEW",
+  "jurisdiction": "EU_EEA",
+  "governingLaw": "TO_BE_SELECTED_BY_COUNSEL",
+  "signatureProfile": "EIDAS_SIMPLE_ELECTRONIC_SIGNATURE_WORKFLOW",
+  "title": "EU/EEA investor confidentiality agreement — legal review draft",
+  "disclosingParty": "UP AI DOWN SL",
+  "notice": "LEGAL REVIEW REQUIRED — the governing law, venue, company particulars, term and final wording must be approved by counsel before external use.",
+  "paragraphs": [
+    "The recipient wishes to receive non-public business, technical, product, financial and commercial information solely to evaluate a possible investment or business relationship with the disclosing party.",
+    "The recipient will keep confidential information secure, use it only for that evaluation and disclose it only to advisers or representatives who need to know it and are bound by confidentiality duties at least as protective as this agreement.",
+    "Confidential information excludes information the recipient can demonstrate was lawfully known without restriction, becomes public without breach, is lawfully received from a third party without a duty of confidence, or is independently developed without use of the confidential information.",
+    "If disclosure is required by law or a competent authority, the recipient will, where legally permitted, give prompt notice and disclose only the minimum information required.",
+    "On written request, the recipient will return or securely destroy confidential material, except for copies retained under mandatory law, professional standards or automated backup procedures, which remain protected.",
+    "No intellectual-property licence, product warranty, investment commitment or obligation to proceed is created by disclosure of information. Information is provided for evaluation and may be incomplete or forward-looking.",
+    "The confidentiality period, governing law, competent courts and complete registered particulars of the disclosing party are intentionally not asserted in this workflow draft and must be completed by qualified counsel before approval.",
+    "By applying an electronic signature, the recipient confirms an intention to be bound by the approved agreement assigned to the invitation and consents to receiving and retaining the agreement and evidence record electronically."
+  ]
+}

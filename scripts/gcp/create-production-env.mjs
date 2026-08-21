@@ -43,6 +43,7 @@ const rows = {
   INVESTOR_HTML_URL: '/demo/investor-demo',
   PUBLIC_BASE_URL: 'https://demo.upaidown.com',
   EXTERNAL_PORTAL_ENABLED: 'false',
+  EMAIL_VERIFICATION_PROVIDER: previous.EMAIL_VERIFICATION_PROVIDER || 'NONE',
   ADMIN_EMAIL: adminEmail,
   ADMIN_PASSWORD_HASH: adminPasswordHash,
   ADMIN_TOTP_SECRET: local.ADMIN_TOTP_SECRET || previous.ADMIN_TOTP_SECRET || '',

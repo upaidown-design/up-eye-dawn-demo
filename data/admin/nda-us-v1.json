@@ -1,0 +1,20 @@
+{
+  "version": "NDA-US-LEGAL-REVIEW-2026-08-21",
+  "status": "LEGAL_REVIEW",
+  "jurisdiction": "UNITED_STATES",
+  "governingLaw": "STATE_TO_BE_SELECTED_BY_COUNSEL",
+  "signatureProfile": "ESIGN_SIMPLE_ELECTRONIC_SIGNATURE_WORKFLOW",
+  "title": "United States investor confidentiality agreement — legal review draft",
+  "disclosingParty": "UP AI DOWN SL",
+  "notice": "LEGAL REVIEW REQUIRED — the state law, venue, company particulars, term and final wording must be approved by U.S. counsel before external use.",
+  "paragraphs": [
+    "The recipient wishes to receive non-public business, technical, product, financial and commercial information solely to evaluate a possible investment or business relationship with the disclosing party.",
+    "The recipient will protect confidential information using at least reasonable care, use it only for that evaluation and disclose it only to advisers or representatives who need to know it and are subject to confidentiality obligations at least as protective as this agreement.",
+    "Confidential information excludes information the recipient can demonstrate was already lawfully known without restriction, becomes public without breach, is lawfully received from a third party without a duty of confidence, or is independently developed without use of the confidential information.",
+    "If disclosure is required by law, subpoena or court order, the recipient will, where legally permitted, give prompt notice and reasonably cooperate in seeking protective treatment, while disclosing only what is required.",
+    "On written request, the recipient will return or securely destroy confidential material, except for copies retained under mandatory law, professional standards or automated backup procedures, which remain protected.",
+    "No intellectual-property licence, product warranty, investment commitment, partnership or obligation to proceed is created by disclosure. Information is provided for evaluation and may be incomplete or forward-looking.",
+    "The confidentiality period, governing state law, forum, remedies and complete registered particulars of the disclosing party are intentionally not asserted in this workflow draft and must be completed by qualified U.S. counsel before approval.",
+    "By applying an electronic signature, the recipient confirms an intention to be bound by the approved agreement assigned to the invitation and consents to receiving and retaining the agreement and evidence record electronically."
+  ]
+}

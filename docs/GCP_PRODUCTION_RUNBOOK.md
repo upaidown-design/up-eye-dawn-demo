@@ -41,16 +41,17 @@ The rollout TTL is 10 minutes, the minimum exposed by DonDominio. Unrelated TXT,
 - PostgreSQL is reachable only inside the Docker network.
 - HTTPS certificates and redirects are managed by Caddy after DNS propagation.
 - The VM disk has a daily `03:00 UTC` snapshot schedule with 14-day retention in `europe-west1`.
-- The current NDA and privacy documents remain `DRAFT`; `EXTERNAL_PORTAL_ENABLED` stays `false` until counsel approval, MFA and production SMTP are configured.
+- The NDA jurisdiction drafts and privacy notice remain unapproved; `EXTERNAL_PORTAL_ENABLED` stays `false` until counsel approval, verified email ownership, MFA and production SMTP are configured.
 
 ## Required release gates
 
 1. Replace the NDA workflow draft with counsel-approved text.
 2. Approve privacy, retention and controller details.
 3. Configure administrator TOTP and require MFA.
-4. Configure an approved transactional SMTP provider and archive mailbox.
-5. Create production invitations individually; never ship a default invitation token.
-6. Test registration, IP-change re-verification, NDA PDF delivery, revocation and audit export.
+4. Configure and server-verify email ownership (recommended candidate: Google Identity Platform/Firebase email-link authentication).
+5. Configure an approved transactional SMTP provider and archive mailbox.
+6. Create production invitations individually; never ship a default invitation token.
+7. Test registration, shared-link use in a second browser, IP-change re-verification, NDA PDF delivery, revocation and audit export.
 
 ## Operations
 

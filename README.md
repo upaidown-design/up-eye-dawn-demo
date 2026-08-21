@@ -1,4 +1,4 @@
-# UP-EYE-DAWN Enterprise Demo
+# UP AI DOWN Enterprise Demo
 
 An isolated, deterministic and explicitly synthetic investor demo for autonomous field intelligence.
 

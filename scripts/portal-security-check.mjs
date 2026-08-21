@@ -14,6 +14,7 @@ const checks = {
   database: Boolean(values.DATABASE_URL),
   ndaApproved: values.NDA_LEGAL_STATUS === 'APPROVED',
   privacyApproved: values.PRIVACY_LEGAL_STATUS === 'APPROVED',
+  emailVerification: Boolean(values.EMAIL_VERIFICATION_PROVIDER && values.EMAIL_VERIFICATION_PROVIDER !== 'NONE'),
   secureCookies: values.COOKIE_SECURE === 'true',
   adminMfa: values.ADMIN_MFA_REQUIRED === 'true' && Boolean(values.ADMIN_TOTP_SECRET),
   smtp: Boolean(values.SMTP_HOST && values.SMTP_FROM),
@@ -26,7 +27,7 @@ const checks = {
   noDefaultInvite: !values.DEFAULT_INVITE_TOKEN,
 };
 const localRequired = ['database', 'encryption', 'sessionSecret', 'invitationSecret', 'ipFingerprintSecret', 'keySeparation'];
-const externalRequired = [...localRequired, 'ndaApproved', 'privacyApproved', 'secureCookies', 'adminMfa', 'smtp', 'noDefaultInvite'];
+const externalRequired = [...localRequired, 'ndaApproved', 'privacyApproved', 'emailVerification', 'secureCookies', 'adminMfa', 'smtp', 'noDefaultInvite'];
 const failed = (external ? externalRequired : localRequired).filter((key) => !checks[key]);
 const verdict = failed.length ? 'PRIVATE_PORTAL_NOT_READY' : external ? 'PRIVATE_PORTAL_READY_FOR_EXTERNAL_USE' : 'PRIVATE_PORTAL_READY_FOR_LOCAL_TESTING';
 console.log(JSON.stringify({mode: external ? 'EXTERNAL' : 'LOCAL', checks, failed, verdict}, null, 2));

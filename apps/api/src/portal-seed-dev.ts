@@ -26,7 +26,7 @@ try {
   const rawToken = process.env.DEFAULT_INVITE_TOKEN || randomOpaqueToken();
   await pool.query(`INSERT INTO private_portal.invitations(id,public_id,token_hash,name,description,organisation_name,policy,nda_document_id,status,created_by,expires_at,max_registrations,metadata)
     VALUES($1,$2,$3,$4,$5,$6,'MULTI_VISITOR',$7,'ACTIVE',$8,now()+interval '180 days',10,$9) ON CONFLICT(token_hash) DO NOTHING`,
-  [randomUUID(), `inv_${randomOpaqueToken(12)}`, hmacHex(rawToken, process.env.INVITATION_TOKEN_HMAC_SECRET!), 'New York 2026 local invitation', 'Local workflow test', 'UP-EYE-DAWN local test', documentId, adminId, JSON.stringify({localSeed: true})]);
+  [randomUUID(), `inv_${randomOpaqueToken(12)}`, hmacHex(rawToken, process.env.INVITATION_TOKEN_HMAC_SECRET!), 'New York 2026 local invitation', 'Local workflow test', 'UP AI DOWN local test', documentId, adminId, JSON.stringify({localSeed: true})]);
   console.log(JSON.stringify({seeded: true, invitationTokenSource: process.env.DEFAULT_INVITE_TOKEN ? 'ENVIRONMENT' : 'GENERATED_NOT_RETURNED'}, null, 2));
 } finally {
   await pool.end();

@@ -21,7 +21,7 @@ The workflow records electronic acknowledgement evidence. It is not described as
 
 Public:
 
-- `/demo/preflight`
+- `/demo/`
 - `/demo/about-demo`
 - `/demo/transparency`
 - `/demo/access`
@@ -30,6 +30,7 @@ Public:
 
 Visitor-controlled:
 
+- `/demo/preflight`
 - `/demo/investor`
 - `/demo/investor-financials`
 - `/demo/mission-control`
@@ -65,7 +66,7 @@ PostgreSQL schema `private_portal` persists:
 - `project_events`, `project_tasks`, `project_notes`;
 - `schema_migrations`.
 
-The base access migration is `infra/migrations/001_private_investor_portal.sql`; the operational workspace is added by `infra/migrations/002_admin_project_workspace.sql`. Application startup runs pending migrations transactionally. The access and administrator workspace no longer use demo memory.
+The base access migration is `infra/migrations/001_private_investor_portal.sql`; the operational workspace is added by `infra/migrations/002_admin_project_workspace.sql`; multi-jurisdiction NDA evidence fields are added by `infra/migrations/003_multijurisdiction_nda.sql`. Application startup runs pending migrations transactionally. The access and administrator workspace no longer use demo memory.
 
 The administrator control room combines two deliberately separate concerns:
 
@@ -100,14 +101,19 @@ Each acceptance is append-only and stores:
 
 - NDA ID/version and exact document SHA-256;
 - immutable document, privacy and recipient snapshot;
-- typed acknowledgement plus two independent confirmations;
+- registered address, signatory title and typed legal-name signature;
+- affirmative electronic-signature intent, electronic-record consent, NDA acceptance and privacy acknowledgement;
 - UTC timestamp and deterministic evidence SHA-256;
 - encrypted IP, HMAC IP fingerprint and masked IP;
 - user agent;
 - generated PDF bytes and PDF SHA-256;
 - email delivery state and optional revocation record.
 
-The PDF is generated from the stored acceptance snapshot and never includes a full IP. It contains the masked network evidence, document hash, version, recipient, timestamp and evidence identifier. Downloads re-check an active visitor or administrator session.
+The PDF is generated from the stored acceptance snapshot and never includes a full IP. It contains the jurisdiction profile, governing-law field, signature method, masked network evidence, document hash, version, recipient, timestamp and evidence identifier. Downloads re-check an active visitor or administrator session.
+
+Three workflow documents are seeded: the original generic draft, an EU/EEA legal-review draft and a United States legal-review draft. An administrator assigns one exact version when creating an invitation. The two jurisdiction profiles deliberately retain unresolved governing-law and company-detail fields and cannot be described as approved agreements until qualified counsel supplies and approves the final text.
+
+Firebase/Google Identity Platform is treated as a possible **email ownership verification** layer, not as the NDA evidence store or signature system. PostgreSQL remains authoritative for invitations, visitors, document snapshots, acceptances, sessions and audit evidence. External startup fails closed while `EMAIL_VERIFICATION_PROVIDER=NONE`; enabling a named provider also requires a completed, server-verified email-link/token integration.
 
 Manual approval follows `REGISTER -> NDA ACCEPTED -> PENDING_APPROVAL`. The pending browser context polls status without receiving confidential content. Approval marks the visitor active; the next status check rotates/creates the visitor session.
 
@@ -219,6 +225,7 @@ Before external use, implement encrypted PostgreSQL backups, restore drills, res
 
 - [ ] NDA approved by counsel
 - [ ] Privacy notice approved
+- [ ] Email ownership verification configured and server-verified
 - [ ] Company legal identity inserted
 - [ ] Authorised signatory confirmed
 - [ ] Retention policy approved
@@ -234,4 +241,4 @@ Before external use, implement encrypted PostgreSQL backups, restore drills, res
 - [ ] Trusted-proxy topology verified
 - [ ] Security, visitor, admin, mail, PDF and Playwright suites passed
 
-External startup fails closed when the legal/privacy/MFA/Secure-cookie gate is incomplete. Localhost deliberately does not send HSTS.
+External startup fails closed when the legal/privacy/email-verification/MFA/Secure-cookie gate is incomplete. Localhost deliberately does not send HSTS.
