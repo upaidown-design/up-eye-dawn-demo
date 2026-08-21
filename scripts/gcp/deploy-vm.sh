@@ -35,5 +35,6 @@ systemctl daemon-reload
 systemctl enable --now up-eye-dawn.service
 systemctl restart up-eye-dawn.service
 /usr/local/bin/ued-compose --env-file /etc/up-eye-dawn/app.env -f /opt/up-eye-dawn/current/infra/production/compose.yaml ps
-curl --fail --silent http://127.0.0.1:8088/healthz
+docker exec production_gateway_1 wget --quiet --output-document=- http://127.0.0.1:8088/healthz
+docker exec production_api_1 wget --quiet --output-document=- http://127.0.0.1:4010/api/v1/health/live
 REMOTE
