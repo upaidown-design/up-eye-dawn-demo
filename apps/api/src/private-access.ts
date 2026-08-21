@@ -24,6 +24,14 @@ import {
   verifyTotp,
 } from './portal-core.js';
 import {runPortalMigrations} from './portal-migrations.js';
+import {
+  CreateProjectEventBody,
+  CreateProjectNoteBody,
+  CreateProjectTaskBody,
+  UpdateProjectEventBody,
+  UpdateProjectNoteBody,
+  UpdateProjectTaskBody,
+} from './workspace-schema.js';
 
 const {Pool} = pg;
 const MINUTE = 60_000;
@@ -112,6 +120,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   const visitorIdleMs = intEnv('VISITOR_SESSION_IDLE_MINUTES', 120) * MINUTE; const visitorMaxMs = intEnv('VISITOR_SESSION_MAX_HOURS', 72) * HOUR;
   const adminIdleMs = intEnv('ADMIN_SESSION_IDLE_MINUTES', 30) * MINUTE; const adminMaxMs = intEnv('ADMIN_SESSION_MAX_HOURS', 8) * HOUR;
   const publicBaseUrl = env('PUBLIC_BASE_URL', 'http://127.0.0.1:8088'); const adminEmail = normalizeEmail(env('ADMIN_EMAIL')); const adminPasswordHash = env('ADMIN_PASSWORD_HASH');
+  const localPortalTestMode = ['localhost', '127.0.0.1', '::1'].includes(new URL(publicBaseUrl).hostname);
   const adminTotpSecret = env('ADMIN_TOTP_SECRET'); const defaultInviteToken = env('DEFAULT_INVITE_TOKEN');
   const visitorCookie = cookieSecure ? '__Host-ued-visitor' : 'ued_visitor'; const adminCookie = cookieSecure ? '__Host-ued-admin' : 'ued_admin';
   const registrationCookie = cookieSecure ? '__Host-ued-registration' : 'ued_registration'; const csrfCookie = cookieSecure ? '__Host-ued-admin-csrf' : 'ued_admin_csrf';
@@ -194,7 +203,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   app.addHook('onSend', async (request, reply, payload) => { if (request.url.startsWith('/api/v1/access') || request.url.startsWith('/api/v1/admin')) reply.header('Cache-Control', 'no-store, private'); return payload; });
 
   app.post('/api/v1/access/invitations/prepare', {config: {rateLimit: {max: 30, timeWindow: '15 minutes'}}}, async (request, reply) => {
-    if (!trustedOrigin(request, reply)) return; const parsed = PrepareBody.safeParse(request.body); if (!parsed.success) return reply.code(404).send({error: 'INVITATION_UNAVAILABLE'});
+    if (!trustedOrigin(request, reply)) return; if (!externalEnabled && !localPortalTestMode) return reply.code(503).send({error: 'EXTERNAL_PORTAL_DISABLED'}); const parsed = PrepareBody.safeParse(request.body); if (!parsed.success) return reply.code(404).send({error: 'INVITATION_UNAVAILABLE'});
     const invitation = (await pool.query('SELECT * FROM private_portal.invitations WHERE token_hash=$1', [hmacHex(parsed.data.token, invitationSecret)])).rows[0]; const now = Date.now();
     if (!invitation || invitation.status === 'REVOKED' || new Date(invitation.valid_from).getTime() > now || new Date(invitation.expires_at).getTime() <= now) { await audit('ACCESS_DENIED', 'WARNING', 'ANONYMOUS', request, {}, {reason: 'INVITATION_UNAVAILABLE'}); return reply.code(404).send({error: 'INVITATION_UNAVAILABLE'}); }
     if (invitation.status === 'CONSUMED' || (invitation.max_registrations && invitation.registration_count >= invitation.max_registrations)) return reply.code(409).send({error: 'REGISTRATION_LIMIT_REACHED'});
@@ -240,7 +249,67 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   app.get('/api/v1/admin/session', async (request, reply) => { const session = await requireAdmin(request, reply); if (!session) return; return {authenticated: true, email: session.email, role: session.role}; });
   app.post('/api/v1/admin/logout', async (request, reply) => { const session = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'VIEWER']); if (!session) return; await pool.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='LOGOUT' WHERE id=$1", [session.id]); reply.clearCookie(adminCookie, {path: '/'}).clearCookie(csrfCookie, {path: '/'}); await audit('ADMIN_LOGOUT', 'INFO', 'ADMIN', request, {actorId: session.admin_user_id, adminId: session.admin_user_id, sessionId: session.id}); return {authenticated: false}; });
   app.get('/api/v1/admin/briefing', async (request, reply) => { if (!await requireAdmin(request, reply)) return; return {...briefing, nda: {version: nda.version, status: nda.status, title: nda.title, notice: nda.notice}, defaultInviteUrl: defaultInviteToken ? `${publicBaseUrl}/demo/access/${defaultInviteToken}` : null}; });
-  app.get('/api/v1/admin/dashboard', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const [kpis, recent] = await Promise.all([pool.query(`SELECT (SELECT count(*) FROM private_portal.invitations)::int invitations_issued,(SELECT count(*) FROM private_portal.invitations WHERE status='ACTIVE' AND expires_at>now())::int active_invitations,(SELECT count(*) FROM private_portal.visitors)::int registered_visitors,(SELECT count(*) FROM private_portal.visitors WHERE status='PENDING_APPROVAL')::int pending_approvals,(SELECT count(*) FROM private_portal.nda_acceptances WHERE revoked_at IS NULL)::int nda_accepted,(SELECT count(*) FROM private_portal.visitor_sessions WHERE status='ACTIVE' AND expires_at>now() AND idle_expires_at>now())::int active_sessions,(SELECT count(*) FROM private_portal.visitor_sessions WHERE status='EXPIRED')::int expired_sessions,(SELECT count(*) FROM private_portal.visitors WHERE status='REVOKED')::int revoked_access`), pool.query('SELECT event_type,severity,actor_type,timestamp_utc,masked_ip,metadata FROM private_portal.audit_events ORDER BY timestamp_utc DESC LIMIT 30')]); return {kpis: kpis.rows[0], recentActivity: recent.rows}; });
+  app.get('/api/v1/admin/dashboard', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const [kpis, recent] = await Promise.all([pool.query(`SELECT (SELECT count(*) FROM private_portal.invitations)::int invitations_issued,(SELECT count(*) FROM private_portal.invitations WHERE status='ACTIVE' AND expires_at>now())::int active_invitations,(SELECT count(*) FROM private_portal.visitors)::int registered_visitors,(SELECT count(*) FROM private_portal.visitors WHERE status='PENDING_APPROVAL')::int pending_approvals,(SELECT count(*) FROM private_portal.nda_acceptances WHERE revoked_at IS NULL)::int nda_accepted,(SELECT count(*) FROM private_portal.visitor_sessions WHERE status='ACTIVE' AND expires_at>now() AND idle_expires_at>now())::int active_sessions,(SELECT count(*) FROM private_portal.project_tasks WHERE status NOT IN ('DONE','ARCHIVED'))::int open_tasks,(SELECT count(*) FROM private_portal.project_tasks WHERE status NOT IN ('DONE','ARCHIVED') AND due_at<now())::int overdue_tasks,(SELECT count(*) FROM private_portal.project_events WHERE status='SCHEDULED' AND starts_at>=now())::int upcoming_events,(SELECT count(*) FROM private_portal.project_notes WHERE status='ACTIVE' AND pinned=true)::int pinned_notes`), pool.query('SELECT event_type,severity,actor_type,timestamp_utc,masked_ip,metadata FROM private_portal.audit_events ORDER BY timestamp_utc DESC LIMIT 30')]); return {kpis: kpis.rows[0], recentActivity: recent.rows}; });
+  app.get('/api/v1/admin/workspace', async (request, reply) => {
+    if (!await requireAdmin(request, reply)) return;
+    const [events, tasks, notes] = await Promise.all([
+      pool.query("SELECT * FROM private_portal.project_events WHERE status<>'ARCHIVED' ORDER BY starts_at ASC, created_at ASC"),
+      pool.query("SELECT * FROM private_portal.project_tasks WHERE status<>'ARCHIVED' ORDER BY CASE priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END, due_at ASC NULLS LAST, created_at DESC"),
+      pool.query("SELECT * FROM private_portal.project_notes WHERE status='ACTIVE' ORDER BY pinned DESC, updated_at DESC"),
+    ]);
+    return {events: events.rows, tasks: tasks.rows, notes: notes.rows};
+  });
+  app.post('/api/v1/admin/events', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const parsed = CreateProjectEventBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_EVENT', issues: parsed.error.flatten()});
+    const input = parsed.data; const id = randomUUID();
+    const result = await pool.query(`INSERT INTO private_portal.project_events(id,title,description,starts_at,ends_at,timezone,location,event_type,status,priority,owner_name,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$12) RETURNING *`, [id, input.title, input.description, new Date(input.startsAt), input.endsAt ? new Date(input.endsAt) : null, input.timezone, input.location, input.eventType, input.status, input.priority, input.ownerName, admin.admin_user_id]);
+    await audit('PROJECT_EVENT_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, eventType: input.eventType});
+    return reply.code(201).send(result.rows[0]);
+  });
+  app.patch('/api/v1/admin/events/:id', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const parsed = UpdateProjectEventBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_EVENT_UPDATE', issues: parsed.error.flatten()});
+    const id = (request.params as {id: string}).id; const input = parsed.data; const hasEndsAt = Object.hasOwn(input, 'endsAt');
+    const result = await pool.query(`UPDATE private_portal.project_events SET title=COALESCE($2,title),description=COALESCE($3,description),starts_at=COALESCE($4,starts_at),ends_at=CASE WHEN $5 THEN $6 ELSE ends_at END,timezone=COALESCE($7,timezone),location=COALESCE($8,location),event_type=COALESCE($9,event_type),status=COALESCE($10,status),priority=COALESCE($11,priority),owner_name=COALESCE($12,owner_name),updated_by=$13,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.description ?? null, input.startsAt ? new Date(input.startsAt) : null, hasEndsAt, input.endsAt ? new Date(input.endsAt) : null, input.timezone ?? null, input.location ?? null, input.eventType ?? null, input.status ?? null, input.priority ?? null, input.ownerName ?? null, admin.admin_user_id]);
+    if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
+    await audit('PROJECT_EVENT_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, changed: Object.keys(input)});
+    return result.rows[0];
+  });
+  app.post('/api/v1/admin/tasks', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const parsed = CreateProjectTaskBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TASK', issues: parsed.error.flatten()});
+    const input = parsed.data; const id = randomUUID();
+    const result = await pool.query(`INSERT INTO private_portal.project_tasks(id,title,description,owner_name,due_at,status,priority,linked_event_id,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING *`, [id, input.title, input.description, input.ownerName, input.dueAt ? new Date(input.dueAt) : null, input.status, input.priority, input.linkedEventId ?? null, admin.admin_user_id]);
+    await audit('PROJECT_TASK_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {taskId: id, priority: input.priority});
+    return reply.code(201).send(result.rows[0]);
+  });
+  app.patch('/api/v1/admin/tasks/:id', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const parsed = UpdateProjectTaskBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TASK_UPDATE', issues: parsed.error.flatten()});
+    const id = (request.params as {id: string}).id; const input = parsed.data; const hasDueAt = Object.hasOwn(input, 'dueAt'); const hasLinkedEvent = Object.hasOwn(input, 'linkedEventId');
+    const result = await pool.query(`UPDATE private_portal.project_tasks SET title=COALESCE($2,title),description=COALESCE($3,description),owner_name=COALESCE($4,owner_name),due_at=CASE WHEN $5 THEN $6 ELSE due_at END,status=COALESCE($7,status),priority=COALESCE($8,priority),linked_event_id=CASE WHEN $9 THEN $10 ELSE linked_event_id END,updated_by=$11,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.description ?? null, input.ownerName ?? null, hasDueAt, input.dueAt ? new Date(input.dueAt) : null, input.status ?? null, input.priority ?? null, hasLinkedEvent, input.linkedEventId ?? null, admin.admin_user_id]);
+    if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
+    await audit('PROJECT_TASK_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {taskId: id, changed: Object.keys(input)});
+    return result.rows[0];
+  });
+  app.post('/api/v1/admin/notes', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const parsed = CreateProjectNoteBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_NOTE', issues: parsed.error.flatten()});
+    const input = parsed.data; const id = randomUUID();
+    const result = await pool.query(`INSERT INTO private_portal.project_notes(id,title,body,category,pinned,status,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$7) RETURNING *`, [id, input.title, input.body, input.category, input.pinned, input.status, admin.admin_user_id]);
+    await audit('PROJECT_NOTE_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, category: input.category});
+    return reply.code(201).send(result.rows[0]);
+  });
+  app.patch('/api/v1/admin/notes/:id', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const parsed = UpdateProjectNoteBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_NOTE_UPDATE', issues: parsed.error.flatten()});
+    const id = (request.params as {id: string}).id; const input = parsed.data; const hasPinned = Object.hasOwn(input, 'pinned');
+    const result = await pool.query(`UPDATE private_portal.project_notes SET title=COALESCE($2,title),body=COALESCE($3,body),category=COALESCE($4,category),pinned=CASE WHEN $5 THEN $6 ELSE pinned END,status=COALESCE($7,status),updated_by=$8,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.body ?? null, input.category ?? null, hasPinned, input.pinned ?? false, input.status ?? null, admin.admin_user_id]);
+    if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
+    await audit('PROJECT_NOTE_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, changed: Object.keys(input)});
+    return result.rows[0];
+  });
   app.get('/api/v1/admin/invitations', async (request, reply) => { if (!await requireAdmin(request, reply)) return; return (await pool.query(`SELECT i.id,i.public_id,i.name,i.organisation_name,i.policy,i.created_at,i.valid_from,i.expires_at,i.registration_count,i.max_registrations,i.manual_approval_required,i.status,d.version AS nda_version,count(v.id)::int visitor_count FROM private_portal.invitations i JOIN private_portal.nda_documents d ON d.id=i.nda_document_id LEFT JOIN private_portal.visitors v ON v.invitation_id=i.id GROUP BY i.id,d.version ORDER BY i.created_at DESC`)).rows; });
   app.post('/api/v1/admin/invitations', async (request, reply) => {
     const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = CreateInvitationBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_INVITATION', issues: parsed.error.flatten()}); const input = parsed.data; const document = await pool.query("SELECT id FROM private_portal.nda_documents WHERE version=$1 AND legal_status<>'RETIRED'", [input.ndaVersion]); if (!document.rowCount) return reply.code(400).send({error: 'NDA_VERSION_UNAVAILABLE'}); const raw = randomOpaqueToken(); const id = randomUUID(); const publicId = `inv_${randomOpaqueToken(12)}`;

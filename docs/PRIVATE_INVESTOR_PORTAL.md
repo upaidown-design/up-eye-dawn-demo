@@ -41,6 +41,9 @@ Visitor-controlled:
 Administrator only:
 
 - `/demo/admin`
+- `/demo/admin/agenda`
+- `/demo/admin/tasks`
+- `/demo/admin/notes`
 - `/demo/admin/invitations`
 - `/demo/admin/visitors`
 - `/demo/admin/nda`
@@ -59,9 +62,17 @@ PostgreSQL schema `private_portal` persists:
 - `visitors`, `visitor_sessions`;
 - `nda_documents`, `nda_acceptances`;
 - `audit_events`, `email_deliveries`;
+- `project_events`, `project_tasks`, `project_notes`;
 - `schema_migrations`.
 
-The versioned migration is `infra/migrations/001_private_investor_portal.sql`. Application startup runs pending migrations transactionally. The access subsystem no longer uses demo memory.
+The base access migration is `infra/migrations/001_private_investor_portal.sql`; the operational workspace is added by `infra/migrations/002_admin_project_workspace.sql`. Application startup runs pending migrations transactionally. The access and administrator workspace no longer use demo memory.
+
+The administrator control room combines two deliberately separate concerns:
+
+- project operations: dated agenda, task board, owners, priorities and persistent notes;
+- investor access governance: invitations, registration, visitors, NDA evidence, sessions and audit events.
+
+All workspace writes require an authenticated Owner/Admin session and the same CSRF and trusted-origin checks as invitation and visitor mutations. Changes are recorded in the security audit ledger. Records are archived through status changes rather than deleted from the interface.
 
 ## Invitation flow
 
@@ -170,7 +181,8 @@ Retention values are configuration placeholders. No NDA evidence is automaticall
 1. Monitor pending approvals and individual registrations.
 2. Approve only identities expected for the meeting.
 3. Check active sessions and security events.
-4. Use `/demo/admin/meeting` for agenda, visit, presentation and speech.
+4. Use `/demo/admin/agenda` for dated events and `/demo/admin/meeting` for the presentation run, visit checklist and speech.
+5. Capture commitments in `/demo/admin/tasks` and decisions or investor signals in `/demo/admin/notes`.
 
 ### After a meeting
 
@@ -178,6 +190,7 @@ Retention values are configuration placeholders. No NDA evidence is automaticall
 2. Revoke individual visitors or sessions where access should end.
 3. Export the masked ledger if operationally required and record the export.
 4. Verify email/PDF evidence and backups according to the approved policy.
+5. Close or archive completed agenda items, tasks and working notes without deleting the audit trail.
 
 ### Network re-verification
 

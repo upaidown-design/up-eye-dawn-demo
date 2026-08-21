@@ -41,5 +41,28 @@
     "Would a field-validation milestone or a rights-cleared longitudinal dataset change your underwriting view?",
     "Who else should review the technical, agronomic and legal evidence?",
     "What is the clearest next step, owner and date?"
+  ],
+  "materials": [
+    {
+      "title": "UPAIDOWN Autonomous Farming",
+      "format": "PDF · 10 pages · Spanish",
+      "status": "INTERNAL_REVIEW",
+      "classification": "PRESENTATION_REFERENCE",
+      "note": "User-supplied visual deck. Image-only PDF; claims, product geometry and specifications require truth and ownership review before investor distribution."
+    },
+    {
+      "title": "UPAIDOWN Autonomous Agricultural Ecosystem",
+      "format": "PDF · 10 pages · English",
+      "status": "INTERNAL_REVIEW",
+      "classification": "PRESENTATION_REFERENCE",
+      "note": "User-supplied visual deck. Image-only PDF; autonomous-operation, proprietary-platform and hardware claims are not treated as validated evidence."
+    },
+    {
+      "title": "UPAIDOWN overview board · 19 August 2026",
+      "format": "JPEG · Spanish",
+      "status": "INTERNAL_REVIEW",
+      "classification": "VISUAL_REFERENCE",
+      "note": "Contact-sheet reference only. Contains historical WALL-AI/Sentinel naming and visible specifications that must not override the approved product truth."
+    }
   ]
 }
