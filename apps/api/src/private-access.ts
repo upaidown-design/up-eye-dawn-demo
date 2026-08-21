@@ -146,6 +146,25 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   if (defaultInviteToken) await pool.query(`INSERT INTO private_portal.invitations(id,public_id,token_hash,name,description,organisation_name,policy,nda_document_id,status,created_by,expires_at,max_registrations,manual_approval_required,metadata)
     VALUES($1,$2,$3,$4,$5,$6,'MULTI_VISITOR',$7,'ACTIVE',$8,now()+interval '180 days',10,false,$9) ON CONFLICT(token_hash) DO NOTHING`, [randomUUID(), `inv_${randomOpaqueToken(12)}`, hmacHex(defaultInviteToken, invitationSecret), 'New York 2026 local invitation', 'Seeded only for local workflow testing', 'UP-EYE-DAWN local test', ndaDocumentId, seededAdminId, JSON.stringify({localSeed: true})]);
 
+  const initialTasks = [
+    ['Confirm New York meeting date, room and attendees', 'Lock the schedule, attendee roles, room technology and offline fallback before travel.', 'Founding team', 'TODO', 'HIGH'],
+    ['Approve NDA and privacy notice with counsel', 'Replace workflow drafts with approved legal text before enabling external investor registration.', 'Legal owner', 'BLOCKED', 'CRITICAL'],
+    ['Enroll owner MFA before external release', 'Configure and verify the owner TOTP factor, then require MFA for production administrator access.', 'Portal owner', 'TODO', 'CRITICAL'],
+    ['Configure SMTP delivery and NDA archive', 'Select the approved provider, archive recipient and delivery policy; verify PDF evidence delivery.', 'Platform owner', 'TODO', 'HIGH'],
+    ['Truth-review the Spanish and English visual decks', 'Check product geometry, ownership and every autonomous-operation or hardware claim before distribution.', 'Product owner', 'TODO', 'HIGH'],
+    ['Run the full presentation rehearsal', 'Execute the demo, meeting kit and offline fallback from beginning to end and record corrective actions.', 'Founding team', 'TODO', 'HIGH'],
+  ] as const;
+  if (Number((await pool.query('SELECT count(*)::int AS count FROM private_portal.project_tasks WHERE title=ANY($1::text[])', [initialTasks.map((item) => item[0])])).rows[0].count) === 0) {
+    for (const item of initialTasks) await pool.query(`INSERT INTO private_portal.project_tasks(id,title,description,owner_name,status,priority,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$7)`, [randomUUID(), ...item, seededAdminId]);
+  }
+  const initialNotes = [
+    ['External investor access remains gated', 'The registration and NDA workflow is implemented, but external release stays disabled until legal/privacy approval, owner MFA and SMTP evidence delivery are complete.', 'LEGAL'],
+    ['New visual decks are reference material', 'The two 10-page PDFs and overview JPEG contain useful narrative ideas, but include unverified specifications, autonomy claims and product geometries. Do not distribute them as validated evidence without review.', 'INVESTOR'],
+  ] as const;
+  if (Number((await pool.query('SELECT count(*)::int AS count FROM private_portal.project_notes WHERE title=ANY($1::text[])', [initialNotes.map((item) => item[0])])).rows[0].count) === 0) {
+    for (const item of initialNotes) await pool.query(`INSERT INTO private_portal.project_notes(id,title,body,category,pinned,status,created_by,updated_by) VALUES($1,$2,$3,$4,true,'ACTIVE',$5,$5)`, [randomUUID(), ...item, seededAdminId]);
+  }
+
   const audit = async (eventType: string, severity: 'INFO' | 'NOTICE' | 'WARNING' | 'SECURITY', actorType: 'SYSTEM' | 'ADMIN' | 'VISITOR' | 'ANONYMOUS', request: FastifyRequest, links: {actorId?: string; visitorId?: string; adminId?: string; invitationId?: string; sessionId?: string} = {}, metadata: Record<string, unknown> = {}) => {
     const ip = sourceIp(request); await pool.query(`INSERT INTO private_portal.audit_events(id,event_type,severity,actor_type,actor_id,visitor_id,admin_id,invitation_id,session_id,ip_fingerprint,masked_ip,user_agent,metadata)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`, [randomUUID(), eventType, severity, actorType, links.actorId ?? null, links.visitorId ?? null, links.adminId ?? null, links.invitationId ?? null, links.sessionId ?? null, hmacHex(ip, ipFingerprintSecret), maskIp(ip), userAgent(request), JSON.stringify(metadata)]);
