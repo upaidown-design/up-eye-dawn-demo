@@ -1,6 +1,6 @@
 # UP-EYE-DAWN Google Cloud production runbook
 
-Status: production runtime deployed at reserved IPv4 `34.77.12.150`; DNS cutover is pending. External NDA release remains legally blocked while the bundled NDA and privacy notice are drafts.
+Status: production runtime, DNS and HTTPS are active at reserved IPv4 `34.77.12.150`. External NDA release remains legally blocked while the bundled NDA and privacy notice are drafts.
 
 ## Target
 
@@ -21,15 +21,16 @@ gcloud config configurations activate up-eye-dawn
 ./scripts/gcp/deploy-vm.sh
 ```
 
-The provisioning script prints the reserved public IPv4 address. Configure the following records at the current DNS provider:
+The provisioning script prints the reserved public IPv4 address. DonDominio is configured as follows:
 
 | Host | Type | Value |
 |---|---|---|
-| `@` for each domain | `A` | `34.77.12.150` |
-| `www` for each domain | `CNAME` | corresponding apex domain |
+| `origin` for each domain | `A` | `34.77.12.150` |
+| `@` for each domain | `ANAME` | corresponding `origin` hostname |
+| `www` for each domain | `CNAME` | corresponding `origin` hostname |
 | `demo` on `upaidown.com` | `A` | `34.77.12.150` |
 
-Use a 300-second TTL during rollout. Do not delete unrelated MX, TXT, DKIM, SPF, DMARC or verification records.
+The rollout TTL is 10 minutes, the minimum exposed by DonDominio. Unrelated TXT, SPF, mail, webmail, FTP and database records were preserved.
 
 ## Security model
 
@@ -61,3 +62,5 @@ sudo ued-compose --env-file /etc/up-eye-dawn/app.env -f /opt/up-eye-dawn/current
 ```
 
 Budget notifications warn about spend but do not stop resources automatically.
+
+DonDominio currently reports three registrant-contact validations in progress. Complete those validations from the registrant mailbox before their registrar deadlines to prevent a domain suspension.
