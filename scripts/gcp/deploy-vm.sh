@@ -5,6 +5,7 @@ PROJECT_ID="${PROJECT_ID:-project-6ec58af7-91e9-4c25-870}"
 ZONE="${ZONE:-europe-west1-b}"
 VM_NAME="${VM_NAME:-ued-prod-01}"
 SECRET_NAME="${SECRET_NAME:-ued-production-env}"
+BASE_SECRET_VERSION="${BASE_SECRET_VERSION:-latest}"
 
 test -f .env || { echo '.env is required locally to preserve the configured administrator identity.' >&2; exit 1; }
 git diff --quiet && git diff --cached --quiet || { echo 'Commit the deployment source before deploying.' >&2; exit 1; }
@@ -13,12 +14,19 @@ TEMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TEMP_DIR"' EXIT
 ARCHIVE="$TEMP_DIR/up-eye-dawn.tgz"
 ENV_FILE="$TEMP_DIR/app.env"
+EXISTING_ENV_FILE="$TEMP_DIR/existing.env"
 
 git archive --format=tar.gz --output="$ARCHIVE" HEAD
-node scripts/gcp/create-production-env.mjs "$ENV_FILE"
-
-gcloud secrets describe "$SECRET_NAME" --project="$PROJECT_ID" >/dev/null 2>&1 || \
+if gcloud secrets describe "$SECRET_NAME" --project="$PROJECT_ID" >/dev/null 2>&1; then
+  gcloud secrets versions access "$BASE_SECRET_VERSION" \
+    --secret="$SECRET_NAME" \
+    --project="$PROJECT_ID" \
+    --out-file="$EXISTING_ENV_FILE" >/dev/null
+  node scripts/gcp/create-production-env.mjs "$ENV_FILE" "$EXISTING_ENV_FILE"
+else
+  node scripts/gcp/create-production-env.mjs "$ENV_FILE"
   gcloud secrets create "$SECRET_NAME" --project="$PROJECT_ID" --replication-policy=automatic
+fi
 gcloud secrets versions add "$SECRET_NAME" --project="$PROJECT_ID" --data-file="$ENV_FILE" >/dev/null
 
 gcloud compute scp "$ARCHIVE" "$ENV_FILE" "$VM_NAME:/tmp/" --zone="$ZONE" --project="$PROJECT_ID" --tunnel-through-iap

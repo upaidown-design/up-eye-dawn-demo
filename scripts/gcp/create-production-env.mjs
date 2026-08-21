@@ -4,7 +4,8 @@ import {resolve} from 'node:path';
 
 const root = resolve(import.meta.dirname, '../..');
 const output = process.argv[2];
-if (!output) throw new Error('Usage: node scripts/gcp/create-production-env.mjs OUTPUT_PATH');
+const previousPath = process.argv[3];
+if (!output) throw new Error('Usage: node scripts/gcp/create-production-env.mjs OUTPUT_PATH [PREVIOUS_ENV_PATH]');
 
 const parse = (input) => Object.fromEntries(input.split(/\r?\n/).flatMap((line) => {
   const clean = line.trim();
@@ -14,8 +15,15 @@ const parse = (input) => Object.fromEntries(input.split(/\r?\n/).flatMap((line) 
 }));
 
 const local = parse(await readFile(resolve(root, '.env'), 'utf8'));
-const adminEmail = local.ADMIN_EMAIL || 'upaidown@gmail.com';
-let adminPasswordHash = local.ADMIN_PASSWORD_HASH || '';
+let previous = {};
+if (previousPath) {
+  previous = parse(await readFile(previousPath, 'utf8'));
+}
+
+const adminEmail = local.ADMIN_EMAIL || previous.ADMIN_EMAIL || 'upaidown@gmail.com';
+let adminPasswordHash = local.ADMIN_PASSWORD_HASH?.startsWith('scrypt:')
+  ? local.ADMIN_PASSWORD_HASH
+  : previous.ADMIN_PASSWORD_HASH || '';
 if (!adminPasswordHash.startsWith('scrypt:')) {
   const password = randomBytes(18).toString('base64url');
   const salt = randomBytes(16);
@@ -24,7 +32,8 @@ if (!adminPasswordHash.startsWith('scrypt:')) {
 }
 
 const secret = (bytes = 48) => randomBytes(bytes).toString('base64url');
-const postgresPassword = secret(32);
+const stableSecret = (key, create = () => secret()) => previous[key] || create();
+const postgresPassword = stableSecret('POSTGRES_PASSWORD', () => secret(32));
 const rows = {
   API_PORT: '4010',
   DATABASE_URL: `postgresql://ued:${postgresPassword}@postgres:5432/ued_demo`,
@@ -36,39 +45,39 @@ const rows = {
   EXTERNAL_PORTAL_ENABLED: 'false',
   ADMIN_EMAIL: adminEmail,
   ADMIN_PASSWORD_HASH: adminPasswordHash,
-  ADMIN_TOTP_SECRET: local.ADMIN_TOTP_SECRET || '',
-  ADMIN_MFA_REQUIRED: 'false',
+  ADMIN_TOTP_SECRET: local.ADMIN_TOTP_SECRET || previous.ADMIN_TOTP_SECRET || '',
+  ADMIN_MFA_REQUIRED: previous.ADMIN_MFA_REQUIRED || 'false',
   ADMIN_SESSION_IDLE_MINUTES: '30',
   ADMIN_SESSION_MAX_HOURS: '8',
-  SESSION_SECRET: secret(),
-  INVITATION_TOKEN_HMAC_SECRET: secret(),
-  IP_FINGERPRINT_SECRET: secret(),
-  IP_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
-  IP_ENCRYPTION_KEY_VERSION: '1',
+  SESSION_SECRET: stableSecret('SESSION_SECRET'),
+  INVITATION_TOKEN_HMAC_SECRET: stableSecret('INVITATION_TOKEN_HMAC_SECRET'),
+  IP_FINGERPRINT_SECRET: stableSecret('IP_FINGERPRINT_SECRET'),
+  IP_ENCRYPTION_KEY: stableSecret('IP_ENCRYPTION_KEY', () => randomBytes(32).toString('hex')),
+  IP_ENCRYPTION_KEY_VERSION: previous.IP_ENCRYPTION_KEY_VERSION || '1',
   DEFAULT_INVITE_TOKEN: '',
   VISITOR_SESSION_IDLE_MINUTES: '120',
   VISITOR_SESSION_MAX_HOURS: '72',
   COOKIE_SECURE: 'true',
-  NDA_LEGAL_STATUS: local.NDA_LEGAL_STATUS || 'DRAFT_FOR_WORKFLOW_TESTING',
-  PRIVACY_LEGAL_STATUS: local.PRIVACY_LEGAL_STATUS || 'DRAFT',
-  NDA_RETENTION_NOTICE: local.NDA_RETENTION_NOTICE || 'Retention period pending legal approval.',
-  PRIVACY_CONTACT_EMAIL: local.PRIVACY_CONTACT_EMAIL || adminEmail,
-  SMTP_HOST: '',
-  SMTP_PORT: '587',
-  SMTP_SECURE: 'false',
-  SMTP_USER: '',
-  SMTP_PASSWORD: '',
-  SMTP_FROM: 'UP-EYE-DAWN <nda@upaidown.com>',
-  SMTP_ARCHIVE: '',
-  NDA_ARCHIVE_EMAIL: '',
-  VISITOR_SESSION_RETENTION_DAYS: '30',
-  AUDIT_EVENT_RETENTION_DAYS: '365',
-  NDA_EVIDENCE_RETENTION_DAYS: '2555',
-  ENCRYPTED_IP_RETENTION_DAYS: '90',
+  NDA_LEGAL_STATUS: local.NDA_LEGAL_STATUS || previous.NDA_LEGAL_STATUS || 'DRAFT_FOR_WORKFLOW_TESTING',
+  PRIVACY_LEGAL_STATUS: local.PRIVACY_LEGAL_STATUS || previous.PRIVACY_LEGAL_STATUS || 'DRAFT',
+  NDA_RETENTION_NOTICE: local.NDA_RETENTION_NOTICE || previous.NDA_RETENTION_NOTICE || 'Retention period pending legal approval.',
+  PRIVACY_CONTACT_EMAIL: local.PRIVACY_CONTACT_EMAIL || previous.PRIVACY_CONTACT_EMAIL || adminEmail,
+  SMTP_HOST: previous.SMTP_HOST || '',
+  SMTP_PORT: previous.SMTP_PORT || '587',
+  SMTP_SECURE: previous.SMTP_SECURE || 'false',
+  SMTP_USER: previous.SMTP_USER || '',
+  SMTP_PASSWORD: previous.SMTP_PASSWORD || '',
+  SMTP_FROM: previous.SMTP_FROM || 'UP-EYE-DAWN <nda@upaidown.com>',
+  SMTP_ARCHIVE: previous.SMTP_ARCHIVE || '',
+  NDA_ARCHIVE_EMAIL: previous.NDA_ARCHIVE_EMAIL || '',
+  VISITOR_SESSION_RETENTION_DAYS: previous.VISITOR_SESSION_RETENTION_DAYS || '30',
+  AUDIT_EVENT_RETENTION_DAYS: previous.AUDIT_EVENT_RETENTION_DAYS || '365',
+  NDA_EVIDENCE_RETENTION_DAYS: previous.NDA_EVIDENCE_RETENTION_DAYS || '2555',
+  ENCRYPTED_IP_RETENTION_DAYS: previous.ENCRYPTED_IP_RETENTION_DAYS || '90',
   POSTGRES_USER: 'ued',
   POSTGRES_PASSWORD: postgresPassword,
   POSTGRES_DB: 'ued_demo',
-  TLS_EMAIL: 'upaidown@gmail.com',
+  TLS_EMAIL: local.TLS_EMAIL || previous.TLS_EMAIL || 'upaidown@gmail.com',
 };
 
 const content = Object.entries(rows).map(([key, value]) => `${key}=${value}`).join('\n') + '\n';
