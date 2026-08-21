@@ -1,0 +1,2 @@
+services:
+  api: {volumes: [".:/app"], command: ["pnpm", "--filter", "@ued/api", "dev"]}

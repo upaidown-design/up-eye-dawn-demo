@@ -1,0 +1,42 @@
+name: up-eye-dawn-demo
+services:
+  gateway:
+    build: {context: ., dockerfile: infra/docker/gateway.Dockerfile}
+    ports: ["127.0.0.1:8088:8088"]
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../docs/investor-meeting-new-york-2026/web:/srv/investor:ro
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck: {test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8088/demo/preflight"], interval: 5s, timeout: 2s, retries: 12}
+    restart: unless-stopped
+  api:
+    build: {context: ., dockerfile: infra/docker/api.Dockerfile}
+    env_file: [.env]
+    environment: {API_PORT: 4010, DATABASE_URL: "postgresql://ued:ued_demo@postgres:5432/ued_demo", REDIS_URL: "redis://redis:6379"}
+    healthcheck: {test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/api/v1/health/live"], interval: 5s, timeout: 2s, retries: 12}
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      mailpit: {condition: service_started}
+    restart: unless-stopped
+  worker:
+    build: {context: ., dockerfile: infra/docker/api.Dockerfile}
+    command: ["node", "--import", "tsx", "apps/worker/src/worker.ts"]
+    depends_on: {redis: {condition: service_healthy}}
+    restart: unless-stopped
+  postgres:
+    image: postgis/postgis:17-3.5-alpine
+    platform: linux/amd64
+    environment: {POSTGRES_USER: ued, POSTGRES_PASSWORD: ued_demo, POSTGRES_DB: ued_demo}
+    volumes: ["ued_pg:/var/lib/postgresql/data"]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U ued -d ued_demo"], interval: 5s, timeout: 3s, retries: 15}
+  redis:
+    image: redis:8.2.1-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 2s, retries: 15}
+  mailpit:
+    image: axllent/mailpit:v1.27.7
+    ports: ["127.0.0.1:8025:8025"]
+    restart: unless-stopped
+volumes: {ued_pg: {}}

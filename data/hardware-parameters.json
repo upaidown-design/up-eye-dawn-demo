@@ -1,0 +1,21 @@
+{
+  "sentinel": {
+    "maxHeightM": null,
+    "documentedV1HeightM": 4,
+    "status": "CONFLICTING",
+    "mastStages": null
+  },
+  "rover": {
+    "length": null,
+    "width": null,
+    "height": null,
+    "weight": null,
+    "payload": null,
+    "battery": null,
+    "range": null,
+    "speed": null,
+    "probeTravel": null,
+    "droneBayDimensions": null,
+    "status": "NEEDS_VERIFICATION"
+  }
+}

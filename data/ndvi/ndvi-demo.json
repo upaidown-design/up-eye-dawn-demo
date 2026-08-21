@@ -1,0 +1,1 @@
+{"id":"ndvi-demo-v1","classification":"SYNTHETIC","source":"Procedural NIR/Red reference array; not derived from RGB","formula":"(NIR-RED)/(NIR+RED)","bounds":[-3.7023,37.1908,-3.6979,37.1937],"statistics":{"min":-0.12,"max":0.88,"mean":0.61,"p10":0.34,"p50":0.65,"p90":0.81},"histogram":[2,4,7,12,21,32,46,39,25,9],"checksum":"RECALCULATE_DURING_SETUP","fallback":true}

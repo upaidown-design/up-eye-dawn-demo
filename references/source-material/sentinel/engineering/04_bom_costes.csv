@@ -1,0 +1,31 @@
+Categoria,Componente,Especificacion preliminar,Cantidad,Coste unitario EUR estimado,Coste total EUR estimado,Prioridad,Fase,Notas
+Mecanica,Mastil galvanizado,4 m acero galvanizado 80-120 mm,1,180-450,180-450,Alta,V1,Requiere calculo de viento y anclaje
+Mecanica,Zapata/base hormigon,1000x1000x250-350 mm estimado,1,120-350,120-350,Alta,V1,Depende de obra civil local
+Mecanica,Placa anclaje y pernos,Acero galvanizado/inox,1,80-220,80-220,Alta,V1,Dimensionar por carga y viento
+Mecanica,Caja exterior IP66,Armario tecnico UV con cerradura,1,120-400,120-400,Alta,V1,Preferible color claro o verde
+Mecanica,Carril DIN y bornas,Distribucion interna,1,30-100,30-100,Alta,V1,Incluye etiquetas
+Energia,Panel solar,150-200 Wp monocristalino,1,90-220,90-220,Alta,V1,Ajustar a autonomia deseada
+Energia,Controlador MPPT,12/24 V 15-30 A,1,70-180,70-180,Alta,V1,Con telemetria si posible
+Energia,Bateria LiFePO4,12.8 V 50 Ah,1,180-450,180-450,Alta,V1,100 Ah recomendado para margen
+Energia,Fusibles y seccionador,Protecciones DC,1,40-140,40-140,Alta,V1,Obligatorio
+Energia,Convertidor DC/DC 12V-5V,5 V 3-5 A,1,10-35,10-35,Alta,V1,Para controlador/sensores
+Energia,Convertidor USB-C PD,45-65 W,1,20-80,20-80,Media,V2,Para carga manual dron
+Comunicaciones,Router 4G/LTE,Industrial o semiindustrial,1,90-350,90-350,Alta,V1,Con watchdog o reinicio controlado
+Comunicaciones,Antena LTE exterior,Omnidireccional/direccional,1,30-150,30-150,Alta,V1,Depende cobertura
+Comunicaciones,Antena WiFi exterior,2.4 GHz/5 GHz,1,20-100,20-100,Media,V1,Opcional si router ya integra
+Comunicaciones,Modulo LoRa,868 MHz EU,1,15-80,15-80,Baja,V2,Telemetria basica no video
+Control,Controlador IoT,ESP32/LILYGO o gateway industrial,1,20-180,20-180,Alta,V1,Seleccionar segun conectividad
+Sensores,Sensor meteo basico,Temp/humedad/presion,1,10-60,10-60,Alta,V1,Puede integrarse en estacion meteo
+Sensores,Anemometro,Velocidad viento,1,30-150,30-150,Alta,V1,Clave para decision de vuelo
+Sensores,Veleta,Direccion viento,1,30-150,30-150,Media,V1,Opcional en primera prueba
+Sensores,Pluviometro,Lluvia basculante,1,25-120,25-120,Media,V1,Para bloqueo de vuelo
+Sensores,Sensor puerta,Tamper magnetico,1,5-25,5-25,Media,V1,Seguridad y mantenimiento
+Sensores,Medidor energia,Voltaje/corriente/SOC,1,20-120,20-120,Alta,V1,Ideal con shunt
+Dron,DJI Neo,Dron ligero referencia,1,199-350,199-350,Media,V1/V2,Validar normativa y uso exterior
+Dron,Baterias adicionales DJI Neo,10.5 Wh cada una,2-3,39-59,78-177,Media,V2,Facilita rotacion
+Dron,Hub carga DJI Neo,USB-C PD hasta 60 W,1,40-80,40-80,Media,V2,Carga manual/semi
+Dock,Plataforma HEISHA DPad 60,61x64.4 cm 9.5 kg aprox,1,Consultar proveedor,Consultar proveedor,Baja,V3,Compatibilidad DJI Neo no cerrada
+Seguridad,Puesta a tierra,Pica cable y abrazaderas,1,40-150,40-150,Alta,V1,Especialmente por mastil/antenas
+Seguridad,Cerradura antivandalica,Cierre reforzado,1,20-90,20-90,Media,V1,Segun ubicacion
+Software,Dashboard V1,Web/MQTT/alertas,1,300-2000,300-2000,Alta,V1,Desarrollo propio o plataforma IoT
+Instalacion,Mano de obra prototipo,Mecanica electrica pruebas,1,500-2500,500-2500,Alta,V1,Variable segun taller/campo

@@ -1,0 +1,14 @@
+{
+  "entities": [
+    {"id":"ROVER_001","type":"Product","name":"Configurable rover","status":"CONFLICTING"},
+    {"id":"SENTINEL_003","type":"Product","name":"Sentinel V3","status":"PREVIOUS_DESIGN"},
+    {"id":"BUNKER_PRO_REFERENCE","type":"Component","name":"AgileX BUNKER PRO 2.0","status":"THIRD_PARTY_REFERENCE"},
+    {"id":"SOIL_PROBE_001","type":"Sensor","name":"Deployable soil probe","status":"NEEDS_VERIFICATION"},
+    {"id":"DRONE_DOCK_001","type":"Component","name":"Rover drone dock","status":"NEEDS_VERIFICATION"},
+    {"id":"DRONE_DOCK_002","type":"Component","name":"Sentinel drone dock","status":"NEEDS_VERIFICATION"},
+    {"id":"NDVI_ALGORITHM_001","type":"Algorithm","name":"NDVI processing","status":"SYNTHETIC_FALLBACK_ONLY"},
+    {"id":"MAST_DOSSIER_001","type":"Document","name":"Sentinel V3 dossier","status":"VERIFIED_SOURCE"},
+    {"id":"ROVER_VISUAL_FAMILY_001","type":"Image","name":"Wall-AI concept family","status":"CONCEPT_DESIGN_REFERENCE"},
+    {"id":"DEMO_SIMULATION_001","type":"CodeModule","name":"Deterministic simulation engine","status":"FUNCTIONAL"}
+  ]
+}

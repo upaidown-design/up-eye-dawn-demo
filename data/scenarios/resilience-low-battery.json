@@ -1,0 +1,1 @@
+{"id":"resilience-low-battery","version":1,"seed":20260818,"title":"Low Battery Resilience","durationSeconds":180,"farmId":"demo-farm-alpha","actors":[],"phases":[{"id":"fault","label":"LOW BATTERY","start":0,"end":180}],"triggers":["drone.battery.low"],"expectedEvents":["device.alert.raised"],"classification":"SYNTHETIC"}

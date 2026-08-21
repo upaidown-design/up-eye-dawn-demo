@@ -1,0 +1,1 @@
+{"id":"operator-free-play","version":1,"seed":20260817,"title":"Operator Free Play","durationSeconds":900,"farmId":"demo-farm-alpha","actors":[],"phases":[{"id":"free","label":"FREE PLAY","start":0,"end":900}],"triggers":[],"expectedEvents":[],"classification":"SYNTHETIC"}

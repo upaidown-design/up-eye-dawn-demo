@@ -1,0 +1,1 @@
+{"name":"@ued/worker","type":"module","version":"0.1.0","scripts":{"build":"tsc -p tsconfig.json","test":"node --import tsx --test src/*.test.ts"},"devDependencies":{"tsx":"4.20.6","typescript":"5.9.3"}}

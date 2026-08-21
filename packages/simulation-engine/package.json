@@ -1,0 +1,1 @@
+{"name":"@ued/simulation-engine","type":"module","version":"0.1.0","main":"src/index.ts","scripts":{"build":"tsc --noEmit","test":"node --import tsx --test src/*.test.ts"},"dependencies":{"@ued/contracts":"workspace:*"},"devDependencies":{"tsx":"4.20.6","typescript":"5.9.3"}}

@@ -1,0 +1,13 @@
+{
+  "relationships": [
+    {"source":"ROVER_001","relation":"MAY_USE_CHASSIS","target":"BUNKER_PRO_REFERENCE","confidence":"INFERRED"},
+    {"source":"ROVER_001","relation":"CONTAINS","target":"SOIL_PROBE_001","confidence":"EXTRACTED"},
+    {"source":"ROVER_001","relation":"CONTAINS","target":"DRONE_DOCK_001","confidence":"EXTRACTED"},
+    {"source":"SENTINEL_003","relation":"CONTAINS","target":"DRONE_DOCK_002","confidence":"EXTRACTED"},
+    {"source":"MAST_DOSSIER_001","relation":"DOCUMENTS","target":"SENTINEL_003","confidence":"EXTRACTED"},
+    {"source":"ROVER_VISUAL_FAMILY_001","relation":"VISUALIZES","target":"ROVER_001","confidence":"EXTRACTED"},
+    {"source":"DEMO_SIMULATION_001","relation":"SIMULATES","target":"ROVER_001","confidence":"EXTRACTED"},
+    {"source":"DEMO_SIMULATION_001","relation":"SIMULATES","target":"SENTINEL_003","confidence":"EXTRACTED"},
+    {"source":"NDVI_ALGORITHM_001","relation":"REPRESENTED_BY","target":"DEMO_SIMULATION_001","confidence":"AMBIGUOUS","note":"Only synthetic fallback data is implemented."}
+  ]
+}

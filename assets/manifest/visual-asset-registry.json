@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-08-16",
+  "base_path": "/assets/concepts/generated-2026-08-16/",
+  "assets": [
+    {"id":"ROVER_MASTER","file":"rover-master-reference-board.png","use":"Engineering identity reference and product overview","ratio":"16:9","background":"studio","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"MEDIUM"},
+    {"id":"ROVER_FRONT","file":"rover-cutout-front-three-quarter.png","use":"Primary Rover hero and fleet asset","ratio":"1:1","background":"transparent","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"LOW"},
+    {"id":"ROVER_REAR","file":"rover-cutout-rear-three-quarter.png","use":"Rover secondary view","ratio":"1:1","background":"transparent","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"LOW"},
+    {"id":"ROVER_SIDE","file":"rover-cutout-left-side.png","use":"Rover mobility and anatomy","ratio":"1:1","background":"transparent","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"LOW"},
+    {"id":"ROVER_PROBE","file":"rover-cutout-probe-deployed.png","use":"Ground-truth state","ratio":"1:1","background":"transparent","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"LOW"},
+    {"id":"ROVER_DOCK_OPEN","file":"rover-cutout-bay-open.png","use":"Drone-bay state","ratio":"1:1","background":"transparent","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"LOW"},
+    {"id":"ROVER_EXPLODED","file":"rover-exploded-concept.png","use":"System anatomy","ratio":"16:9","background":"dark studio","classification":"CONCEPT_ENGINEERING_VISUAL","approved":true,"replacement_priority":"MEDIUM"},
+    {"id":"SENTINEL_MASTER","file":"sentinel-master-reference-board.png","use":"Sentinel product identity and hero","ratio":"16:9","background":"studio","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"HIGH"},
+    {"id":"SENTINEL_SEQUENCE","file":"sentinel-animation-reference.png","use":"Deployment sequence","ratio":"16:9","background":"agricultural neutral","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"MEDIUM"},
+    {"id":"SYSTEM_HERO","file":"ecosystem-hero.png","use":"Investor and fleet ecosystem hero","ratio":"16:9","background":"agricultural","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"LOW"},
+    {"id":"DATA_ENGINE","file":"data-ai-engine.png","use":"Data Engine visual foundation","ratio":"16:9","background":"dark technical","classification":"CONCEPT_DATA_VISUAL","approved":true,"replacement_priority":"MEDIUM"},
+    {"id":"MISSION_STORYBOARD","file":"mission-storyboard.png","use":"Mission overview and offline explanation","ratio":"16:9","background":"agricultural","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"MEDIUM"},
+    {"id":"DASHBOARD_REFERENCE","file":"dashboard-concept.png","use":"Visual direction only; not shipped as UI screenshot","ratio":"16:9","background":"dark UI","classification":"CONCEPT_RENDER","approved":true,"replacement_priority":"HIGH"}
+  ]
+}

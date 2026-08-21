@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules/
+/financial/node_modules
+dist/
+coverage/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# Local runtime state and secrets
+.env
+.env.*
+!.env.example
+*.local
+*.log
+
+# Generated/test output
+data/generated/*
+!data/generated/.gitkeep
+test-results/
+playwright-report/
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/
+*.swp

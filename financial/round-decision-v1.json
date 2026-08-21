@@ -1,0 +1,2096 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-08-16",
+  "classification": "INTERNAL — CONFIDENTIAL",
+  "status": "AWAITING_FOUNDER_APPROVAL",
+  "verdict": "ROUND_DECISION_READY_FOR_FOUNDER",
+  "source_model": "financial/model-v1.json",
+  "allowed_statuses": [
+    "FULL",
+    "PARTIAL",
+    "MINIMAL",
+    "NOT FUNDED"
+  ],
+  "main_tickets": [
+    500000,
+    750000,
+    1000000,
+    1500000
+  ],
+  "reference_tickets": [
+    400000,
+    1660000
+  ],
+  "capital_table": [
+    {
+      "capital": 500000,
+      "runway": 17.364648354294392,
+      "comparison": "LEAN",
+      "coverage": 1.0775685570667377,
+      "sentinel": "FULL",
+      "rover": "FULL",
+      "ai_data": "MINIMAL",
+      "field_pilots": "PARTIAL",
+      "team": "FULL",
+      "china": "FULL",
+      "legal_ip": "FULL",
+      "buffer": "MINIMAL",
+      "next_round_risk": "HIGH",
+      "assessment": "Funds Lean with a narrow surplus; Base is not funded.",
+      "probability_base_milestones": "LOW"
+    },
+    {
+      "capital": 750000,
+      "runway": 14.295971077662069,
+      "comparison": "BASE",
+      "coverage": 0.8449480835732517,
+      "sentinel": "FULL",
+      "rover": "FULL",
+      "ai_data": "PARTIAL",
+      "field_pilots": "PARTIAL",
+      "team": "PARTIAL",
+      "china": "FULL",
+      "legal_ip": "FULL",
+      "buffer": "MINIMAL",
+      "next_round_risk": "MEDIUM_HIGH",
+      "assessment": "Efficient only with explicit deferrals; €137,629 short of Base.",
+      "probability_base_milestones": "MEDIUM"
+    },
+    {
+      "capital": 1000000,
+      "runway": 19.06129477021609,
+      "comparison": "BASE",
+      "coverage": 1.1265974447643354,
+      "sentinel": "FULL",
+      "rover": "FULL",
+      "ai_data": "FULL",
+      "field_pilots": "FULL",
+      "team": "FULL",
+      "china": "FULL",
+      "legal_ip": "FULL",
+      "buffer": "FULL",
+      "next_round_risk": "LOWER",
+      "assessment": "Funds Base and preserves €112,372 rather than spending it automatically.",
+      "probability_base_milestones": "HIGHER_NOT_GUARANTEED"
+    },
+    {
+      "capital": 1500000,
+      "runway": 16.077664408409834,
+      "comparison": "ACCELERATED",
+      "coverage": 0.9061387912851557,
+      "sentinel": "FULL",
+      "rover": "FULL",
+      "ai_data": "PARTIAL",
+      "field_pilots": "PARTIAL",
+      "team": "FULL",
+      "china": "FULL",
+      "legal_ip": "FULL",
+      "buffer": "PARTIAL",
+      "next_round_risk": "LOWER_BUT_EXECUTION_RISK",
+      "assessment": "Covers 90.6% of Accelerated; acceleration must be milestone-gated.",
+      "probability_base_milestones": "HIGHER_NOT_GUARANTEED"
+    }
+  ],
+  "milestone_ladder": [
+    {
+      "id": 1,
+      "name": "Canonical Sentinel design",
+      "status": "PLANNED"
+    },
+    {
+      "id": 2,
+      "name": "Instrumented Sentinel prototype",
+      "status": "PLANNED"
+    },
+    {
+      "id": 3,
+      "name": "Rover platform selected",
+      "status": "PLANNED"
+    },
+    {
+      "id": 4,
+      "name": "Integrated Rover prototype",
+      "status": "PLANNED"
+    },
+    {
+      "id": 5,
+      "name": "Drone layer integrated",
+      "status": "PLANNED"
+    },
+    {
+      "id": 6,
+      "name": "Real field data",
+      "status": "PLANNED"
+    },
+    {
+      "id": 7,
+      "name": "AI/Data pipeline",
+      "status": "PLANNED"
+    },
+    {
+      "id": 8,
+      "name": "Pilot evidence",
+      "status": "PLANNED"
+    },
+    {
+      "id": 9,
+      "name": "Commercial evidence",
+      "status": "PLANNED"
+    },
+    {
+      "id": 10,
+      "name": "Next-round readiness",
+      "status": "PLANNED"
+    }
+  ],
+  "milestone_coverage": {
+    "500000": [
+      "FULL",
+      "FULL",
+      "FULL",
+      "PARTIAL",
+      "MINIMAL",
+      "MINIMAL",
+      "MINIMAL",
+      "NOT FUNDED",
+      "NOT FUNDED",
+      "NOT FUNDED"
+    ],
+    "750000": [
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "PARTIAL",
+      "PARTIAL",
+      "PARTIAL",
+      "PARTIAL",
+      "MINIMAL",
+      "MINIMAL"
+    ],
+    "1000000": [
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "PARTIAL",
+      "PARTIAL"
+    ],
+    "1500000": [
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "FULL",
+      "PARTIAL"
+    ]
+  },
+  "financing_cliffs": [
+    {
+      "ticket": 500000,
+      "cliff": "Rover purchased and minimally integrated, but insufficient runway for Base field/data proof.",
+      "classification": "FINANCING CLIFF"
+    },
+    {
+      "ticket": 750000,
+      "cliff": "Pilots and data work can start while the three-month financing buffer remains underfunded.",
+      "classification": "FINANCING CLIFF"
+    },
+    {
+      "ticket": 1500000,
+      "cliff": "Accelerated hiring before product and commercial gates validate can create fixed-cost overhang.",
+      "classification": "EXECUTION CLIFF"
+    }
+  ],
+  "evidence_efficiency": [
+    {
+      "capital": 500000,
+      "physical": "PARTIAL",
+      "software": "FULL",
+      "data": "MINIMAL",
+      "commercial": "NOT FUNDED",
+      "ip": "FULL",
+      "manufacturing": "MINIMAL",
+      "efficiency": "MEDIUM",
+      "reason": "Creates credible Lean proof, but financing cliffs can strand integration before Base evidence."
+    },
+    {
+      "capital": 750000,
+      "physical": "FULL",
+      "software": "FULL",
+      "data": "PARTIAL",
+      "commercial": "MINIMAL",
+      "ip": "FULL",
+      "manufacturing": "PARTIAL",
+      "efficiency": "MEDIUM",
+      "reason": "Adds meaningful proof but remains an uncomfortable gap below Base and protects little buffer."
+    },
+    {
+      "capital": 1000000,
+      "physical": "FULL",
+      "software": "FULL",
+      "data": "FULL",
+      "commercial": "PARTIAL",
+      "ip": "FULL",
+      "manufacturing": "PARTIAL",
+      "efficiency": "HIGH",
+      "reason": "Covers Base with a protected surplus and avoids premature fundraising without forcing Accelerated spend."
+    },
+    {
+      "capital": 1500000,
+      "physical": "FULL",
+      "software": "FULL",
+      "data": "FULL",
+      "commercial": "FULL",
+      "ip": "FULL",
+      "manufacturing": "PARTIAL",
+      "efficiency": "MEDIUM",
+      "reason": "Buys speed, but value depends on milestone gating and strategic support; does not fully fund Accelerated."
+    }
+  ],
+  "ticket_assessments": {
+    "500000": {
+      "what_we_can_fund": "Lean plan, core team, commercial rover base/integration, preliminary Sentinel iteration, China sourcing and IP baseline.",
+      "must_defer": "Base AI/data depth, full pilots, commercial proof and a protected financing buffer.",
+      "expected_runway_months": 17.364648354294392,
+      "major_risk": "A financing cliff after hardware integration but before durable field/data evidence.",
+      "next_financing": "Likely before Base evidence is complete.",
+      "value_created": "Lean physical and software proof with limited data depth.",
+      "base_gap": 387628.5
+    },
+    "750000": {
+      "difference_vs_500000": 250000,
+      "unlocks": "Fuller Rover integration, stronger Sentinel work, partial drone/data/pilot scope and longer Base-cost runway.",
+      "buffer": "€137,629 below Base; meaningful buffer is not protected.",
+      "base_gap": 137628.5,
+      "verdict": "UNCOMFORTABLE_BETWEEN_LEAN_AND_BASE"
+    },
+    "1000000": {
+      "base_surplus": 112371.5,
+      "surplus_percentage": 0.12659744476433554,
+      "additional_months": 2.1419462852713376,
+      "verdict": "STRONG",
+      "protection_rule": "Ring-fence surplus; release only against quotes, field gates or financing timing."
+    },
+    "1500000": {
+      "accelerated_coverage": 0.9061387912851557,
+      "accelerated_gap": 155375.55000000005,
+      "what_it_buys": "Larger team, more AI/data capacity, more field activity and faster parallel execution.",
+      "risk": "Premature fixed-cost expansion before product and commercial decisions validate.",
+      "verdict": "USEFUL_ONLY_IF_MILESTONE_GATED_OR_STRATEGIC"
+    }
+  },
+  "valuation": {
+    "pre_money_cases": [
+      4000000,
+      5000000,
+      6000000,
+      7500000,
+      10000000
+    ],
+    "dilution_table": [
+      {
+        "500000": 0.1111111111111111,
+        "750000": 0.15789473684210525,
+        "1000000": 0.2,
+        "1500000": 0.2727272727272727,
+        "pre_money": 4000000
+      },
+      {
+        "500000": 0.09090909090909091,
+        "750000": 0.13043478260869565,
+        "1000000": 0.16666666666666666,
+        "1500000": 0.23076923076923078,
+        "pre_money": 5000000
+      },
+      {
+        "500000": 0.07692307692307693,
+        "750000": 0.1111111111111111,
+        "1000000": 0.14285714285714285,
+        "1500000": 0.2,
+        "pre_money": 6000000
+      },
+      {
+        "500000": 0.0625,
+        "750000": 0.09090909090909091,
+        "1000000": 0.11764705882352941,
+        "1500000": 0.16666666666666666,
+        "pre_money": 7500000
+      },
+      {
+        "500000": 0.047619047619047616,
+        "750000": 0.06976744186046512,
+        "1000000": 0.09090909090909091,
+        "1500000": 0.13043478260869565,
+        "pre_money": 10000000
+      }
+    ],
+    "inverse_pre_money_table": [
+      {
+        "500000": 4500000,
+        "750000": 6750000,
+        "1000000": 9000000,
+        "1500000": 13500000,
+        "max_dilution": 0.1
+      },
+      {
+        "500000": 3500000,
+        "750000": 5250000,
+        "1000000": 7000000,
+        "1500000": 10500000,
+        "max_dilution": 0.125
+      },
+      {
+        "500000": 2833333.3333333335,
+        "750000": 4250000,
+        "1000000": 5666666.666666667,
+        "1500000": 8500000,
+        "max_dilution": 0.15
+      },
+      {
+        "500000": 2357142.8571428573,
+        "750000": 3535714.285714286,
+        "1000000": 4714285.714285715,
+        "1500000": 7071428.571428572,
+        "max_dilution": 0.175
+      },
+      {
+        "500000": 2000000,
+        "750000": 3000000,
+        "1000000": 4000000,
+        "1500000": 6000000,
+        "max_dilution": 0.2
+      }
+    ],
+    "guardrails": {
+      "green": {
+        "max": 0.125,
+        "rationale": "Preserves capacity for a future 15–25% round and an optional pool."
+      },
+      "amber": {
+        "min_exclusive": 0.125,
+        "max": 0.15,
+        "rationale": "Acceptable only when capital fully funds Base or the investor contributes material strategic value."
+      },
+      "red": {
+        "min_exclusive": 0.15,
+        "rationale": "Compounds heavily with future dilution and should require exceptional strategic value and legal review."
+      }
+    },
+    "cumulative_dilution": [
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7555555555555555
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7177777777777777
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.68
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7111111111111111
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6755555555555556
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.64
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6666666666666666
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6333333333333333
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 500000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7157894736842104
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6799999999999998
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6442105263157893
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6736842105263158
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6399999999999999
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6063157894736843
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.631578947368421
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 750000,
+        "current_round_dilution": 0.15789473684210525,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5684210526315789
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.68
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.646
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6120000000000001
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6400000000000001
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6080000000000001
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5760000000000002
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6000000000000001
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.5700000000000001
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5400000000000001
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6181818181818182
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.5872727272727273
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5563636363636364
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.5818181818181819
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.5527272727272727
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5236363636363637
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.5454545454545454
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.5181818181818181
+      },
+      {
+        "pre_money": 4000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2727272727272727,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.4909090909090909
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7727272727272727
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.734090909090909
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6954545454545454
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7272727272727273
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6909090909090909
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6545454545454545
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6818181818181818
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6477272727272726
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 500000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6136363636363636
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7391304347826086
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7021739130434782
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6652173913043478
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6956521739130435
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6608695652173913
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6260869565217392
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6521739130434783
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6195652173913043
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 750000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5869565217391305
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7083333333333334
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6729166666666667
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6375000000000001
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6666666666666667
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6333333333333334
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6000000000000001
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.625
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.59375
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5625
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6538461538461537
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6211538461538461
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5884615384615384
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6153846153846154
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.5846153846153846
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5538461538461539
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.5769230769230769
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.548076923076923
+      },
+      {
+        "pre_money": 5000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.23076923076923078,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5192307692307692
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7846153846153846
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7453846153846153
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.7061538461538461
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7384615384615385
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7015384615384616
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6646153846153847
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6923076923076923
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6576923076923077
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 500000,
+        "current_round_dilution": 0.07692307692307693,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6230769230769231
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7555555555555555
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7177777777777777
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.68
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7111111111111111
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6755555555555556
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.64
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6666666666666666
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6333333333333333
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 750000,
+        "current_round_dilution": 0.1111111111111111,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7285714285714286
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6921428571428572
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6557142857142858
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6857142857142858
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6514285714285715
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6171428571428572
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6428571428571429
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6107142857142858
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.14285714285714285,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5785714285714286
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.68
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.646
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6120000000000001
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6400000000000001
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6080000000000001
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5760000000000002
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6000000000000001
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.5700000000000001
+      },
+      {
+        "pre_money": 6000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.2,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5400000000000001
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.796875
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7570312499999999
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.7171875
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.75
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7124999999999999
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.675
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.703125
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.66796875
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 500000,
+        "current_round_dilution": 0.0625,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6328125
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7727272727272727
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.734090909090909
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6954545454545454
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7272727272727273
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6909090909090909
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6545454545454545
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6818181818181818
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6477272727272726
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 750000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6136363636363636
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.75
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7124999999999999
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.675
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7058823529411765
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6705882352941177
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6352941176470589
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6617647058823529
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6286764705882353
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1000000,
+        "current_round_dilution": 0.11764705882352941,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5955882352941176
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7083333333333334
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6729166666666667
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6375000000000001
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6666666666666667
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6333333333333334
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6000000000000001
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.625
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.59375
+      },
+      {
+        "pre_money": 7500000,
+        "investment": 1500000,
+        "current_round_dilution": 0.16666666666666666,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5625
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.8095238095238094
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7690476190476189
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.7285714285714285
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7619047619047619
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7238095238095237
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6857142857142857
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7142857142857142
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6785714285714285
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 500000,
+        "current_round_dilution": 0.047619047619047616,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6428571428571428
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7906976744186046
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7511627906976743
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.7116279069767442
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7441860465116279
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7069767441860465
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6697674418604651
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6976744186046512
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6627906976744186
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 750000,
+        "current_round_dilution": 0.06976744186046512,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.627906976744186
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7727272727272727
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.734090909090909
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6954545454545454
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7272727272727273
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6909090909090909
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6545454545454545
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6818181818181818
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6477272727272726
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1000000,
+        "current_round_dilution": 0.09090909090909091,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6136363636363636
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.15,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.7391304347826086
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.15,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.7021739130434782
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.15,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6652173913043478
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.2,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6956521739130435
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.2,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6608695652173913
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.2,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.6260869565217392
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.25,
+        "option_pool": 0,
+        "current_shareholders_after_current_future_and_pool": 0.6521739130434783
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.25,
+        "option_pool": 0.05,
+        "current_shareholders_after_current_future_and_pool": 0.6195652173913043
+      },
+      {
+        "pre_money": 10000000,
+        "investment": 1500000,
+        "current_round_dilution": 0.13043478260869565,
+        "future_dilution": 0.25,
+        "option_pool": 0.1,
+        "current_shareholders_after_current_future_and_pool": 0.5869565217391305
+      }
+    ]
+  },
+  "recommendation": {
+    "classification": "CODEX RECOMMENDATION — NOT FOUNDER APPROVED",
+    "ask_format": "OPTION C — €1M core round; up to €1.5M with strategic participation",
+    "opening_ask": 1000000,
+    "target_close": 1000000,
+    "minimum_acceptable_capital": 750000,
+    "maximum_useful_capital": 1500000,
+    "opening_pre_money": 7500000,
+    "target_pre_money": 6000000,
+    "valuation_floor": 5666666.666666667,
+    "ideal_dilution": "10%–12.5%",
+    "maximum_dilution": 0.15,
+    "ebitda_language": "CONDITIONAL",
+    "ebitda_wording": "€500k EBITDA becomes achievable only if pricing, volume, COGS, margin and sales-timing drivers validate."
+  },
+  "ask_options": [
+    {
+      "option": "A",
+      "structure": "Exact €1M ask",
+      "advantage": "Simple and aligned with Base plus surplus.",
+      "risk": "Less flexibility for strategic extension."
+    },
+    {
+      "option": "B",
+      "structure": "€750k–€1M range",
+      "advantage": "Negotiating flexibility.",
+      "risk": "Investor may anchor to the underfunded €750k edge."
+    },
+    {
+      "option": "C",
+      "structure": "€1M core; up to €1.5M strategic extension",
+      "advantage": "Protects Base while allowing justified acceleration.",
+      "risk": "Requires precise milestone gating and strategic criteria.",
+      "recommended": true
+    }
+  ],
+  "strategic_value_criteria": [
+    "Guaranteed distribution",
+    "Access to large agricultural customers",
+    "Manufacturing capacity",
+    "Strategic data access with acceptable rights",
+    "Drone or hardware integration",
+    "Follow-on capital capacity",
+    "International expansion access",
+    "Institutional credibility"
+  ],
+  "investor_types": [
+    {
+      "type": "FINANCIAL VC",
+      "capital": "HIGH",
+      "speed": "MEDIUM",
+      "strategic_value": "VARIABLE",
+      "governance_risk": "MEDIUM_HIGH",
+      "commercial_value": "LOW_VARIABLE",
+      "future_signal": "HIGH"
+    },
+    {
+      "type": "STRATEGIC CORPORATE",
+      "capital": "HIGH",
+      "speed": "LOW_MEDIUM",
+      "strategic_value": "HIGH_POTENTIAL",
+      "governance_risk": "HIGH",
+      "commercial_value": "HIGH_POTENTIAL",
+      "future_signal": "VARIABLE"
+    },
+    {
+      "type": "INDUSTRIAL PARTNER",
+      "capital": "MEDIUM",
+      "speed": "MEDIUM",
+      "strategic_value": "HIGH_MANUFACTURING",
+      "governance_risk": "MEDIUM",
+      "commercial_value": "MEDIUM_HIGH",
+      "future_signal": "MEDIUM"
+    },
+    {
+      "type": "FAMILY OFFICE",
+      "capital": "MEDIUM_HIGH",
+      "speed": "MEDIUM_HIGH",
+      "strategic_value": "VARIABLE",
+      "governance_risk": "LOW_MEDIUM",
+      "commercial_value": "VARIABLE",
+      "future_signal": "MEDIUM"
+    },
+    {
+      "type": "TECH STRATEGIC",
+      "capital": "MEDIUM_HIGH",
+      "speed": "MEDIUM",
+      "strategic_value": "HIGH_TECH",
+      "governance_risk": "HIGH_IP_DATA",
+      "commercial_value": "MEDIUM",
+      "future_signal": "MEDIUM_HIGH"
+    }
+  ],
+  "commercial_proof_required": [
+    {
+      "variable": "Sentinel selling price",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Sentinel COGS",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Rover selling price / service model",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Rover COGS",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "SaaS monthly price",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "AI/data price",
+      "priority": "P1",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Pilot price",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Deployments",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Hectares",
+      "priority": "P1",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Conversion",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Sales timing",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Collections",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Gross margin",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    },
+    {
+      "variable": "Support cost",
+      "priority": "P0",
+      "status": "TO_VALIDATE"
+    }
+  ],
+  "walk_away_matrix": [
+    {
+      "issue": "Capital below €750k",
+      "status": "NEGOTIATE"
+    },
+    {
+      "issue": "Dilution above 15%",
+      "status": "DO NOT ACCEPT WITHOUT REVIEW"
+    },
+    {
+      "issue": "Board control or investor majority rights",
+      "status": "DO NOT ACCEPT WITHOUT REVIEW"
+    },
+    {
+      "issue": "Non-standard liquidation preference",
+      "status": "LEGAL REVIEW"
+    },
+    {
+      "issue": "Full-ratchet anti-dilution",
+      "status": "DO NOT ACCEPT WITHOUT REVIEW"
+    },
+    {
+      "issue": "Broad exclusivity",
+      "status": "DO NOT ACCEPT WITHOUT REVIEW"
+    },
+    {
+      "issue": "Investor ownership of core IP",
+      "status": "DO NOT ACCEPT WITHOUT REVIEW"
+    },
+    {
+      "issue": "Broad or perpetual data rights",
+      "status": "DO NOT ACCEPT WITHOUT REVIEW"
+    },
+    {
+      "issue": "Strategic restrictions on customers or partners",
+      "status": "LEGAL REVIEW"
+    },
+    {
+      "issue": "Information and protective rights",
+      "status": "NEGOTIATE"
+    }
+  ],
+  "founder_questions": [
+    "Do you approve €1M as the core New York ask?",
+    "Is €750k the absolute minimum close you will accept?",
+    "Do you approve a strategic extension up to €1.5M?",
+    "Will you defend a €7.5M opening and €6M target pre-money?",
+    "Is 15% the absolute dilution ceiling?",
+    "Which investor rights are automatic walk-away items?",
+    "Which strategic contributions justify moving into the amber dilution zone?",
+    "Do you approve ring-fencing the €112k Base surplus?",
+    "Do you approve conditional EBITDA language and no forecast claim?",
+    "Who has final authority to mark the proposal APPROVED_FOR_NEW_YORK?"
+  ],
+  "round_narrative": {
+    "thirty_seconds": "We are preparing a €1M core round, with a strategic extension up to €1.5M. The core round funds the Base M0–M15 plan, protects a financing buffer and converts today’s software and concepts into integrated hardware, field evidence, structured data and next-round readiness. Terms remain subject to founder approval.",
+    "two_minutes": "We are preparing a €1M core round because the driver-based Base plan requires approximately €888k including contingency and the three-month financing buffer. The additional €112k is protected, not automatically spent. Capital funds the core team, Rover and Sentinel iterations, the aerial layer, AI/data infrastructure, field validation, China sourcing and the IP baseline. Milestone release is tied to quotes, integrated prototypes, real field data, pilot evidence and commercial inputs. A strategic investor could extend the round to €1.5M when distribution, manufacturing, integration or follow-on value justifies the additional dilution. The next financing trigger is evidence-based: validated unit economics and a repeatable offer, not an invented revenue date."
+  },
+  "investor_objections": [
+    {
+      "question": "Why do you need €1M?",
+      "answer": "Base requires €887.6k including contingency and buffer; €1M protects €112.4k against quotes, delays and financing timing."
+    },
+    {
+      "question": "Why not €500k?",
+      "answer": "€500k funds Lean but leaves a €387.6k Base gap and risks stopping after integration but before durable field/data proof."
+    },
+    {
+      "question": "Why not bootstrap?",
+      "answer": "Bootstrap can continue software and discovery, but the model’s physical integration, field validation, sourcing and IP work require dedicated capital."
+    },
+    {
+      "question": "Why this valuation range?",
+      "answer": "It is a negotiation recommendation, not a fact; €6M pre on €1M produces 14.3% dilution and stays within the proposed 15% ceiling."
+    },
+    {
+      "question": "Why accept this dilution?",
+      "answer": "Capital is tied to evidence that should improve the next financing position; no return or valuation uplift is promised."
+    },
+    {
+      "question": "Why raise before the rover exists?",
+      "answer": "The round explicitly buys the commercial platform, integration and field proof; current maturity is disclosed."
+    },
+    {
+      "question": "What if China costs double?",
+      "answer": "Protect the Base surplus, require quotes before release and defer acceleration rather than consume the financing buffer."
+    },
+    {
+      "question": "What if Sentinel costs more?",
+      "answer": "Keep configuration pending until quotes and acceptance criteria exist; use contingency and milestone gates."
+    },
+    {
+      "question": "What if revenue is delayed?",
+      "answer": "Revenue is currently zero in the model; preserve runway and do not hire against unvalidated sales."
+    },
+    {
+      "question": "When is the next round?",
+      "answer": "When integrated evidence, real field data, pilots and unit-economics inputs support a repeatable offer; not on a fixed invented date."
+    }
+  ]
+}

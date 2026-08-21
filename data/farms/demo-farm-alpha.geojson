@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","classification":"SYNTHETIC","features":[{"type":"Feature","properties":{"id":"demo-farm-alpha","name":"Demo Farm Alpha","classification":"SYNTHETIC"},"geometry":{"type":"Polygon","coordinates":[[[-3.7023,37.1908],[-3.6981,37.1909],[-3.6979,37.1936],[-3.7024,37.1937],[-3.7023,37.1908]]]}}]}

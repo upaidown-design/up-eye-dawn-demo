@@ -1,0 +1,45 @@
+{
+  "classification": "ADMIN_CONFIDENTIAL",
+  "meeting": {
+    "title": "New York investor meeting",
+    "duration": "45 minutes",
+    "status": "WORKING_BRIEF",
+    "owner": "UP-EYE-DAWN founding team"
+  },
+  "agenda": [
+    {"time": "00–05", "title": "Conviction", "objective": "Open with the field-memory thesis and establish why fixed, aerial and ground evidence belong in one system."},
+    {"time": "05–15", "title": "System", "objective": "Explain Sentinel, drone, rover, soil probe and Data & AI Engine. Separate what exists today from the funded roadmap."},
+    {"time": "15–25", "title": "Evidence and risk", "objective": "Show only verifiable evidence. Address maturity, IP ownership and unit economics as explicit validation plans."},
+    {"time": "25–35", "title": "Value creation", "objective": "Connect capital to instrumented prototypes, deployments, rights-cleared data, validated models and recurring revenue."},
+    {"time": "35–45", "title": "Investment conversation", "objective": "Ask what evidence is required to lead diligence, review scenarios and lock next steps, owners and dates."}
+  ],
+  "visit": [
+    "Confirm attendees, roles, pronunciation and decision authority 24 hours before the meeting.",
+    "Confirm room, display resolution, HDMI/USB-C adapters, power, Wi-Fi policy and offline fallback.",
+    "Open the local demo, run preflight, reset the scenario and verify fullscreen before attendees enter.",
+    "Carry the approved deck, NDA link, offline PDF and evidence index on two independent devices.",
+    "Record agreed follow-ups, owner and date before leaving the room. Do not record people without permission."
+  ],
+  "presentation": [
+    {"step": "01", "screen": "Preflight", "message": "The presentation runtime is deterministic and can run locally."},
+    {"step": "02", "screen": "Investor demo", "message": "Fixed sensing, aerial observation and ground truth form one evidence loop."},
+    {"step": "03", "screen": "Rover and Sentinel", "message": "Concept renders communicate intended product architecture; they are not physical prototype evidence."},
+    {"step": "04", "screen": "Mission Control", "message": "Demonstrate the operational workflow and identify simulated elements clearly."},
+    {"step": "05", "screen": "NDVI", "message": "The visible dataset is synthetic. Related Red/NIR code exists in INSECE but is not yet integrated."},
+    {"step": "06", "screen": "Capital", "message": "Scenarios are planning envelopes until founder terms and operating assumptions are approved."},
+    {"step": "07", "screen": "Close", "message": "Ask which evidence gates would support the investor's diligence process."}
+  ],
+  "speech": {
+    "opening": "Agriculture has data, but it still lacks a persistent memory of the field. UP-EYE-DAWN is designed to connect autonomous observation, physical ground truth and learning over time.",
+    "system": "Sentinel provides persistent fixed observation. The drone adds repeatable aerial coverage. The rover investigates selected locations and the soil probe anchors remote signals in physical measurements. The data layer preserves the evidence chain.",
+    "truth": "Today we are showing a working deterministic software demo and approved concept imagery. We will distinguish those assets from physical validation, real integrated NDVI and production readiness.",
+    "close": "Rather than asking you to accept an unsupported claim, we want to agree the evidence that would make this opportunity diligence-ready, who owns each proof point and when it can be delivered."
+  },
+  "questions": [
+    "What evidence would you need to sponsor or lead technical diligence?",
+    "Which risk matters most at this stage: hardware maturity, data rights, commercial adoption or unit economics?",
+    "Would a field-validation milestone or a rights-cleared longitudinal dataset change your underwriting view?",
+    "Who else should review the technical, agronomic and legal evidence?",
+    "What is the clearest next step, owner and date?"
+  ]
+}

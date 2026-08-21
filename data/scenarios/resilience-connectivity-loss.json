@@ -1,0 +1,1 @@
+{"id":"resilience-connectivity-loss","version":1,"seed":20260819,"title":"Connectivity Loss Resilience","durationSeconds":180,"farmId":"demo-farm-alpha","actors":[],"phases":[{"id":"fault","label":"LINK LOSS","start":0,"end":180}],"triggers":["device.link.loss"],"expectedEvents":["device.alert.raised"],"classification":"SYNTHETIC"}

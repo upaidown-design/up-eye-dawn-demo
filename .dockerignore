@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+**/dist
+**/test-results
+assets/meeting-fallback
+references
+*.mp4
+*.pdf
+.DS_Store
+.git
+.gitignore
+.env

@@ -1,0 +1,1 @@
+import{mkdir,writeFile}from'node:fs/promises';import{resolve}from'node:path';const p=resolve(import.meta.dirname,'../data/generated/seed-status.json');await mkdir(resolve(p,'..'),{recursive:true});await writeFile(p,JSON.stringify({seed:20260816,scenario:'new-york-investor-demo-v1',classification:'SYNTHETIC'},null,2));console.log('Synthetic demo seed prepared');

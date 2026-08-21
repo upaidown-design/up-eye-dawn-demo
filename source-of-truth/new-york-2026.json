@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-08-16",
+  "meeting": "New York 2026",
+  "company": {
+    "legal_name": "UP-EYE-DAWN SL",
+    "display_name": "UP-EYE-DAWN",
+    "country": "Spain",
+    "stage": "Early-stage / pre-industrialization",
+    "pending": ["shareholder percentages", "cap table", "historical contributions", "signed IP assignments", "corporate diligence"]
+  },
+  "terminology": {
+    "platform": "UP-EYE-DAWN PLATFORM",
+    "sentinel": "SENTINEL",
+    "rover": "ROVER_001",
+    "rover_commercial_name": null,
+    "drone": "AUTONOMOUS DRONE LAYER",
+    "probe": "SOIL / GROUND-TRUTH LAYER",
+    "software": "SOFTWARE PLATFORM",
+    "data_engine": "DATA ENGINE",
+    "ai": "AI LAYER",
+    "demo_description": "A deterministic digital prototype of the operating system we are building."
+  },
+  "allowed_maturity": ["REAL", "PROTOTYPE", "SOFTWARE_WORKING", "DEMO_SIMULATION", "IN_DEVELOPMENT", "PLANNED", "VISION", "NEEDS_VERIFICATION"],
+  "products": [
+    {"id":"sentinel","name":"SENTINEL","role":"Autonomous fixed field node","maturity":"NEEDS_VERIFICATION","configuration":"PRODUCT DECISION PENDING","allowed_concepts":["fixed field node","drone docking concept","environmental sensing","autonomous missions","communications","energy autonomy","software integration"],"prohibited_specs":["maximum height","battery capacity","specific drone","solar power","communications stack"]},
+    {"id":"rover","name":"ROVER_001","role":"Mobile autonomous field node","maturity":"DEMO_SIMULATION","secondary_maturity":"VISION","configuration":"Tracked autonomous agricultural rover concept","capabilities":["mobile sensing platform","ground inspection","soil probe concept","camera and spectral perception concept","drone docking concept","cloud connected"],"mobility_candidate":"AgileX BUNKER PRO — CANDIDATE COMMERCIAL MOBILITY PLATFORM"},
+    {"id":"drone","name":"AUTONOMOUS DRONE LAYER","role":"Aerial observation","maturity":"PLANNED","approved_model":null,"historical_candidates":["DJI Neo","Matrice 350","Mavic 3 Enterprise"]},
+    {"id":"probe","name":"SOIL / GROUND-TRUTH LAYER","role":"Physical field measurements","maturity":"DEMO_SIMULATION","selected_sensor":null,"reading_label":"SIMULATED DEMO READING"},
+    {"id":"software","name":"SOFTWARE PLATFORM","role":"Mission, telemetry and analytics","maturity":"SOFTWARE_WORKING"},
+    {"id":"data_engine","name":"DATA ENGINE","role":"Longitudinal agricultural data","maturity":"IN_DEVELOPMENT"},
+    {"id":"ai","name":"AI LAYER","role":"Models, detection and recommendations","maturity":"VISION"}
+  ],
+  "product_maturity": {
+    "sentinel":"NEEDS_VERIFICATION","rover":"DEMO_SIMULATION","drone":"PLANNED","probe":"DEMO_SIMULATION","software":"SOFTWARE_WORKING","ndvi_demo":"DEMO_SIMULATION","data_engine":"IN_DEVELOPMENT","ai_models":"VISION"
+  },
+  "ndvi": {
+    "related_technology":{"name":"INSECE Red/NIR NDVI engine","classification":"REAL","relationship":"EXISTING EXTERNAL/RELATED TECHNOLOGY","rights":"REUSE RIGHTS TO CONFIRM"},
+    "demo":{"classification":"DEMO_SIMULATION","data":"SYNTHETIC PRECOMPUTED NDVI","live_red_nir_processing":false},
+    "investor_wording":"NDVI processing capability exists in related technology; UP-EYE-DAWN integration is planned, subject to reuse rights and technical integration."
+  },
+  "financial": {
+    "model_status":"MODELLED_NOT_APPROVED","model_version":"financial/model-v1.json","currency":"EUR","period":"M0-M15 monthly; M24-ready","runway":null,"revenue_series":null,"arr":null,"cac":null,"ltv":null,
+    "input_classifications":["CONFIRMED","DOCUMENTED_ESTIMATE","MANAGEMENT_ASSUMPTION","SCENARIO","TO_QUOTE","TO_VALIDATE"],
+    "scenario_status":"DECISION_REQUIRED","approved_scenario":null,
+    "provisional_capital_envelopes":{
+      "minimum_viable":{"amount":400000,"currency":"EUR","basis":"Lean M0-M12 plus 5% contingency","status":"SCENARIO"},
+      "recommended":{"amount":890000,"currency":"EUR","basis":"Base M0-M15 plus 10% contingency","status":"SCENARIO"},
+      "comfortable":{"amount":1660000,"currency":"EUR","basis":"Accelerated M0-M15 plus 15% contingency","status":"SCENARIO"}
+    },
+    "revenue_policy":"ZERO_UNTIL_APPROVED_DRIVERS","unit_economics_status":"PENDING",
+    "ebitda_12m":{"value":500000,"currency":"EUR","status":"TARGET_TO_VALIDATE","supportability":"BLOCKED_BY_PRICE_VOLUME_MARGIN_AND_TIMING_INPUTS"},
+    "sprint_3_verdict":"READY_WITH_INPUTS_PENDING"
+  },
+  "round": {"status":"DECISION_REQUIRED","current_ask":null,"instrument":null,"pre_money":null,"post_money":null,"dilution":null},
+  "proposed_round_decision": {
+    "status":"AWAITING_FOUNDER_APPROVAL",
+    "classification":"CODEX RECOMMENDATION — NOT FOUNDER APPROVED",
+    "source":"financial/round-decision-v1.json",
+    "ask_format":"€1M core round; up to €1.5M with strategic participation",
+    "opening_ask":1000000,
+    "target_close":1000000,
+    "minimum_acceptable_capital":750000,
+    "maximum_useful_capital":1500000,
+    "opening_pre_money":7500000,
+    "target_pre_money":6000000,
+    "valuation_floor":5666666.67,
+    "ideal_dilution":"10%–12.5%",
+    "maximum_recommended_dilution":0.15,
+    "ebitda_language":"CONDITIONAL",
+    "approval_rule":"May become APPROVED_FOR_NEW_YORK only after explicit founder instruction"
+  },
+  "historical_scenarios": [
+    {"label":"User-discussed 2026 scenario","investment":300000,"pre_money":5000000,"classification":"HISTORICAL","active":false},
+    {"label":"Legacy base","investment":500000,"pre_money":2500000,"dilution":0.166667,"classification":"LEGACY","active":false},
+    {"label":"Illustrative future round","investment":7500000,"pre_money":30000000,"classification":"HISTORICAL","active":false}
+  ],
+  "milestones": [
+    {"period":"M0-M2","name":"Corporate and IP baseline","maturity":"PLANNED"},{"period":"M1-M3","name":"Rover sourcing and prototype sprint","maturity":"PLANNED"},{"period":"M2-M5","name":"Instrumented Sentinel iteration","maturity":"PLANNED"},{"period":"M3-M7","name":"Ground-air data pipeline v1","maturity":"PLANNED"},{"period":"M5-M9","name":"Design-partner validation","maturity":"PLANNED"},{"period":"M7-M11","name":"AI benchmark","maturity":"PLANNED"},{"period":"M9-M12","name":"Unit economics and repeatable offer","maturity":"PLANNED"}
+  ],
+  "claims": [
+    {"id":"CLM-001","claim":"UP-EYE-DAWN has an autonomous rover prototype","classification":"NOT_SUPPORTED","evidence":[],"allowed_externally":false,"required_wording":"Do not use"},
+    {"id":"CLM-002","claim":"The demo simulates a complete autonomous mission","classification":"SUPPORTED","evidence":["simulation-engine tests","critical Playwright"],"allowed_externally":true,"required_wording":"Deterministic digital prototype"},
+    {"id":"CLM-003","claim":"INSECE contains a Red/NIR NDVI engine","classification":"SUPPORTED_WITH_CONTEXT","evidence":["INSECE documentation audit"],"allowed_externally":true,"required_wording":"Related existing technology; UP-EYE-DAWN integration pending rights and technical integration"},
+    {"id":"CLM-004","claim":"A physical Sentinel prototype exists","classification":"NOT_SUPPORTED","evidence":["Owner verbal statement only"],"allowed_externally":false,"required_wording":"Prototype evidence required before classification"},
+    {"id":"CLM-005","claim":"The software demo is functional and deterministic","classification":"SUPPORTED","evidence":["runtime preflight","API tests","Playwright tests"],"allowed_externally":true,"required_wording":"Working deterministic demo environment"},
+    {"id":"CLM-006","claim":"The demo performs live Red/NIR NDVI processing","classification":"NOT_SUPPORTED","evidence":["synthetic fallback JSON"],"allowed_externally":false,"required_wording":"Precomputed synthetic NDVI in the demo"},
+    {"id":"CLM-007","claim":"Current fundraising terms are approved","classification":"NOT_SUPPORTED","evidence":[],"allowed_externally":false,"required_wording":"Round structure under final review"},
+    {"id":"CLM-008","claim":"The 12-month EBITDA target is an approved forecast","classification":"NOT_SUPPORTED","evidence":["assumptions.json"],"allowed_externally":false,"required_wording":"Target to validate"}
+  ],
+  "language_matrix": {
+    "ndvi":{"internal":"Synthetic NDVI fallback.","investor":"Deterministic NDVI demonstration using synthetic data.","technical":"Precomputed synthetic raster and statistics; production pipeline not integrated.","diligence":"No claim of live Red/NIR processing in the UP-EYE-DAWN demo."},
+    "demo":{"internal":"Deterministic simulation runtime.","investor":"A deterministic digital prototype of the operating system we are building.","technical":"Replayable state machine, API, WebSocket and synthetic domain data.","diligence":"Hardware actors and agronomic outputs are simulated; software workflow is functional."},
+    "sentinel":{"internal":"Configuration decision pending; evidence insufficient to classify physical prototype.","investor":"Autonomous fixed field node concept within the UP-EYE-DAWN architecture.","technical":"Candidate configurations conflict and remain unselected.","diligence":"No approved dimensions, energy system, drone model or test record."}
+  },
+  "what_exists_today": [
+    {"capability":"Software platform","today":"SOFTWARE_WORKING","new_york_demo":"SOFTWARE_WORKING","objective_12m":"Production hardening"},
+    {"capability":"Sentinel","today":"NEEDS_VERIFICATION","new_york_demo":"DEMO_SIMULATION","objective_12m":"Field-deployed configuration"},
+    {"capability":"Rover","today":"VISION","new_york_demo":"DEMO_SIMULATION","objective_12m":"Physical prototype"},
+    {"capability":"Drone automation","today":"PLANNED","new_york_demo":"DEMO_SIMULATION","objective_12m":"Integrated mission layer"},
+    {"capability":"NDVI","today":"REAL related technology","new_york_demo":"DEMO_SIMULATION synthetic fallback","objective_12m":"Integrated real pipeline"},
+    {"capability":"Data Engine","today":"IN_DEVELOPMENT","new_york_demo":"DEMO_SIMULATION","objective_12m":"Rights-controlled dataset foundation"}
+  ],
+  "assets": {"allowed_classes":["APPROVED_FOR_MEETING","CONCEPT_RENDER"],"blocked_classes":["UNKNOWN_LICENSE"],"rover_master":"CONCEPT_RENDER","sentinel_master":"CONCEPT_RENDER"},
+  "demo_disclosures": {"environment":"DEMO ENVIRONMENT","data":["synthetic farm","synthetic NDVI","simulated anomaly","simulated telemetry","simulated soil reading","simulated report"],"hardware":"Concept representations; not proof of physical prototypes"},
+  "sentinel_physical_prototype_evidence_required": ["photographs","videos","date","location","dimensions","components installed","functions demonstrated","functions not implemented","test log","owner","relation to current Sentinel design"],
+  "legacy_quarantine": [
+    {"term":"2.5M / 2,500,000","classification":"LEGACY"},{"term":"500k seed","classification":"LEGACY"},{"term":"16.67%","classification":"LEGACY"},{"term":"500k EBITDA 2028","classification":"LEGACY"},{"term":"DJI Neo","classification":"HISTORICAL"},{"term":"Matrice 350","classification":"HISTORICAL"},{"term":"Mavic 3 Enterprise","classification":"HISTORICAL"},{"term":"4 m","classification":"NEEDS_REVIEW"},{"term":"5 m","classification":"NEEDS_REVIEW"},{"term":"Wall-E","classification":"LEGACY"}
+  ],
+  "narrative_order": ["Opportunity","Vision","What we are building","Sentinel","Rover","Autonomous mission","Software","Data & AI","What exists today","Why now","Why us","Business model","12-month value creation","Capital required","What the capital creates","Next financing position","Closing"],
+  "why_us": {"status":"NEEDS_VERIFICATION","candidate_topics":["technology experience","software / AI","agriculture experience","30+ years sector experience from partner side","field access","execution velocity","existing software/assets"],"prohibited_endorsements":["Google"]},
+  "decision_queue": [
+    {"priority":"P0","decision":"Sentinel configuration","why":"Conflicting height, energy, mast and docking variants block credible specifications.","options":["Conservative fixed V1","Telescopic configuration","New configuration after engineering review"],"evidence":["Sentinel dossier families conflict"],"recommended_default":"Keep PRODUCT DECISION PENDING externally.","consequence":"No dimensions or component claims until selected."},
+    {"priority":"P0","decision":"Rover commercial naming","why":"Legacy Wall-E terminology creates identity and legal risk.","options":["ROVER_001 temporarily","Approve a new commercial name"],"evidence":["Conflicting legacy materials"],"recommended_default":"Use ROVER_001.","consequence":"Investor and product language remains consistent."},
+    {"priority":"P0","decision":"Current fundraising ask","why":"No terms can be presented as current without approval.","options":["Approve driver-based ask","Keep round under review"],"evidence":["Three incompatible scenarios"],"recommended_default":"Keep all current terms null.","consequence":"No investor dilution block is shown."},
+    {"priority":"P0","decision":"EBITDA target and model","why":"12-month target conflicts with a legacy 2028 statement and lacks drivers.","options":["Approve driver-based model","Retain target to validate","Remove target"],"evidence":["assumptions.json and legacy financial dossier"],"recommended_default":"TARGET_TO_VALIDATE; do not display as forecast.","consequence":"Financial view remains capital-to-assets focused."},
+    {"priority":"P0","decision":"INSECE NDVI reuse rights","why":"Related real capability cannot be represented as integrated until rights and dependencies are cleared.","options":["Authorize reuse","License explicitly","Build independently"],"evidence":["INSECE documentation; no integrated engine in demo"],"recommended_default":"Integration pending rights and technical review.","consequence":"Demo continues with synthetic precomputed NDVI."},
+    {"priority":"P0","decision":"Prototype and pilot claims","why":"Verbal statements are not sufficient for external claims.","options":["Supply evidence package","Do not claim prototypes/pilots"],"evidence":["No verified photographs, logs, agreements or test package"],"recommended_default":"Do not claim.","consequence":"Sentinel remains NEEDS_VERIFICATION and rover remains concept/demo."},
+    {"priority":"P0","decision":"Asset and IP rights","why":"Meeting distribution and future diligence require ownership clarity.","options":["Approve owned assets","Obtain licenses","Exclude assets"],"evidence":["Manifest contains REVIEW_REQUIRED/UNKNOWN"],"recommended_default":"Allow only APPROVED_FOR_MEETING or classified CONCEPT_RENDER assets.","consequence":"Unknown-license assets stay quarantined."}
+  ]
+}

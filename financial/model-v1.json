@@ -1,0 +1,1350 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-08-16",
+  "currency": "EUR",
+  "status": "MODELLED_NOT_APPROVED",
+  "verdict": "READY_WITH_INPUTS_PENDING",
+  "conventions": {
+    "period": "M0-M15 monthly",
+    "extension": "M24-ready",
+    "revenue_policy": "Zero until approved drivers exist"
+  },
+  "input_classifications": [
+    "CONFIRMED",
+    "DOCUMENTED_ESTIMATE",
+    "MANAGEMENT_ASSUMPTION",
+    "SCENARIO",
+    "TO_QUOTE",
+    "TO_VALIDATE"
+  ],
+  "scenarios": [
+    {
+      "id": "LEAN",
+      "label": "Lean",
+      "contingency": 0.05,
+      "months": [
+        {
+          "month": "M0",
+          "opex": 10000,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -10000,
+          "by_category": {
+            "Team": 0,
+            "Software & cloud": 0,
+            "AI & data": 0,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 10000,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M1",
+          "opex": 33300,
+          "capex": 18000,
+          "revenue": 0,
+          "net_cash_flow": -51300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 0,
+            "Sentinel": 0,
+            "Rover platform": 18000,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 12000,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M2",
+          "opex": 22800,
+          "capex": 20412,
+          "revenue": 0,
+          "net_cash_flow": -43212,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 2412,
+            "Rover platform": 0,
+            "Rover integration": 18000,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M3",
+          "opex": 22800,
+          "capex": 12500,
+          "revenue": 0,
+          "net_cash_flow": -35300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 7500,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 5000,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M4",
+          "opex": 24300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -24300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 1500,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M5",
+          "opex": 27300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -27300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 1500,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M6",
+          "opex": 27300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -27300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 1500,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M7",
+          "opex": 27300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -27300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 1500,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M8",
+          "opex": 27300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -27300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 1500,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M9",
+          "opex": 27300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -27300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 1500,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M10",
+          "opex": 25800,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -25800,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M11",
+          "opex": 25800,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -25800,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M12",
+          "opex": 25800,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -25800,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 3000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 1500
+          }
+        },
+        {
+          "month": "M13",
+          "opex": 21300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -21300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M14",
+          "opex": 21300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -21300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M15",
+          "opex": 21300,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -21300,
+          "by_category": {
+            "Team": 18000,
+            "Software & cloud": 1800,
+            "AI & data": 1500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        }
+      ],
+      "total_core_m0_m12": 378012,
+      "total_m0_m15": 441912,
+      "contingency_core": 18900.600000000002,
+      "contingency_m0_m15": 22095.600000000002,
+      "capital_core": 396912.6,
+      "capital_with_buffer": 464007.6,
+      "average_monthly_burn_m1_m15": 28794.133333333335,
+      "peak_monthly_burn": 51300
+    },
+    {
+      "id": "BASE",
+      "label": "Base",
+      "contingency": 0.1,
+      "months": [
+        {
+          "month": "M0",
+          "opex": 20000,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -20000,
+          "by_category": {
+            "Team": 0,
+            "Software & cloud": 0,
+            "AI & data": 0,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 20000,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M1",
+          "opex": 58200,
+          "capex": 30000,
+          "revenue": 0,
+          "net_cash_flow": -88200,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 0,
+            "Sentinel": 0,
+            "Rover platform": 30000,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 22000,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M2",
+          "opex": 39700,
+          "capex": 45935,
+          "revenue": 0,
+          "net_cash_flow": -85635,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 5935,
+            "Rover platform": 0,
+            "Rover integration": 40000,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M3",
+          "opex": 39700,
+          "capex": 33000,
+          "revenue": 0,
+          "net_cash_flow": -72700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 18000,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 15000,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M4",
+          "opex": 43200,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -43200,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 3500,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M5",
+          "opex": 49700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -49700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 3500,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M6",
+          "opex": 49700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -49700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 3500,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M7",
+          "opex": 49700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -49700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 3500,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M8",
+          "opex": 49700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -49700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 3500,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M9",
+          "opex": 49700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -49700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 3500,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M10",
+          "opex": 46200,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -46200,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M11",
+          "opex": 46200,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -46200,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M12",
+          "opex": 46200,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -46200,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 6500,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 3000
+          }
+        },
+        {
+          "month": "M13",
+          "opex": 36700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -36700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M14",
+          "opex": 36700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -36700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M15",
+          "opex": 36700,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -36700,
+          "by_category": {
+            "Team": 30000,
+            "Software & cloud": 3200,
+            "AI & data": 3500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        }
+      ],
+      "total_core_m0_m12": 696835,
+      "total_m0_m15": 806935,
+      "contingency_core": 69683.5,
+      "contingency_m0_m15": 80693.5,
+      "capital_core": 766518.5,
+      "capital_with_buffer": 887628.5,
+      "average_monthly_burn_m1_m15": 52462.333333333336,
+      "peak_monthly_burn": 88200
+    },
+    {
+      "id": "ACCELERATED",
+      "label": "Accelerated",
+      "contingency": 0.15,
+      "months": [
+        {
+          "month": "M0",
+          "opex": 40000,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -40000,
+          "by_category": {
+            "Team": 0,
+            "Software & cloud": 0,
+            "AI & data": 0,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 40000,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M1",
+          "opex": 102000,
+          "capex": 45000,
+          "revenue": 0,
+          "net_cash_flow": -147000,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 0,
+            "Sentinel": 0,
+            "Rover platform": 45000,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 40000,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M2",
+          "opex": 69500,
+          "capex": 89457,
+          "revenue": 0,
+          "net_cash_flow": -158957,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 9457,
+            "Rover platform": 0,
+            "Rover integration": 80000,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M3",
+          "opex": 69500,
+          "capex": 70000,
+          "revenue": 0,
+          "net_cash_flow": -139500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 35000,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 35000,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M4",
+          "opex": 76500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -76500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 7000,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M5",
+          "opex": 88500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -88500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 7000,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M6",
+          "opex": 88500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -88500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 7000,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M7",
+          "opex": 88500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -88500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 7000,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M8",
+          "opex": 88500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -88500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 7000,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M9",
+          "opex": 88500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -88500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 7000,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M10",
+          "opex": 81500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -81500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M11",
+          "opex": 81500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -81500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M12",
+          "opex": 81500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -81500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 12000,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 6000
+          }
+        },
+        {
+          "month": "M13",
+          "opex": 63500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -63500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M14",
+          "opex": 63500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -63500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        },
+        {
+          "month": "M15",
+          "opex": 63500,
+          "capex": 0,
+          "revenue": 0,
+          "net_cash_flow": -63500,
+          "by_category": {
+            "Team": 50000,
+            "Software & cloud": 6000,
+            "AI & data": 7500,
+            "Sentinel": 0,
+            "Rover platform": 0,
+            "Rover integration": 0,
+            "Drone": 0,
+            "Field validation": 0,
+            "China sourcing": 0,
+            "IP / legal": 0,
+            "Regulatory": 0,
+            "Investor & commercial validation": 0
+          }
+        }
+      ],
+      "total_core_m0_m12": 1248957,
+      "total_m0_m15": 1439457,
+      "contingency_core": 187343.55,
+      "contingency_m0_m15": 215918.55,
+      "capital_core": 1436300.55,
+      "capital_with_buffer": 1655375.55,
+      "average_monthly_burn_m1_m15": 93297.13333333333,
+      "peak_monthly_burn": 158957
+    }
+  ],
+  "provisional_round_guidance": {
+    "status": "DECISION_REQUIRED",
+    "minimum_viable": {
+      "amount": 400000,
+      "basis": "Lean M0-M12 plus 5% contingency"
+    },
+    "recommended": {
+      "amount": 890000,
+      "basis": "Base M0-M15 plus 10% contingency"
+    },
+    "comfortable": {
+      "amount": 1660000,
+      "basis": "Accelerated M0-M15 plus 15% contingency"
+    },
+    "approved": false
+  },
+  "round_sensitivity": [
+    {
+      "investment": 300000,
+      "pre_money": 2500000,
+      "post_money": 2800000,
+      "dilution": 0.10714285714285714,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 500000,
+      "pre_money": 2500000,
+      "post_money": 3000000,
+      "dilution": 0.16666666666666666,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 750000,
+      "pre_money": 2500000,
+      "post_money": 3250000,
+      "dilution": 0.23076923076923078,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1000000,
+      "pre_money": 2500000,
+      "post_money": 3500000,
+      "dilution": 0.2857142857142857,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1500000,
+      "pre_money": 2500000,
+      "post_money": 4000000,
+      "dilution": 0.375,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 300000,
+      "pre_money": 5000000,
+      "post_money": 5300000,
+      "dilution": 0.05660377358490566,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 500000,
+      "pre_money": 5000000,
+      "post_money": 5500000,
+      "dilution": 0.09090909090909091,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 750000,
+      "pre_money": 5000000,
+      "post_money": 5750000,
+      "dilution": 0.13043478260869565,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1000000,
+      "pre_money": 5000000,
+      "post_money": 6000000,
+      "dilution": 0.16666666666666666,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1500000,
+      "pre_money": 5000000,
+      "post_money": 6500000,
+      "dilution": 0.23076923076923078,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 300000,
+      "pre_money": 7500000,
+      "post_money": 7800000,
+      "dilution": 0.038461538461538464,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 500000,
+      "pre_money": 7500000,
+      "post_money": 8000000,
+      "dilution": 0.0625,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 750000,
+      "pre_money": 7500000,
+      "post_money": 8250000,
+      "dilution": 0.09090909090909091,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1000000,
+      "pre_money": 7500000,
+      "post_money": 8500000,
+      "dilution": 0.11764705882352941,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1500000,
+      "pre_money": 7500000,
+      "post_money": 9000000,
+      "dilution": 0.16666666666666666,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 300000,
+      "pre_money": 10000000,
+      "post_money": 10300000,
+      "dilution": 0.02912621359223301,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 500000,
+      "pre_money": 10000000,
+      "post_money": 10500000,
+      "dilution": 0.047619047619047616,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 750000,
+      "pre_money": 10000000,
+      "post_money": 10750000,
+      "dilution": 0.06976744186046512,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1000000,
+      "pre_money": 10000000,
+      "post_money": 11000000,
+      "dilution": 0.09090909090909091,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1500000,
+      "pre_money": 10000000,
+      "post_money": 11500000,
+      "dilution": 0.13043478260869565,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 300000,
+      "pre_money": 15000000,
+      "post_money": 15300000,
+      "dilution": 0.0196078431372549,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 500000,
+      "pre_money": 15000000,
+      "post_money": 15500000,
+      "dilution": 0.03225806451612903,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 750000,
+      "pre_money": 15000000,
+      "post_money": 15750000,
+      "dilution": 0.047619047619047616,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1000000,
+      "pre_money": 15000000,
+      "post_money": 16000000,
+      "dilution": 0.0625,
+      "classification": "SCENARIO"
+    },
+    {
+      "investment": 1500000,
+      "pre_money": 15000000,
+      "post_money": 16500000,
+      "dilution": 0.09090909090909091,
+      "classification": "SCENARIO"
+    }
+  ],
+  "revenue_drivers": [
+    {
+      "id": "REV-01",
+      "name": "Sentinel hardware units",
+      "value": 0,
+      "unit": "units",
+      "status": "TO_VALIDATE",
+      "note": "No approved price, volume or delivery calendar"
+    },
+    {
+      "id": "REV-02",
+      "name": "Rover hardware units",
+      "value": 0,
+      "unit": "units",
+      "status": "TO_VALIDATE",
+      "note": "No approved price, volume or delivery calendar"
+    },
+    {
+      "id": "REV-03",
+      "name": "Active SaaS accounts",
+      "value": 0,
+      "unit": "accounts",
+      "status": "TO_VALIDATE",
+      "note": "No approved pricing, conversion or churn"
+    },
+    {
+      "id": "REV-04",
+      "name": "Managed service contracts",
+      "value": 0,
+      "unit": "contracts",
+      "status": "TO_VALIDATE",
+      "note": "No approved scope, pricing or delivery capacity"
+    }
+  ],
+  "ebitda_target": {
+    "value": 500000,
+    "period": "12 months",
+    "status": "TARGET_TO_VALIDATE",
+    "reverse_engineering_status": "BLOCKED_BY_PRICE_VOLUME_MARGIN_INPUTS"
+  },
+  "unit_economics": {
+    "status": "PENDING",
+    "required": [
+      "approved price",
+      "COGS",
+      "installation cost",
+      "support cost",
+      "gross margin",
+      "SaaS MRR",
+      "churn",
+      "CAC"
+    ]
+  },
+  "founder_decisions": [
+    "Approve a planning scenario and capital envelope",
+    "Approve hiring sequence and loaded compensation bands",
+    "Select Sentinel configuration and obtain supplier quotes",
+    "Select rover platform and integration BOM",
+    "Select drone/regulatory operating path",
+    "Approve commercial pricing and revenue activation gates",
+    "Approve instrument, valuation range and dilution guardrail"
+  ],
+  "sources": [
+    {
+      "id": "SRC-01",
+      "type": "DOCUMENTED_ESTIMATE",
+      "ref": "references/source-material/sentinel/engineering/04_bom_costes.csv",
+      "note": "Preliminary Sentinel BOM; numeric component range €2,412–€9,457, excluding supplier-only dock quote"
+    },
+    {
+      "id": "SRC-02",
+      "type": "CANONICAL",
+      "ref": "source-of-truth/new-york-2026.json",
+      "note": "Product maturity, null round terms and €500k EBITDA target status"
+    },
+    {
+      "id": "SRC-03",
+      "type": "HISTORICAL",
+      "ref": "docs/investor-meeting-new-york-2026/financial/fundraising-scenarios.csv",
+      "note": "Quarantined historical scenarios; not current terms"
+    }
+  ]
+}
