@@ -1,4 +1,4 @@
-name: up-eye-dawn-production
+version: "2.4"
 
 x-logging: &default-logging
   driver: json-file
