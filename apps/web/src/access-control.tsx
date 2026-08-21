@@ -1,11 +1,12 @@
 import type {FormEvent, ReactNode} from 'react';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {Link, Navigate, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {runtimeConfig} from './runtime-config';
 
 type AccessStatus = {granted: boolean; reason: string; role?: string; fullName?: string; email?: string};
 type NdaDocument = {
   invitation: {publicId: string; name: string; organisationName: string; purpose: string; intendedRecipientEmail?: string};
+  emailVerification: {required: boolean; verified: boolean; verifiedEmail: string | null; provider: string};
   version: string; status: string; jurisdiction: string; governingLaw: string; signatureProfile: string; title: string; disclosingParty: string; notice: string; paragraphs: string[];
   privacy: {legalStatus: string; controller: string; contact: string; purpose: string; data: string; retention: string; rights: string};
 };
@@ -58,7 +59,7 @@ export function ProtectedInvestorRoute({children, adminOnly = false}: {children:
   if (!status) return <Loading text="Verifying confidential access…"/>;
   if (adminOnly && status.role !== 'OWNER' && status.role !== 'ADMIN') return <Navigate to="/admin/login" replace/>;
   if (!status.granted) {
-    const routes: Record<string, string> = {NETWORK_CHANGED: '/access/reverify', SESSION_EXPIRED: '/access/expired', ACCESS_REVOKED: '/access/revoked', NDA_REVOKED: '/access/revoked', NDA_UPDATE_REQUIRED: '/access/reverify'};
+    const routes: Record<string, string> = {NETWORK_CHANGED: '/access/reverify', CLIENT_CHANGED: '/access/reverify', SESSION_EXPIRED: '/access/expired', ACCESS_REVOKED: '/access/revoked', NDA_REVOKED: '/access/revoked', NDA_UPDATE_REQUIRED: '/access/reverify'};
     return <Navigate to={routes[status.reason] ?? '/access'} replace state={{reason: status.reason}}/>;
   }
   return <>{children}</>;
@@ -69,10 +70,15 @@ function Loading({text}: {text: string}) {
 }
 
 export function AdminLogin() {
-  const nav = useNavigate(); const passwordRef = useRef<HTMLInputElement>(null); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [mfaCode, setMfaCode] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
-  useEffect(() => { api<{authenticated: boolean}>('/admin/session').then(() => nav('/admin', {replace: true})).catch(() => {}); }, []);
+  const nav = useNavigate(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [mfaCode, setMfaCode] = useState(''); const [devToken, setDevToken] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, '')); const privateToken = fragment.get('dev') ?? '';
+    if (privateToken) { setDevToken(privateToken); window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`); }
+    api<{authenticated: boolean}>('/admin/session').then(() => nav('/admin', {replace: true})).catch(() => {});
+  }, []);
   const submit = async (event: FormEvent) => { event.preventDefault(); setBusy(true); setError(''); try { await api('/admin/login', {method: 'POST', body: JSON.stringify({email, password, mfaCode})}); nav('/admin', {replace: true}); } catch { setError('The credentials or verification code are incorrect.'); } finally { setBusy(false); } };
-  return <main className="secure-shell"><section className="secure-brand"><p>UP AI DOWN · PRIVATE OPERATIONS</p><h1>Investor access,<br/>under control.</h1><span>Invitations, individual visitors, NDA evidence, active sessions and meeting materials are managed in one auditable workspace.</span></section><section className="secure-panel login-panel"><div><p className="secure-kicker">ADMINISTRATOR ACCESS</p><h2>Sign in</h2><p>Use administrator credentials. Production access requires MFA.</p></div><button className="dev-account-helper" type="button" onClick={() => { setEmail('upaidown@gmail.com'); window.setTimeout(() => passwordRef.current?.focus(), 0); }}><b>TEMP DEV</b><span>Load owner account</span></button><form onSubmit={submit}><label>Email<input type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required/></label><label>Password<input ref={passwordRef} type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required/></label><label>Authenticator code <small>when enabled</small><input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={mfaCode} onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, ''))}/></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="secure-primary" disabled={busy}>{busy ? 'VERIFYING…' : 'ENTER PRIVATE PORTAL'}</button></form><small>The temporary helper loads only the owner email. No password or bypass is embedded in the public application. Admin and visitor sessions are separate, HTTP-only, time-limited and bound to their network context.</small></section></main>;
+  const devLogin = async () => { setBusy(true); setError(''); try { await api('/admin/dev-login', {method: 'POST', body: JSON.stringify({token: devToken})}); setDevToken(''); nav('/admin', {replace: true}); } catch { setDevToken(''); setError('The temporary private access is invalid, expired or already disabled.'); } finally { setBusy(false); } };
+  return <main className="secure-shell"><section className="secure-brand"><p>UP AI DOWN · PRIVATE OPERATIONS</p><h1>Investor access,<br/>under control.</h1><span>Invitations, individual visitors, NDA evidence, active sessions and meeting materials are managed in one auditable workspace.</span></section><section className="secure-panel login-panel"><div><p className="secure-kicker">ADMINISTRATOR ACCESS</p><h2>Sign in</h2><p>Use administrator credentials. Production access requires MFA.</p></div>{devToken && <button className="dev-account-helper" type="button" disabled={busy} onClick={() => void devLogin()}><b>TEMP DEV · PRIVATE</b><span>Create a time-limited owner session</span></button>}<form onSubmit={submit}><label>Email<input type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required/></label><label>Password<input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required/></label><label>Authenticator code <small>when enabled</small><input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={mfaCode} onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, ''))}/></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="secure-primary" disabled={busy}>{busy ? 'VERIFYING…' : 'ENTER PRIVATE PORTAL'}</button></form><small>The temporary DEV control exists only when a private fragment is supplied and is removed from browser history immediately. It creates a normal, audited, time-limited session bound to this network and browser.</small></section></main>;
 }
 
 function AccessState({kind}: {kind: string}) {
@@ -88,11 +94,18 @@ function AccessState({kind}: {kind: string}) {
 }
 
 export function NdaAccessPage() {
-  const {inviteToken = ''} = useParams(); const nav = useNavigate(); const location = useLocation(); const [documentData, setDocumentData] = useState<NdaDocument | null>(null); const [mode, setMode] = useState('loading'); const [error, setError] = useState(''); const [busy, setBusy] = useState(false); const [complete, setComplete] = useState<{emailStatus: string; legalStatus: string} | null>(null);
+  const {inviteToken = ''} = useParams(); const nav = useNavigate(); const location = useLocation(); const [documentData, setDocumentData] = useState<NdaDocument | null>(null); const [mode, setMode] = useState('loading'); const [error, setError] = useState(''); const [emailSent, setEmailSent] = useState(false); const [busy, setBusy] = useState(false); const [complete, setComplete] = useState<{emailStatus: string; legalStatus: string} | null>(null);
   const loadDocument = () => api<NdaDocument>('/access/document').then((value) => { setDocumentData(value); setMode('form'); }).catch(() => setMode('invalid'));
   useEffect(() => {
     let active = true;
     const run = async () => {
+      const oobCode = new URLSearchParams(location.search).get('oobCode');
+      if (location.pathname.endsWith('/verify') && oobCode) {
+        const email = window.localStorage.getItem('ued-investor-verification-email') ?? '';
+        try { await api('/access/email/complete', {method: 'POST', body: JSON.stringify({email, oobCode})}); window.localStorage.removeItem('ued-investor-verification-email'); if (active) { nav('/access', {replace: true}); await loadDocument(); } }
+        catch { if (active) { setError('The email verification link is invalid or expired. Reopen the invitation and request a new link.'); setMode('invalid'); } }
+        return;
+      }
       if (inviteToken) {
         try { await api('/access/invitations/prepare', {method: 'POST', body: JSON.stringify({token: inviteToken})}); if (active) nav('/access', {replace: true}); }
         catch (reason) { if (!active) return; setMode((reason as Error).message === 'REGISTRATION_LIMIT_REACHED' ? 'full' : 'invalid'); }
@@ -107,11 +120,12 @@ export function NdaAccessPage() {
         if (status.reason === 'PENDING_APPROVAL') return setMode('pending');
         if (status.reason === 'ACCESS_REVOKED' || status.reason === 'NDA_REVOKED') return setMode('revoked');
         if (status.reason === 'SESSION_EXPIRED') return setMode('expired');
+        if (status.reason === 'CLIENT_CHANGED' || status.reason === 'NETWORK_CHANGED') return void await loadDocument();
         await loadDocument();
       } catch { if (active) await loadDocument(); }
     };
     void run(); return () => { active = false; };
-  }, [inviteToken, location.pathname]);
+  }, [inviteToken, location.pathname, location.search]);
   useEffect(() => { if (mode !== 'pending') return; const timer = window.setInterval(() => { api<AccessStatus>('/access/status').then((status) => { if (status.granted) setComplete({emailStatus: 'SENT', legalStatus: 'ACCEPTED'}); if (status.reason === 'ACCESS_REVOKED') setMode('revoked'); }).catch(() => {}); }, 5000); return () => window.clearInterval(timer); }, [mode]);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); setBusy(true); setError(''); const form = new FormData(event.currentTarget);
@@ -120,8 +134,14 @@ export function NdaAccessPage() {
       if (result.reason === 'PENDING_APPROVAL') setMode('pending'); else setComplete(result);
     } catch (reason) {
       const code = reason instanceof Error ? reason.message : 'REGISTRATION_FAILED';
-      setError(code === 'INVALID_REGISTRATION' ? 'Review every field. The typed acknowledgement must exactly match your full name.' : code === 'REGISTRATION_NOT_AVAILABLE' ? 'Registration is not available for the details supplied.' : statusLabel(code));
+      setError(code === 'INVALID_REGISTRATION' ? 'Review every field. The typed acknowledgement must exactly match your full name.' : code === 'REGISTRATION_NOT_AVAILABLE' ? 'Registration is not available for the details supplied.' : code === 'IDENTITY_ALREADY_REGISTERED' ? 'This email already has an individual record. A shared invitation cannot create another session for that identity; contact the administrator for verified recovery.' : statusLabel(code));
     } finally { setBusy(false); }
+  };
+  const sendEmailVerification = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setBusy(true); setError(''); const email = String(new FormData(event.currentTarget).get('email') ?? '').trim().toLowerCase();
+    try { await api('/access/email/start', {method: 'POST', body: JSON.stringify({email})}); window.localStorage.setItem('ued-investor-verification-email', email); setEmailSent(true); }
+    catch (reason) { const code = reason instanceof Error ? reason.message : 'EMAIL_DELIVERY_FAILED'; setError(code === 'REGISTRATION_NOT_AVAILABLE' ? 'This email is not permitted by the invitation.' : 'The verification email could not be sent. Please try again or contact the administrator.'); }
+    finally { setBusy(false); }
   };
   if (complete) return <main className="access-complete"><div className="complete-mark">✓</div><p className="secure-kicker">ACCESS VERIFIED</p><h1>Individual access is active.</h1><p>Your acknowledgement and independent secure session have been recorded. Email delivery: <b>{statusLabel(complete.emailStatus)}</b>.</p><div className="complete-actions"><button className="secure-primary" onClick={() => nav('/investor')}>ENTER PRIVATE INVESTOR ROOM</button><a href={`${API}/access/nda-copy`} target="_blank" rel="noreferrer">Download NDA evidence</a></div><small>Access remains bound to this browser session and network context. IP alone is never treated as identity.</small></main>;
   if (mode === 'loading') return <Loading text="Preparing controlled access…"/>;
@@ -129,6 +149,7 @@ export function NdaAccessPage() {
   if (mode === 'expired' || mode === 'revoked' || mode === 'invalid' || mode === 'full') return <AccessState kind={mode === 'full' ? 'invalid' : mode}/>;
   if (!documentData) return <AccessState kind="invalid"/>;
   const reverify = documentData.invitation.purpose === 'REVERIFY' || location.pathname.endsWith('/reverify');
+  if (documentData.emailVerification.required && !documentData.emailVerification.verified) return <main className="nda-shell email-verification-shell"><section className="nda-intro"><p className="secure-kicker">PRIVATE INVESTOR ACCESS · EMAIL OWNERSHIP</p><h1>Verify your business email before signing.</h1><p>The invitation may be shared, but every person receives an independent record. Access is never inherited from another visitor’s password, cookie or email address.</p><div className={`legal-status ${documentData.status === 'APPROVED' ? 'approved' : 'draft'}`}>{statusLabel(documentData.status)}</div><small>{documentData.notice}</small></section><section className="nda-workspace"><form className="nda-form email-verification-form" onSubmit={sendEmailVerification}><div className="form-heading"><span>INDIVIDUAL VERIFICATION</span><h2>{emailSent ? 'Check your inbox' : 'Confirm email ownership'}</h2></div>{emailSent ? <><p>A single-use sign-in link was sent. Open it in this same browser to continue to the assigned NDA.</p><button type="button" className="secure-primary" onClick={() => setEmailSent(false)}>SEND ANOTHER LINK</button></> : <><label>Business email<input name="email" type="email" autoComplete="email" defaultValue={documentData.invitation.intendedRecipientEmail ?? ''} required/></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="secure-primary" disabled={busy}>{busy ? 'SENDING…' : 'SEND SECURE EMAIL LINK'}</button></>}<small>The link expires and does not replace the NDA, administrator approval or the client-bound portal session.</small></form></section></main>;
   return <main className="nda-shell"><section className="nda-intro"><p className="secure-kicker">{reverify ? 'SECURE RE-VERIFICATION' : 'PRIVATE INVESTOR ACCESS'} · {documentData.version}</p><h1>{reverify ? 'Your network changed. Verify the individual record again.' : 'Confidential materials begin with an individual record.'}</h1><p>Review the assigned agreement, provide your business identity and apply your typed legal name as an electronic signature.</p><div className={`legal-status ${documentData.status === 'APPROVED' ? 'approved' : 'draft'}`}>{statusLabel(documentData.status)}</div><small>{documentData.notice}</small></section><section className="nda-workspace"><article className="nda-document"><header><span>UP AI DOWN</span><b>{documentData.version}</b></header><div className="nda-jurisdiction"><span>{statusLabel(documentData.jurisdiction)}</span><span>{statusLabel(documentData.signatureProfile)}</span></div><h2>{documentData.title}</h2><p><strong>Disclosing party:</strong> {documentData.disclosingParty}</p><p><strong>Governing law:</strong> {statusLabel(documentData.governingLaw)}</p>{documentData.paragraphs.map((paragraph, index) => <p key={paragraph}><i>{String(index + 1).padStart(2, '0')}</i>{paragraph}</p>)}<aside><b>Privacy and access record · {statusLabel(documentData.privacy.legalStatus)}</b><p>{documentData.privacy.purpose}</p><p>{documentData.privacy.data}</p><p>{documentData.privacy.retention}</p><p>{documentData.privacy.rights} Contact: {documentData.privacy.contact}</p></aside></article><form className="nda-form" onSubmit={submit}><div className="form-heading"><span>RECIPIENT & SIGNATORY DETAILS</span><h2>{reverify ? 'Verify again' : 'Create and sign your record'}</h2></div><label>Full legal name<input name="fullName" autoComplete="name" required/></label><label>Business email<input name="email" type="email" autoComplete="email" defaultValue={documentData.invitation.intendedRecipientEmail ?? ''} required/></label><label>Legal organisation / entity<input name="organisation" autoComplete="organization" defaultValue={documentData.invitation.organisationName} required/></label><label>Registered address<textarea name="registeredAddress" autoComplete="street-address" rows={3} required/></label><div className="form-pair"><label>Role / signatory title<input name="role" autoComplete="organization-title" required/></label><label>Country<input name="country" autoComplete="country-name" required/></label></div><label className="signature-field">Electronic signature — type your full legal name<input name="typedSignature" autoComplete="name" required/><small>Must exactly match the full legal name above.</small></label><label className="check-field"><input name="signatureIntentConfirmed" type="checkbox" required/><span>I intend my typed name to be my electronic signature and consent to receive and retain this agreement and its evidence record electronically.</span></label><label className="check-field"><input name="ndaConfirmed" type="checkbox" required/><span>I have read and agree to the NDA displayed on this page.</span></label><label className="check-field"><input name="privacyConfirmed" type="checkbox" required/><span>I acknowledge the privacy notice and processing of technical identifiers for access security.</span></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="secure-primary" disabled={busy}>{busy ? 'SIGNING & RECORDING…' : 'SIGN NDA & CONTINUE'}</button><small className="form-footnote">The system stores the assigned document version and hash, signatory data, affirmative intent, UTC timestamp, security evidence and an exact PDF copy. This is a simple electronic-signature workflow, not an advanced or qualified electronic signature.</small></form></section></main>;
 }
 

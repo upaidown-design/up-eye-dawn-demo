@@ -202,6 +202,12 @@ Retention values are configuration placeholders. No NDA evidence is automaticall
 
 A network mismatch invalidates the active session. The browser receives a re-verification context and shows `/demo/access/reverify`. The visitor submits identity and acknowledgement again; the invitation registration count does not increase for the existing identity.
 
+The session is also bound to the browser user-agent fingerprint. Copying an HttpOnly cookie to a different client invalidates the session with `CLIENT_CHANGED`, creates a controlled re-verification context and records a security audit event.
+
+An invitation is not an investor password. A shared `MULTI_VISITOR` invitation creates a separate identity record for each new business email. A fresh registration context cannot reuse an email that is already registered under that invitation; it receives `IDENTITY_ALREADY_REGISTERED` and must use an administrator-controlled, email-verified recovery flow. In workflow-testing mode every newly created invitation forces manual administrator approval.
+
+Temporary administrator access uses `/demo/admin/login#dev=<private-token>`. The fragment is removed from browser history immediately and the button is rendered only when that private fragment exists. The backend checks enablement, expiry and the server-held token, then issues a normal audited admin session bound to the current client. The clean admin URL never displays a DEV bypass.
+
 ### Changing NDA
 
 Create a new `nda_documents` row; never overwrite prior evidence. Set `reaccept_required` according to the legal decision and assign the new version to relevant invitations. Existing snapshots remain immutable.
