@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   canonicalIp,
+  decryptSecret,
   decryptIp,
   encryptIp,
   evidenceHash,
+  encryptSecret,
+  generateTotpSecret,
   invitationAllowsEmail,
   maskIp,
   randomOpaqueToken,
@@ -55,4 +58,14 @@ test('TOTP validation accepts the current window and rejects a wrong code', () =
   const code = totp(secret, at);
   assert.equal(verifyTotp(secret, code, at), true);
   assert.equal(verifyTotp(secret, code === '000000' ? '000001' : '000000', at), false);
+});
+
+test('encrypted team MFA secrets round-trip and generated secrets work with TOTP', () => {
+  const key = '22'.repeat(32);
+  const secret = generateTotpSecret();
+  const encrypted = encryptSecret(secret, key, 3);
+  assert.equal(encrypted.includes(secret), false);
+  assert.equal(decryptSecret(encrypted, key), secret);
+  const at = 1_700_000_000_000;
+  assert.equal(verifyTotp(decryptSecret(encrypted, key), totp(secret, at), at), true);
 });

@@ -1,7 +1,7 @@
 import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
 import type {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify';
-import {randomUUID, scryptSync} from 'node:crypto';
+import {randomBytes, randomUUID, scryptSync} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import nodemailer from 'nodemailer';
@@ -10,8 +10,11 @@ import pg from 'pg';
 import {z} from 'zod';
 import {
   canonicalIp,
+  decryptSecret,
   encryptIp,
+  encryptSecret,
   evidenceHash,
+  generateTotpSecret,
   hmacHex,
   invitationAllowsEmail,
   maskIp,
@@ -25,13 +28,27 @@ import {
 } from './portal-core.js';
 import {runPortalMigrations} from './portal-migrations.js';
 import {
+  AcceptTeamInvitationBody,
+  AcceptAdminRecoveryBody,
+  ConfirmMfaBody,
+  CreateAdminRecoveryBody,
+  CreateProjectCommentBody,
+  CreateProjectDecisionBody,
   CreateProjectEventBody,
   CreateProjectNoteBody,
   CreateProjectTaskBody,
+  CreateTeamInvitationBody,
+  PrepareTeamInvitationBody,
+  PrepareAdminRecoveryBody,
+  UpdateProjectDecisionBody,
   UpdateProjectEventBody,
   UpdateProjectNoteBody,
   UpdateProjectTaskBody,
+  UpdateTeamMemberBody,
 } from './workspace-schema.js';
+import {registerMeetingKitRoutes} from './workspace-meeting-kit.js';
+import {registerCrmRoutes} from './workspace-crm.js';
+import {registerMaterialsRoutes} from './workspace-materials.js';
 
 const {Pool} = pg;
 const MINUTE = 60_000;
@@ -49,7 +66,10 @@ type NdaFile = {
   paragraphs: string[];
 };
 
-type AdminSession = {id: string; admin_user_id: string; email: string; role: 'OWNER' | 'ADMIN' | 'VIEWER'; csrf_token_hash: string};
+type AdminRole = 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER';
+export type AdminSession = {id: string; admin_user_id: string; email: string; role: AdminRole; csrf_token_hash: string};
+export type PortalRequireAdminFn = (request: FastifyRequest, reply: FastifyReply, roles?: AdminRole[]) => Promise<AdminSession | null>;
+export type PortalAuditFn = (eventType: string, severity: 'INFO' | 'NOTICE' | 'WARNING' | 'SECURITY', actorType: 'SYSTEM' | 'ADMIN' | 'VISITOR' | 'ANONYMOUS', request: FastifyRequest, links?: {actorId?: string; visitorId?: string; adminId?: string; invitationId?: string; sessionId?: string}, metadata?: Record<string, unknown>) => Promise<void>;
 type VisitorDecision = {
   granted: boolean;
   reason: string;
@@ -94,6 +114,7 @@ function intEnv(name: string, fallback: number) { const value = Number(env(name,
 function sourceIp(request: FastifyRequest) { return canonicalIp(request.ip); }
 function userAgent(request: FastifyRequest) { return String(request.headers['user-agent'] ?? 'unknown').slice(0, 500); }
 function verifyPassword(password: string, stored: string) { const [algorithm, saltHex, hashHex] = stored.split(':'); if (algorithm !== 'scrypt' || !saltHex || !hashHex) return false; return safeEqual(scryptSync(password, Buffer.from(saltHex, 'hex'), 64).toString('hex'), hashHex); }
+function hashPassword(password: string) { const salt = randomBytes(16); return `scrypt:${salt.toString('hex')}:${scryptSync(password, salt, 64).toString('hex')}`; }
 function csvCell(value: unknown) { const clean = String(value ?? '').replace(/[\r\n]+/g, ' '); const safe = /^[=+\-@]/.test(clean) ? `'${clean}` : clean; return `"${safe.replaceAll('"', '""')}"`; }
 function cookieOptions(secure: boolean, maxAgeMs: number, httpOnly = true) { return {path: '/', httpOnly, sameSite: 'strict' as const, secure, maxAge: Math.floor(maxAgeMs / 1000)}; }
 
@@ -133,6 +154,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   const publicBaseUrl = env('PUBLIC_BASE_URL', 'http://127.0.0.1:8088'); const adminEmail = normalizeEmail(env('ADMIN_EMAIL')); const adminPasswordHash = env('ADMIN_PASSWORD_HASH');
   const localPortalTestMode = ['localhost', '127.0.0.1', '::1'].includes(new URL(publicBaseUrl).hostname);
   const adminTotpSecret = env('ADMIN_TOTP_SECRET'); const defaultInviteToken = env('DEFAULT_INVITE_TOKEN');
+  const adminMfaEncryptionKey = env('ADMIN_MFA_ENCRYPTION_KEY', ipEncryptionKey);
   const devLoginEnabled = env('TEMP_ADMIN_DEV_LOGIN_ENABLED', 'false') === 'true'; const devLoginToken = env('TEMP_ADMIN_DEV_LOGIN_TOKEN');
   const devLoginExpiresAt = env('TEMP_ADMIN_DEV_LOGIN_EXPIRES_AT'); const devLoginExpiry = devLoginExpiresAt ? Date.parse(devLoginExpiresAt) : 0;
   const visitorCookie = cookieSecure ? '__Host-ued-visitor' : 'ued_visitor'; const adminCookie = cookieSecure ? '__Host-ued-admin' : 'ued_admin';
@@ -141,20 +163,22 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   const nda = ndaFiles[0]!; nda.status = env('NDA_LEGAL_STATUS', nda.status) as NdaFile['status'];
   const briefing = JSON.parse(await readFile(resolve(root, 'data/admin/new-york-private-briefing.json'), 'utf8')) as Record<string, unknown>;
   const privacyNotice = {legalStatus: privacyStatus, controller: nda.disclosingParty, contact: env('PRIVACY_CONTACT_EMAIL', adminEmail), purpose: 'Administer controlled investor access, record NDA acknowledgement, detect session misuse and preserve a security audit trail.', data: 'Identity and business contact data, acknowledgement evidence, timestamp, user agent and technical network identifiers. Source IP is encrypted at rest and separately HMAC-fingerprinted.', retention: env('NDA_RETENTION_NOTICE', 'LEGAL_REVIEW_REQUIRED'), rights: 'Contact the privacy address for applicable rights requests. Evidence-retention decisions require legal review.'};
+  const smtpConfigured = Boolean(env('SMTP_HOST') && env('SMTP_FROM', env('MAIL_FROM')) && env('SMTP_ARCHIVE', env('NDA_ARCHIVE_EMAIL')));
 
   const secrets = [sessionSecret, invitationSecret, ipFingerprintSecret];
-  if (!databaseUrl || secrets.some((secret) => secret.length < 32) || new Set(secrets).size !== secrets.length || !/^[a-f0-9]{64}$/i.test(ipEncryptionKey) || !adminEmail || !adminPasswordHash) throw new Error('Private portal configuration is incomplete or key separation is invalid');
+  if (!databaseUrl || secrets.some((secret) => secret.length < 32) || new Set(secrets).size !== secrets.length || !/^[a-f0-9]{64}$/i.test(ipEncryptionKey) || !/^[a-f0-9]{64}$/i.test(adminMfaEncryptionKey) || !adminEmail || !adminPasswordHash) throw new Error('Private portal configuration is incomplete or key separation is invalid');
   if (devLoginEnabled && (devLoginToken.length < 32 || !Number.isFinite(devLoginExpiry))) throw new Error('Temporary administrator login requires a strong token and a valid expiry');
   if (emailVerificationProvider === 'GOOGLE_IDENTITY_PLATFORM' && (!identityPlatformProjectId || identityPlatformApiKey.length < 20)) throw new Error('Google Identity Platform email verification is incomplete');
   if (externalEnabled) {
-    const failures = [!ndaFiles.some((document) => document.status === 'APPROVED') && 'at least one NDA must be APPROVED', privacyStatus !== 'APPROVED' && 'privacy notice must be APPROVED', emailVerificationProvider === 'NONE' && 'verified email provider is required', !cookieSecure && 'secure cookies are required', !adminMfaRequired && 'admin MFA is required', !adminTotpSecret && 'admin TOTP secret is required', Boolean(defaultInviteToken) && 'default invitation must be removed'].filter(Boolean);
+    const failures = [!ndaFiles.some((document) => document.status === 'APPROVED') && 'at least one NDA must be APPROVED', privacyStatus !== 'APPROVED' && 'privacy notice must be APPROVED', emailVerificationProvider === 'NONE' && 'verified email provider is required', !cookieSecure && 'secure cookies are required', !adminMfaRequired && 'admin MFA is required', adminMfaEncryptionKey === ipEncryptionKey && 'MFA encryption key must be separated', !smtpConfigured && 'SMTP sender and archive delivery must be configured', devLoginEnabled && 'temporary developer login must be disabled', Boolean(defaultInviteToken) && 'default invitation must be removed'].filter(Boolean);
     if (failures.length) throw new Error(`External portal safety gate failed: ${failures.join('; ')}`);
   }
 
   const pool = new Pool({connectionString: databaseUrl, max: 8}); await runPortalMigrations(pool, root); await app.register(cookie); await app.register(rateLimit, {global: false});
-  await pool.query(`INSERT INTO private_portal.admin_users(id,email,password_hash,role,status,mfa_enabled) VALUES($1,$2,$3,'OWNER','ACTIVE',$4)
-    ON CONFLICT ((lower(email))) DO UPDATE SET password_hash=excluded.password_hash,mfa_enabled=excluded.mfa_enabled`, [randomUUID(), adminEmail, adminPasswordHash, Boolean(adminTotpSecret)]);
+  await pool.query(`INSERT INTO private_portal.admin_users AS target(id,email,password_hash,role,status,mfa_enabled,mfa_secret_encrypted) VALUES($1,$2,$3,'OWNER','ACTIVE',$4,$5)
+    ON CONFLICT ((lower(email))) DO UPDATE SET password_hash=excluded.password_hash,mfa_enabled=target.mfa_enabled OR excluded.mfa_enabled,mfa_secret_encrypted=COALESCE(target.mfa_secret_encrypted,excluded.mfa_secret_encrypted)`, [randomUUID(), adminEmail, adminPasswordHash, Boolean(adminTotpSecret), adminTotpSecret ? encryptSecret(adminTotpSecret, adminMfaEncryptionKey) : null]);
   const seededAdminId = (await pool.query('SELECT id FROM private_portal.admin_users WHERE lower(email)=lower($1)', [adminEmail])).rows[0].id as string;
+  if (externalEnabled && !(await pool.query("SELECT 1 FROM private_portal.admin_users WHERE role='OWNER' AND status='ACTIVE' AND mfa_enabled=true AND mfa_secret_encrypted IS NOT NULL LIMIT 1")).rowCount) throw new Error('External portal safety gate failed: at least one active owner must have MFA enrolled');
   for (const document of ndaFiles) {
     const contentHash = sha256(stableJson(document));
     await pool.query(`INSERT INTO private_portal.nda_documents(id,version,title,legal_status,jurisdiction,governing_law,signature_profile,content,content_sha256,reaccept_required,metadata) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,true,$10)
@@ -200,10 +224,13 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     if (!row.user_agent_hash || row.user_agent_hash !== sha256(userAgent(request))) { if (mutate) { await pool.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='CLIENT_CHANGED' WHERE id=$1", [row.id]); await audit('ADMIN_CLIENT_CHANGED', 'SECURITY', 'ADMIN', request, {adminId: row.admin_user_id, sessionId: row.id}); } return null; }
     if (mutate) await pool.query('UPDATE private_portal.admin_sessions SET last_activity_at=now(),idle_expires_at=$2 WHERE id=$1', [row.id, new Date(now + adminIdleMs)]); return row as AdminSession;
   };
-  const requireAdmin = async (request: FastifyRequest, reply: FastifyReply, roles: Array<AdminSession['role']> = ['OWNER', 'ADMIN', 'VIEWER']) => { const session = await adminSession(request); if (!session || !roles.includes(session.role)) { reply.code(401).send({error: 'ADMIN_AUTH_REQUIRED'}); return null; } return session; };
+  const requireAdmin = async (request: FastifyRequest, reply: FastifyReply, roles: Array<AdminSession['role']> = ['OWNER', 'ADMIN', 'EDITOR', 'VIEWER']) => { const session = await adminSession(request); if (!session) { reply.code(401).send({error: 'ADMIN_AUTH_REQUIRED'}); return null; } if (!roles.includes(session.role)) { reply.code(403).send({error: 'ADMIN_PERMISSION_REQUIRED'}); return null; } return session; };
   const requireAdminMutation = async (request: FastifyRequest, reply: FastifyReply, roles: Array<AdminSession['role']> = ['OWNER', 'ADMIN']) => {
     if (!trustedOrigin(request, reply)) return null; const session = await requireAdmin(request, reply, roles); if (!session) return null; const csrf = String(request.headers['x-csrf-token'] ?? '');
     if (!csrf || !safeEqual(hmacHex(csrf, sessionSecret), session.csrf_token_hash)) { await audit('ADMIN_CSRF_REJECTED', 'SECURITY', 'ADMIN', request, {adminId: session.admin_user_id, sessionId: session.id}); reply.code(403).send({error: 'REQUEST_REJECTED'}); return null; } return session;
+  };
+  const recordProjectChange = async (entityType: string, entityId: string, action: string, adminId: string, changes: Record<string, unknown>) => {
+    await pool.query('INSERT INTO private_portal.project_change_history(id,entity_type,entity_id,action,changed_by,changes) VALUES($1,$2,$3,$4,$5,$6)', [randomUUID(), entityType, entityId, action, adminId, JSON.stringify(changes)]);
   };
   const createRegistrationContext = async (reply: FastifyReply, invitationId: string, visitorId: string | null, purpose: 'REGISTRATION' | 'REVERIFY' | 'PENDING_APPROVAL', request: FastifyRequest) => {
     const raw = randomOpaqueToken(); const expiresMs = 30 * MINUTE; await pool.query(`INSERT INTO private_portal.registration_contexts(id,context_token_hash,invitation_id,visitor_id,purpose,expires_at,ip_fingerprint,user_agent_hash) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [randomUUID(), hmacHex(raw, sessionSecret), invitationId, visitorId, purpose, new Date(Date.now() + expiresMs), hmacHex(sourceIp(request), ipFingerprintSecret), sha256(userAgent(request))]); reply.setCookie(registrationCookie, raw, cookieOptions(cookieSecure, expiresMs));
@@ -256,6 +283,37 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   };
 
   app.addHook('onSend', async (request, reply, payload) => { if (request.url.startsWith('/api/v1/access') || request.url.startsWith('/api/v1/admin')) reply.header('Cache-Control', 'no-store, private'); return payload; });
+
+  app.post('/api/v1/admin/team-invitations/prepare', {config: {rateLimit: {max: 10, timeWindow: '15 minutes'}}}, async (request, reply) => {
+    if (!trustedOrigin(request, reply)) return; const parsed = PrepareTeamInvitationBody.safeParse(request.body); if (!parsed.success) return reply.code(404).send({error: 'TEAM_INVITATION_UNAVAILABLE'});
+    const invitation = (await pool.query("SELECT * FROM private_portal.team_invitations WHERE token_hash=$1 AND status='ACTIVE' AND expires_at>now()", [hmacHex(parsed.data.token, invitationSecret)])).rows[0];
+    if (!invitation) return reply.code(404).send({error: 'TEAM_INVITATION_UNAVAILABLE'});
+    const secret = decryptSecret(invitation.mfa_secret_encrypted, adminMfaEncryptionKey);
+    await audit('TEAM_INVITATION_OPENED', 'NOTICE', 'ANONYMOUS', request, {}, {invitationId: invitation.id, emailHash: sha256(invitation.email)});
+    return {email: invitation.email, displayName: invitation.display_name, role: invitation.role, expiresAt: invitation.expires_at, totpSecret: secret, otpauthUri: `otpauth://totp/${encodeURIComponent(`UP AI DOWN:${invitation.email}`)}?secret=${encodeURIComponent(secret)}&issuer=${encodeURIComponent('UP AI DOWN')}`};
+  });
+
+  app.post('/api/v1/admin/team-invitations/accept', {config: {rateLimit: {max: 8, timeWindow: '30 minutes'}}}, async (request, reply) => {
+    if (!trustedOrigin(request, reply)) return; const parsed = AcceptTeamInvitationBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TEAM_REGISTRATION', issues: parsed.error.flatten()});
+    const input = parsed.data; const client = await pool.connect(); let userId = '';
+    try {
+      await client.query('BEGIN');
+      const invitation = (await client.query("SELECT * FROM private_portal.team_invitations WHERE token_hash=$1 FOR UPDATE", [hmacHex(input.token, invitationSecret)])).rows[0];
+      if (!invitation || invitation.status !== 'ACTIVE' || new Date(invitation.expires_at).getTime() <= Date.now()) throw Object.assign(new Error('TEAM_INVITATION_UNAVAILABLE'), {statusCode: 404});
+      if ((await client.query('SELECT 1 FROM private_portal.admin_users WHERE lower(email)=lower($1)', [invitation.email])).rowCount) throw Object.assign(new Error('TEAM_ACCOUNT_EXISTS'), {statusCode: 409});
+      const secret = decryptSecret(invitation.mfa_secret_encrypted, adminMfaEncryptionKey); if (!verifyTotp(secret, input.mfaCode)) throw Object.assign(new Error('INVALID_MFA_CODE'), {statusCode: 401});
+      userId = randomUUID(); await client.query(`INSERT INTO private_portal.admin_users(id,email,display_name,password_hash,password_changed_at,role,status,mfa_enabled,mfa_secret_encrypted,invited_by) VALUES($1,$2,$3,$4,now(),$5,'ACTIVE',true,$6,$7)`, [userId, normalizeEmail(invitation.email), input.displayName, hashPassword(input.password), invitation.role, invitation.mfa_secret_encrypted, invitation.created_by]);
+      await client.query("UPDATE private_portal.team_invitations SET status='CONSUMED',consumed_at=now(),consumed_by=$2 WHERE id=$1", [invitation.id, userId]); await client.query('COMMIT');
+    } catch (error) { await client.query('ROLLBACK'); const typed = error as Error & {statusCode?: number}; return reply.code(typed.statusCode ?? 500).send({error: typed.statusCode ? typed.message : 'TEAM_REGISTRATION_FAILED'}); } finally { client.release(); }
+    await audit('TEAM_MEMBER_ACTIVATED', 'SECURITY', 'ADMIN', request, {actorId: userId, adminId: userId}); return reply.code(201).send({created: true, redirect: '/demo/admin/login'});
+  });
+  app.post('/api/v1/admin/recovery/prepare', {config: {rateLimit: {max: 10, timeWindow: '15 minutes'}}}, async (request, reply) => {
+    if (!trustedOrigin(request, reply)) return; const parsed = PrepareAdminRecoveryBody.safeParse(request.body); if (!parsed.success) return reply.code(404).send({error: 'RECOVERY_UNAVAILABLE'}); const reset = (await pool.query(`SELECT r.*,u.email,u.display_name FROM private_portal.admin_password_resets r JOIN private_portal.admin_users u ON u.id=r.admin_user_id WHERE r.token_hash=$1 AND r.status='ACTIVE' AND r.expires_at>now() AND u.status='ACTIVE'`, [hmacHex(parsed.data.token, invitationSecret)])).rows[0]; if (!reset) return reply.code(404).send({error: 'RECOVERY_UNAVAILABLE'}); const secret = decryptSecret(reset.mfa_secret_encrypted, adminMfaEncryptionKey); await audit('ADMIN_RECOVERY_OPENED', 'SECURITY', 'ANONYMOUS', request, {}, {resetId: reset.id, emailHash: sha256(reset.email)}); return {email: reset.email, displayName: reset.display_name, expiresAt: reset.expires_at, totpSecret: secret, otpauthUri: `otpauth://totp/${encodeURIComponent(`UP AI DOWN:${reset.email}`)}?secret=${encodeURIComponent(secret)}&issuer=${encodeURIComponent('UP AI DOWN')}`};
+  });
+  app.post('/api/v1/admin/recovery/accept', {config: {rateLimit: {max: 8, timeWindow: '30 minutes'}}}, async (request, reply) => {
+    if (!trustedOrigin(request, reply)) return; const parsed = AcceptAdminRecoveryBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_RECOVERY', issues: parsed.error.flatten()}); const input = parsed.data; const client = await pool.connect(); let adminUserId = '';
+    try { await client.query('BEGIN'); const reset = (await client.query(`SELECT r.*,u.status AS user_status FROM private_portal.admin_password_resets r JOIN private_portal.admin_users u ON u.id=r.admin_user_id WHERE r.token_hash=$1 FOR UPDATE`, [hmacHex(input.token, invitationSecret)])).rows[0]; if (!reset || reset.status !== 'ACTIVE' || reset.user_status !== 'ACTIVE' || new Date(reset.expires_at).getTime() <= Date.now()) throw Object.assign(new Error('RECOVERY_UNAVAILABLE'), {statusCode: 404}); const secret = decryptSecret(reset.mfa_secret_encrypted, adminMfaEncryptionKey); if (!verifyTotp(secret, input.mfaCode)) throw Object.assign(new Error('INVALID_MFA_CODE'), {statusCode: 401}); adminUserId = reset.admin_user_id; await client.query('UPDATE private_portal.admin_users SET password_hash=$2,password_changed_at=now(),mfa_enabled=true,mfa_secret_encrypted=$3 WHERE id=$1', [adminUserId, hashPassword(input.password), reset.mfa_secret_encrypted]); await client.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='CREDENTIALS_RECOVERED' WHERE admin_user_id=$1 AND status='ACTIVE'", [adminUserId]); await client.query("UPDATE private_portal.admin_password_resets SET status='CONSUMED',consumed_at=now() WHERE id=$1", [reset.id]); await client.query('COMMIT'); } catch (error) { await client.query('ROLLBACK'); const typed = error as Error & {statusCode?: number}; return reply.code(typed.statusCode ?? 500).send({error: typed.statusCode ? typed.message : 'RECOVERY_FAILED'}); } finally { client.release(); } await audit('ADMIN_CREDENTIALS_RECOVERED', 'SECURITY', 'ADMIN', request, {actorId: adminUserId, adminId: adminUserId}); return {recovered: true, redirect: '/demo/admin/login'};
+  });
 
   app.post('/api/v1/access/invitations/prepare', {config: {rateLimit: {max: 30, timeWindow: '15 minutes'}}}, async (request, reply) => {
     if (!trustedOrigin(request, reply)) return; if (!externalEnabled && !workflowTestEnabled && !localPortalTestMode) return reply.code(503).send({error: 'EXTERNAL_PORTAL_DISABLED'}); const parsed = PrepareBody.safeParse(request.body); if (!parsed.success) return reply.code(404).send({error: 'INVITATION_UNAVAILABLE'});
@@ -312,7 +370,9 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   app.get('/api/v1/access/check', async (request, reply) => { if (await adminSession(request, false)) return reply.code(204).send(); const originalUri = String(request.headers['x-original-uri'] ?? ''); if (originalUri.startsWith('/demo/dev/')) return reply.header('X-Access-Reason', 'ADMIN_REQUIRED').code(401).send(); const session = await visitorSession(request, undefined, false); return session.granted ? reply.code(204).send() : reply.header('X-Access-Reason', session.reason).code(401).send(); });
 
   app.post('/api/v1/admin/login', {config: {rateLimit: {max: 8, timeWindow: '15 minutes'}}}, async (request, reply) => {
-    if (!trustedOrigin(request, reply)) return; const parsed = LoginBody.safeParse(request.body); if (!parsed.success) return reply.code(401).send({error: 'INVALID_CREDENTIALS'}); const user = (await pool.query("SELECT * FROM private_portal.admin_users WHERE lower(email)=lower($1) AND status='ACTIVE'", [parsed.data.email])).rows[0]; const passwordValid = user && verifyPassword(parsed.data.password, user.password_hash); const mfaEnabled = Boolean(user?.mfa_enabled); const mfaValid = !mfaEnabled || (adminTotpSecret && parsed.data.mfaCode && verifyTotp(adminTotpSecret, parsed.data.mfaCode));
+    if (!trustedOrigin(request, reply)) return; const parsed = LoginBody.safeParse(request.body); if (!parsed.success) return reply.code(401).send({error: 'INVALID_CREDENTIALS'}); const user = (await pool.query("SELECT * FROM private_portal.admin_users WHERE lower(email)=lower($1) AND status='ACTIVE'", [parsed.data.email])).rows[0]; const passwordValid = user && verifyPassword(parsed.data.password, user.password_hash); const mfaEnabled = Boolean(user?.mfa_enabled); let mfaSecret = '';
+    if (mfaEnabled) { try { mfaSecret = user.mfa_secret_encrypted ? decryptSecret(user.mfa_secret_encrypted, adminMfaEncryptionKey) : (normalizeEmail(user.email) === adminEmail ? adminTotpSecret : ''); } catch { mfaSecret = ''; } }
+    const mfaValid = !mfaEnabled || Boolean(mfaSecret && parsed.data.mfaCode && verifyTotp(mfaSecret, parsed.data.mfaCode));
     if (!passwordValid || !mfaValid || (adminMfaRequired && !mfaEnabled)) { await audit('ADMIN_LOGIN_FAILURE', 'WARNING', 'ANONYMOUS', request, {}, {mfaAttempted: Boolean(parsed.data.mfaCode)}); return reply.code(401).send({error: 'INVALID_CREDENTIALS'}); }
     return createAdminSession(user, request, reply);
   });
@@ -324,69 +384,117 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     if (!user) return reply.code(404).send({error: 'DEV_ACCESS_UNAVAILABLE'});
     return createAdminSession(user, request, reply, 'ADMIN_DEV_LOGIN_SUCCESS');
   });
-  app.get('/api/v1/admin/session', async (request, reply) => { const session = await requireAdmin(request, reply); if (!session) return; return {authenticated: true, email: session.email, role: session.role}; });
-  app.post('/api/v1/admin/logout', async (request, reply) => { const session = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'VIEWER']); if (!session) return; await pool.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='LOGOUT' WHERE id=$1", [session.id]); reply.clearCookie(adminCookie, {path: '/'}).clearCookie(csrfCookie, {path: '/'}); await audit('ADMIN_LOGOUT', 'INFO', 'ADMIN', request, {actorId: session.admin_user_id, adminId: session.admin_user_id, sessionId: session.id}); return {authenticated: false}; });
+  app.get('/api/v1/admin/session', async (request, reply) => { const session = await requireAdmin(request, reply); if (!session) return; const profile = (await pool.query('SELECT display_name,mfa_enabled FROM private_portal.admin_users WHERE id=$1', [session.admin_user_id])).rows[0]; return {authenticated: true, email: session.email, role: session.role, displayName: profile?.display_name ?? '', mfa: Boolean(profile?.mfa_enabled)}; });
+  app.post('/api/v1/admin/logout', async (request, reply) => { const session = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR', 'VIEWER']); if (!session) return; await pool.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='LOGOUT' WHERE id=$1", [session.id]); reply.clearCookie(adminCookie, {path: '/'}).clearCookie(csrfCookie, {path: '/'}); await audit('ADMIN_LOGOUT', 'INFO', 'ADMIN', request, {actorId: session.admin_user_id, adminId: session.admin_user_id, sessionId: session.id}); return {authenticated: false}; });
+  app.get('/api/v1/admin/team', async (request, reply) => {
+    const admin = await requireAdmin(request, reply); if (!admin) return;
+    const members = (await pool.query(`SELECT id,email,display_name,role,status,mfa_enabled,created_at,last_login_at,disabled_at FROM private_portal.admin_users ORDER BY CASE role WHEN 'OWNER' THEN 1 WHEN 'ADMIN' THEN 2 WHEN 'EDITOR' THEN 3 ELSE 4 END,created_at`)).rows;
+    const invitations = ['OWNER', 'ADMIN'].includes(admin.role) ? (await pool.query(`SELECT id,email,display_name,role,status,created_at,expires_at FROM private_portal.team_invitations WHERE status IN ('ACTIVE','EXPIRED') ORDER BY created_at DESC`)).rows : [];
+    return {current: {id: admin.admin_user_id, email: admin.email, role: admin.role}, members, invitations};
+  });
+  app.post('/api/v1/admin/team/invitations', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER']); if (!admin) return; const parsed = CreateTeamInvitationBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TEAM_INVITATION', issues: parsed.error.flatten()}); const input = parsed.data; const email = normalizeEmail(input.email);
+    if ((await pool.query('SELECT 1 FROM private_portal.admin_users WHERE lower(email)=lower($1)', [email])).rowCount) return reply.code(409).send({error: 'TEAM_ACCOUNT_EXISTS'});
+    await pool.query("UPDATE private_portal.team_invitations SET status='EXPIRED' WHERE status='ACTIVE' AND expires_at<=now()"); if ((await pool.query("SELECT 1 FROM private_portal.team_invitations WHERE lower(email)=lower($1) AND status='ACTIVE'", [email])).rowCount) return reply.code(409).send({error: 'TEAM_INVITATION_EXISTS'});
+    const raw = randomOpaqueToken(); const secret = generateTotpSecret(); const id = randomUUID();
+    await pool.query(`INSERT INTO private_portal.team_invitations(id,token_hash,email,display_name,role,mfa_secret_encrypted,status,created_by,expires_at) VALUES($1,$2,$3,$4,$5,$6,'ACTIVE',$7,$8)`, [id, hmacHex(raw, invitationSecret), email, input.displayName, input.role, encryptSecret(secret, adminMfaEncryptionKey), admin.admin_user_id, new Date(input.expiresAt)]);
+    await audit('TEAM_INVITATION_CREATED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {teamInvitationId: id, emailHash: sha256(email), role: input.role});
+    return reply.code(201).send({id, shareUrl: `${publicBaseUrl}/demo/admin/join#token=${raw}`, warning: 'This team invitation is shown once and requires individual MFA enrollment.'});
+  });
+  app.post('/api/v1/admin/team/invitations/:id/revoke', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER']); if (!admin) return; const id = (request.params as {id: string}).id;
+    await pool.query("UPDATE private_portal.team_invitations SET status='REVOKED',revoked_at=now(),revoked_by=$2 WHERE id=$1 AND status='ACTIVE'", [id, admin.admin_user_id]); await audit('TEAM_INVITATION_REVOKED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {teamInvitationId: id}); return {revoked: true};
+  });
+  app.patch('/api/v1/admin/team/:id', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER']); if (!admin) return; const parsed = UpdateTeamMemberBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TEAM_UPDATE'}); const id = (request.params as {id: string}).id; const target = (await pool.query('SELECT id,role,status FROM private_portal.admin_users WHERE id=$1', [id])).rows[0]; if (!target) return reply.code(404).send({error: 'NOT_FOUND'});
+    const removesOwner = target.role === 'OWNER' && (parsed.data.role && parsed.data.role !== 'OWNER' || parsed.data.status === 'DISABLED'); if (removesOwner && Number((await pool.query("SELECT count(*)::int AS count FROM private_portal.admin_users WHERE role='OWNER' AND status='ACTIVE' AND id<>$1", [id])).rows[0].count) < 1) return reply.code(409).send({error: 'LAST_OWNER_REQUIRED'}); if (id === admin.admin_user_id && parsed.data.status === 'DISABLED') return reply.code(409).send({error: 'CANNOT_DISABLE_CURRENT_SESSION'});
+    await pool.query(`UPDATE private_portal.admin_users SET role=COALESCE($2,role),status=COALESCE($3,status),disabled_at=CASE WHEN $3='DISABLED' THEN now() WHEN $3='ACTIVE' THEN NULL ELSE disabled_at END,disabled_by=CASE WHEN $3='DISABLED' THEN $4 WHEN $3='ACTIVE' THEN NULL ELSE disabled_by END WHERE id=$1`, [id, parsed.data.role ?? null, parsed.data.status ?? null, admin.admin_user_id]);
+    if (parsed.data.status === 'DISABLED') await pool.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='ACCOUNT_DISABLED' WHERE admin_user_id=$1 AND status='ACTIVE'", [id]); await audit('TEAM_MEMBER_UPDATED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {targetAdminId: id, ...parsed.data}); return {updated: true};
+  });
+  app.post('/api/v1/admin/team/:id/recovery', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER']); if (!admin) return; const parsed = CreateAdminRecoveryBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_RECOVERY_EXPIRY'}); const id = (request.params as {id: string}).id; const target = (await pool.query("SELECT id,email FROM private_portal.admin_users WHERE id=$1 AND status='ACTIVE'", [id])).rows[0]; if (!target) return reply.code(404).send({error: 'NOT_FOUND'}); const raw = randomOpaqueToken(); const secret = generateTotpSecret(); await pool.query("UPDATE private_portal.admin_password_resets SET status='REVOKED' WHERE admin_user_id=$1 AND status='ACTIVE'", [id]); const resetId = randomUUID(); await pool.query(`INSERT INTO private_portal.admin_password_resets(id,admin_user_id,token_hash,mfa_secret_encrypted,status,created_by,expires_at) VALUES($1,$2,$3,$4,'ACTIVE',$5,$6)`, [resetId, id, hmacHex(raw, invitationSecret), encryptSecret(secret, adminMfaEncryptionKey), admin.admin_user_id, new Date(parsed.data.expiresAt)]); await audit('ADMIN_RECOVERY_CREATED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {targetAdminId: id, resetId, emailHash: sha256(target.email)}); return reply.code(201).send({shareUrl: `${publicBaseUrl}/demo/admin/recover#token=${raw}`, warning: 'This recovery link rotates both the password and MFA factor and is shown once.'});
+  });
+  app.post('/api/v1/admin/mfa/begin', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return; const secret = generateTotpSecret(); await pool.query(`INSERT INTO private_portal.admin_mfa_enrollments(id,admin_user_id,secret_encrypted,expires_at) VALUES($1,$2,$3,now()+interval '10 minutes') ON CONFLICT(admin_user_id) DO UPDATE SET id=excluded.id,secret_encrypted=excluded.secret_encrypted,created_at=now(),expires_at=excluded.expires_at`, [randomUUID(), admin.admin_user_id, encryptSecret(secret, adminMfaEncryptionKey)]); await audit('ADMIN_MFA_ENROLLMENT_STARTED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}); return {secret, otpauthUri: `otpauth://totp/${encodeURIComponent(`UP AI DOWN:${admin.email}`)}?secret=${encodeURIComponent(secret)}&issuer=${encodeURIComponent('UP AI DOWN')}`, expiresInSeconds: 600};
+  });
+  app.post('/api/v1/admin/mfa/confirm', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = ConfirmMfaBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_MFA_CODE'}); const enrollment = (await pool.query('SELECT * FROM private_portal.admin_mfa_enrollments WHERE admin_user_id=$1 AND expires_at>now()', [admin.admin_user_id])).rows[0]; if (!enrollment) return reply.code(404).send({error: 'MFA_ENROLLMENT_EXPIRED'}); const secret = decryptSecret(enrollment.secret_encrypted, adminMfaEncryptionKey); if (!verifyTotp(secret, parsed.data.code)) return reply.code(401).send({error: 'INVALID_MFA_CODE'}); const client = await pool.connect(); try { await client.query('BEGIN'); await client.query('UPDATE private_portal.admin_users SET mfa_enabled=true,mfa_secret_encrypted=$2 WHERE id=$1', [admin.admin_user_id, enrollment.secret_encrypted]); await client.query('DELETE FROM private_portal.admin_mfa_enrollments WHERE admin_user_id=$1', [admin.admin_user_id]); await client.query('COMMIT'); } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); } await audit('ADMIN_MFA_ENABLED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}); return {enabled: true};
+  });
   app.get('/api/v1/admin/briefing', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const documents = (await pool.query("SELECT version,title,legal_status AS status,jurisdiction,governing_law,signature_profile FROM private_portal.nda_documents WHERE legal_status<>'RETIRED' ORDER BY jurisdiction,version")).rows; return {...briefing, nda: {version: nda.version, status: nda.status, title: nda.title, notice: nda.notice}, ndaDocuments: documents, defaultInviteUrl: defaultInviteToken ? `${publicBaseUrl}/demo/access/${defaultInviteToken}` : null}; });
   app.get('/api/v1/admin/dashboard', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const [kpis, recent] = await Promise.all([pool.query(`SELECT (SELECT count(*) FROM private_portal.invitations)::int invitations_issued,(SELECT count(*) FROM private_portal.invitations WHERE status='ACTIVE' AND expires_at>now())::int active_invitations,(SELECT count(*) FROM private_portal.visitors)::int registered_visitors,(SELECT count(*) FROM private_portal.visitors WHERE status='PENDING_APPROVAL')::int pending_approvals,(SELECT count(*) FROM private_portal.nda_acceptances WHERE revoked_at IS NULL)::int nda_accepted,(SELECT count(*) FROM private_portal.visitor_sessions WHERE status='ACTIVE' AND expires_at>now() AND idle_expires_at>now())::int active_sessions,(SELECT count(*) FROM private_portal.project_tasks WHERE status NOT IN ('DONE','ARCHIVED'))::int open_tasks,(SELECT count(*) FROM private_portal.project_tasks WHERE status NOT IN ('DONE','ARCHIVED') AND due_at<now())::int overdue_tasks,(SELECT count(*) FROM private_portal.project_events WHERE status='SCHEDULED' AND starts_at>=now())::int upcoming_events,(SELECT count(*) FROM private_portal.project_notes WHERE status='ACTIVE' AND pinned=true)::int pinned_notes`), pool.query('SELECT event_type,severity,actor_type,timestamp_utc,masked_ip,metadata FROM private_portal.audit_events ORDER BY timestamp_utc DESC LIMIT 30')]); return {kpis: kpis.rows[0], recentActivity: recent.rows}; });
   app.get('/api/v1/admin/workspace', async (request, reply) => {
     if (!await requireAdmin(request, reply)) return;
-    const [events, tasks, notes] = await Promise.all([
+    const [events, tasks, notes, decisions, comments, history] = await Promise.all([
       pool.query("SELECT * FROM private_portal.project_events WHERE status<>'ARCHIVED' ORDER BY starts_at ASC, created_at ASC"),
       pool.query("SELECT * FROM private_portal.project_tasks WHERE status<>'ARCHIVED' ORDER BY CASE priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END, due_at ASC NULLS LAST, created_at DESC"),
       pool.query("SELECT * FROM private_portal.project_notes WHERE status='ACTIVE' ORDER BY pinned DESC, updated_at DESC"),
+      pool.query(`SELECT d.*,u.display_name AS owner_name FROM private_portal.project_decisions d LEFT JOIN private_portal.admin_users u ON u.id=d.owner_admin_id WHERE d.status<>'ARCHIVED' ORDER BY CASE d.status WHEN 'PROPOSED' THEN 1 WHEN 'REVISIT' THEN 2 ELSE 3 END,d.updated_at DESC`),
+      pool.query(`SELECT c.*,u.display_name AS author_name,u.email AS author_email FROM private_portal.project_comments c JOIN private_portal.admin_users u ON u.id=c.created_by WHERE c.status='ACTIVE' ORDER BY c.created_at ASC`),
+      pool.query(`SELECT h.*,u.display_name AS author_name,u.email AS author_email FROM private_portal.project_change_history h JOIN private_portal.admin_users u ON u.id=h.changed_by ORDER BY h.changed_at DESC LIMIT 100`),
     ]);
-    return {events: events.rows, tasks: tasks.rows, notes: notes.rows};
+    return {events: events.rows, tasks: tasks.rows, notes: notes.rows, decisions: decisions.rows, comments: comments.rows, history: history.rows};
   });
   app.post('/api/v1/admin/events', async (request, reply) => {
-    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = CreateProjectEventBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_EVENT', issues: parsed.error.flatten()});
     const input = parsed.data; const id = randomUUID();
     const result = await pool.query(`INSERT INTO private_portal.project_events(id,title,description,starts_at,ends_at,timezone,location,event_type,status,priority,owner_name,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$12) RETURNING *`, [id, input.title, input.description, new Date(input.startsAt), input.endsAt ? new Date(input.endsAt) : null, input.timezone, input.location, input.eventType, input.status, input.priority, input.ownerName, admin.admin_user_id]);
-    await audit('PROJECT_EVENT_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, eventType: input.eventType});
+    await recordProjectChange('EVENT', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_EVENT_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, eventType: input.eventType});
     return reply.code(201).send(result.rows[0]);
   });
   app.patch('/api/v1/admin/events/:id', async (request, reply) => {
-    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = UpdateProjectEventBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_EVENT_UPDATE', issues: parsed.error.flatten()});
     const id = (request.params as {id: string}).id; const input = parsed.data; const hasEndsAt = Object.hasOwn(input, 'endsAt');
     const result = await pool.query(`UPDATE private_portal.project_events SET title=COALESCE($2,title),description=COALESCE($3,description),starts_at=COALESCE($4,starts_at),ends_at=CASE WHEN $5 THEN $6 ELSE ends_at END,timezone=COALESCE($7,timezone),location=COALESCE($8,location),event_type=COALESCE($9,event_type),status=COALESCE($10,status),priority=COALESCE($11,priority),owner_name=COALESCE($12,owner_name),updated_by=$13,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.description ?? null, input.startsAt ? new Date(input.startsAt) : null, hasEndsAt, input.endsAt ? new Date(input.endsAt) : null, input.timezone ?? null, input.location ?? null, input.eventType ?? null, input.status ?? null, input.priority ?? null, input.ownerName ?? null, admin.admin_user_id]);
     if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
-    await audit('PROJECT_EVENT_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, changed: Object.keys(input)});
+    await recordProjectChange('EVENT', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_EVENT_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, changed: Object.keys(input)});
     return result.rows[0];
   });
   app.post('/api/v1/admin/tasks', async (request, reply) => {
-    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = CreateProjectTaskBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TASK', issues: parsed.error.flatten()});
     const input = parsed.data; const id = randomUUID();
     const result = await pool.query(`INSERT INTO private_portal.project_tasks(id,title,description,owner_name,due_at,status,priority,linked_event_id,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING *`, [id, input.title, input.description, input.ownerName, input.dueAt ? new Date(input.dueAt) : null, input.status, input.priority, input.linkedEventId ?? null, admin.admin_user_id]);
-    await audit('PROJECT_TASK_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {taskId: id, priority: input.priority});
+    await recordProjectChange('TASK', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_TASK_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {taskId: id, priority: input.priority});
     return reply.code(201).send(result.rows[0]);
   });
   app.patch('/api/v1/admin/tasks/:id', async (request, reply) => {
-    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = UpdateProjectTaskBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_TASK_UPDATE', issues: parsed.error.flatten()});
     const id = (request.params as {id: string}).id; const input = parsed.data; const hasDueAt = Object.hasOwn(input, 'dueAt'); const hasLinkedEvent = Object.hasOwn(input, 'linkedEventId');
     const result = await pool.query(`UPDATE private_portal.project_tasks SET title=COALESCE($2,title),description=COALESCE($3,description),owner_name=COALESCE($4,owner_name),due_at=CASE WHEN $5 THEN $6 ELSE due_at END,status=COALESCE($7,status),priority=COALESCE($8,priority),linked_event_id=CASE WHEN $9 THEN $10 ELSE linked_event_id END,updated_by=$11,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.description ?? null, input.ownerName ?? null, hasDueAt, input.dueAt ? new Date(input.dueAt) : null, input.status ?? null, input.priority ?? null, hasLinkedEvent, input.linkedEventId ?? null, admin.admin_user_id]);
     if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
-    await audit('PROJECT_TASK_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {taskId: id, changed: Object.keys(input)});
+    await recordProjectChange('TASK', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_TASK_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {taskId: id, changed: Object.keys(input)});
     return result.rows[0];
   });
   app.post('/api/v1/admin/notes', async (request, reply) => {
-    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = CreateProjectNoteBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_NOTE', issues: parsed.error.flatten()});
     const input = parsed.data; const id = randomUUID();
     const result = await pool.query(`INSERT INTO private_portal.project_notes(id,title,body,category,pinned,status,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$7) RETURNING *`, [id, input.title, input.body, input.category, input.pinned, input.status, admin.admin_user_id]);
-    await audit('PROJECT_NOTE_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, category: input.category});
+    await recordProjectChange('NOTE', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_NOTE_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, category: input.category});
     return reply.code(201).send(result.rows[0]);
   });
   app.patch('/api/v1/admin/notes/:id', async (request, reply) => {
-    const admin = await requireAdminMutation(request, reply); if (!admin) return;
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = UpdateProjectNoteBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_NOTE_UPDATE', issues: parsed.error.flatten()});
     const id = (request.params as {id: string}).id; const input = parsed.data; const hasPinned = Object.hasOwn(input, 'pinned');
     const result = await pool.query(`UPDATE private_portal.project_notes SET title=COALESCE($2,title),body=COALESCE($3,body),category=COALESCE($4,category),pinned=CASE WHEN $5 THEN $6 ELSE pinned END,status=COALESCE($7,status),updated_by=$8,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.body ?? null, input.category ?? null, hasPinned, input.pinned ?? false, input.status ?? null, admin.admin_user_id]);
     if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
-    await audit('PROJECT_NOTE_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, changed: Object.keys(input)});
+    await recordProjectChange('NOTE', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_NOTE_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, changed: Object.keys(input)});
     return result.rows[0];
+  });
+  app.post('/api/v1/admin/decisions', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return; const parsed = CreateProjectDecisionBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_DECISION', issues: parsed.error.flatten()}); const input = parsed.data; const id = randomUUID();
+    const result = await pool.query(`INSERT INTO private_portal.project_decisions(id,title,context,decision,alternatives,consequences,owner_admin_id,status,decision_at,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10) RETURNING *`, [id, input.title, input.context, input.decision, input.alternatives, input.consequences, input.ownerAdminId ?? null, input.status, input.decisionAt ? new Date(input.decisionAt) : input.status === 'DECIDED' ? new Date() : null, admin.admin_user_id]); await recordProjectChange('DECISION', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_DECISION_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {decisionId: id, status: input.status}); return reply.code(201).send(result.rows[0]);
+  });
+  app.patch('/api/v1/admin/decisions/:id', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return; const parsed = UpdateProjectDecisionBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_DECISION_UPDATE', issues: parsed.error.flatten()}); const id = (request.params as {id: string}).id; const input = parsed.data; const hasOwner = Object.hasOwn(input, 'ownerAdminId'); const hasDecisionAt = Object.hasOwn(input, 'decisionAt');
+    const result = await pool.query(`UPDATE private_portal.project_decisions SET title=COALESCE($2,title),context=COALESCE($3,context),decision=COALESCE($4,decision),alternatives=COALESCE($5,alternatives),consequences=COALESCE($6,consequences),owner_admin_id=CASE WHEN $7 THEN $8 ELSE owner_admin_id END,status=COALESCE($9,status),decision_at=CASE WHEN $10 THEN $11 WHEN $9='DECIDED' AND decision_at IS NULL THEN now() ELSE decision_at END,updated_by=$12,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.context ?? null, input.decision ?? null, input.alternatives ?? null, input.consequences ?? null, hasOwner, input.ownerAdminId ?? null, input.status ?? null, hasDecisionAt, input.decisionAt ? new Date(input.decisionAt) : null, admin.admin_user_id]); if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'}); await recordProjectChange('DECISION', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_DECISION_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {decisionId: id, changed: Object.keys(input)}); return result.rows[0];
+  });
+  app.post('/api/v1/admin/comments', async (request, reply) => {
+    const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return; const parsed = CreateProjectCommentBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_COMMENT', issues: parsed.error.flatten()}); const input = parsed.data; const tables = {EVENT: 'project_events', TASK: 'project_tasks', NOTE: 'project_notes', DECISION: 'project_decisions'} as const; if (!(await pool.query(`SELECT 1 FROM private_portal.${tables[input.entityType]} WHERE id=$1`, [input.entityId])).rowCount) return reply.code(404).send({error: 'NOT_FOUND'}); const id = randomUUID(); const result = await pool.query(`INSERT INTO private_portal.project_comments(id,entity_type,entity_id,body,created_by) VALUES($1,$2,$3,$4,$5) RETURNING *`, [id, input.entityType, input.entityId, input.body, admin.admin_user_id]); await recordProjectChange(input.entityType, input.entityId, 'COMMENTED', admin.admin_user_id, {commentId: id}); await audit('PROJECT_COMMENT_CREATED', 'INFO', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {commentId: id, entityType: input.entityType, entityId: input.entityId}); return reply.code(201).send(result.rows[0]);
   });
   app.get('/api/v1/admin/invitations', async (request, reply) => { if (!await requireAdmin(request, reply)) return; return (await pool.query(`SELECT i.id,i.public_id,i.name,i.organisation_name,i.policy,i.created_at,i.valid_from,i.expires_at,i.registration_count,i.max_registrations,i.manual_approval_required,i.status,d.version AS nda_version,count(v.id)::int visitor_count FROM private_portal.invitations i JOIN private_portal.nda_documents d ON d.id=i.nda_document_id LEFT JOIN private_portal.visitors v ON v.invitation_id=i.id GROUP BY i.id,d.version ORDER BY i.created_at DESC`)).rows; });
   app.post('/api/v1/admin/invitations', async (request, reply) => {
@@ -407,8 +515,14 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   app.get('/api/v1/admin/nda/:id/pdf', async (request, reply) => { const admin = await requireAdmin(request, reply); if (!admin) return; const id = (request.params as {id: string}).id; const row = (await pool.query('SELECT nda_version,evidence_hash,pdf_bytes FROM private_portal.nda_acceptances WHERE id=$1', [id])).rows[0]; if (!row?.pdf_bytes) return reply.code(404).send({error: 'DOCUMENT_UNAVAILABLE'}); await audit('NDA_EVIDENCE_DOWNLOADED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {acceptanceId: id}); return reply.type('application/pdf').header('Content-Disposition', `attachment; filename="UP AI DOWN-${row.nda_version}-${row.evidence_hash.slice(0, 12)}.pdf"`).send(row.pdf_bytes); });
   app.post('/api/v1/admin/nda/:id/revoke', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = ReasonBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'REASON_REQUIRED'}); const id = (request.params as {id: string}).id; const result = await pool.query('UPDATE private_portal.nda_acceptances SET revoked_at=now(),revoked_by=$2,revocation_reason=$3 WHERE id=$1 RETURNING visitor_id', [id, admin.admin_user_id, parsed.data.reason]); if (result.rowCount) await pool.query("UPDATE private_portal.visitor_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='NDA_REVOKED' WHERE nda_acceptance_id=$1 AND status='ACTIVE'", [id]); await audit('NDA_ACCEPTANCE_REVOKED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, visitorId: result.rows[0]?.visitor_id}, {acceptanceId: id, reason: parsed.data.reason}); return {revoked: true}; });
   app.get('/api/v1/admin/audit', async (request, reply) => { if (!await requireAdmin(request, reply)) return; return (await pool.query('SELECT event_type,severity,actor_type,visitor_id,admin_id,invitation_id,session_id,timestamp_utc,masked_ip,metadata FROM private_portal.audit_events ORDER BY timestamp_utc DESC LIMIT 500')).rows; });
+
+  // ── New collaborative modules ──────────────────────────────────────────────
+  registerMeetingKitRoutes(app, {pool, requireAdmin, requireAdminMutation, audit});
+  registerCrmRoutes(app, {pool, requireAdmin, requireAdminMutation, audit});
+  registerMaterialsRoutes(app, {pool, requireAdmin, requireAdminMutation, audit});
+
   app.get('/api/v1/admin/visitors.csv', async (request, reply) => { const admin = await requireAdmin(request, reply, ['OWNER', 'ADMIN']); if (!admin) return; const result = await pool.query(`SELECT v.full_name,v.email,v.organisation,v.role,v.country,v.status,v.created_at,v.last_access_at,i.name AS invitation_name,a.nda_version,a.accepted_at_utc,a.masked_ip,a.email_delivery_status FROM private_portal.visitors v JOIN private_portal.invitations i ON i.id=v.invitation_id LEFT JOIN LATERAL (SELECT * FROM private_portal.nda_acceptances a WHERE a.visitor_id=v.id ORDER BY accepted_at_utc DESC LIMIT 1) a ON true ORDER BY v.created_at DESC`); const headers = ['Name','Email','Organisation','Role','Country','Status','Registered','Last access','Invitation','NDA','Accepted','Masked IP','Email delivery']; const rows = result.rows.map((row) => [row.full_name,row.email,row.organisation,row.role,row.country,row.status,row.created_at,row.last_access_at,row.invitation_name,row.nda_version,row.accepted_at_utc,row.masked_ip,row.email_delivery_status]); await audit('VISITOR_LEDGER_EXPORTED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {format: 'CSV', rows: rows.length}); return reply.type('text/csv; charset=utf-8').header('Content-Disposition', 'attachment; filename="up-ai-down-visitor-ledger.csv"').send([headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n')); });
-  app.get('/api/v1/admin/security', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const [activeSessions, securityEvents] = await Promise.all([pool.query("SELECT count(*)::int AS count FROM private_portal.visitor_sessions WHERE status='ACTIVE' AND expires_at>now() AND idle_expires_at>now()"), pool.query("SELECT count(*)::int AS count FROM private_portal.audit_events WHERE severity='SECURITY' AND timestamp_utc>now()-interval '7 days'")]); return {externalPortal: externalEnabled ? 'ENABLED' : workflowTestEnabled ? 'WORKFLOW_TESTING' : 'DISABLED', ndaLegalStatus: nda.status, privacyLegalStatus: privacyStatus, emailVerification: emailVerificationProvider, adminMfa: adminMfaRequired ? 'REQUIRED' : 'LOCAL_OPTIONAL', smtp: env('SMTP_HOST') ? 'CONFIGURED' : 'NOT_CONFIGURED', https: cookieSecure ? 'REQUIRED' : 'LOCAL_HTTP', secureCookies: cookieSecure, trustedProxy: 'CONTROLLED_NGINX_ONLY', activeSessions: activeSessions.rows[0].count, securityEvents7d: securityEvents.rows[0].count, productionReady: externalEnabled && ndaFiles.some((document) => document.status === 'APPROVED') && privacyStatus === 'APPROVED' && emailVerificationProvider !== 'NONE' && cookieSecure && adminMfaRequired}; });
+  app.get('/api/v1/admin/security', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const [activeSessions, securityEvents, mfaStats] = await Promise.all([pool.query("SELECT count(*)::int AS count FROM private_portal.visitor_sessions WHERE status='ACTIVE' AND expires_at>now() AND idle_expires_at>now()"), pool.query("SELECT count(*)::int AS count FROM private_portal.audit_events WHERE severity='SECURITY' AND timestamp_utc>now()-interval '7 days'"), pool.query("SELECT count(*) FILTER (WHERE mfa_enabled=true AND mfa_secret_encrypted IS NOT NULL)::int AS enrolled,count(*)::int AS members FROM private_portal.admin_users WHERE status='ACTIVE'")]); const mfa = mfaStats.rows[0]; return {externalPortal: externalEnabled ? 'ENABLED' : workflowTestEnabled ? 'WORKFLOW_TESTING' : 'DISABLED', ndaLegalStatus: nda.status, privacyLegalStatus: privacyStatus, emailVerification: emailVerificationProvider, adminMfa: `${adminMfaRequired ? 'REQUIRED' : 'OPTIONAL'} · ${mfa.enrolled}/${mfa.members} ENROLLED`, smtp: smtpConfigured ? 'CONFIGURED_AND_ARCHIVED' : env('SMTP_HOST') ? 'INCOMPLETE' : 'NOT_CONFIGURED', temporaryDevAccess: devLoginEnabled && devLoginExpiry > Date.now() ? 'ENABLED' : 'DISABLED', https: cookieSecure ? 'REQUIRED' : 'LOCAL_HTTP', secureCookies: cookieSecure, trustedProxy: 'CONTROLLED_NGINX_ONLY', activeSessions: activeSessions.rows[0].count, securityEvents7d: securityEvents.rows[0].count, productionReady: externalEnabled && ndaFiles.some((document) => document.status === 'APPROVED') && privacyStatus === 'APPROVED' && emailVerificationProvider !== 'NONE' && cookieSecure && adminMfaRequired && Number(mfa.enrolled) === Number(mfa.members) && smtpConfigured && !devLoginEnabled}; });
 
   app.addHook('preHandler', async (request, reply) => {
     const privatePrefixes = ['/api/v1/demo', '/api/v1/farms', '/api/v1/devices', '/api/v1/missions', '/api/v1/analytics', '/api/v1/reports'];
@@ -420,5 +534,5 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
 
   const cleanupTimer = setInterval(async () => { try { await pool.query("UPDATE private_portal.visitor_sessions SET status='EXPIRED',invalidated_at=now(),invalidation_reason='TIMEOUT' WHERE status='ACTIVE' AND (expires_at<=now() OR idle_expires_at<=now())"); await pool.query("UPDATE private_portal.admin_sessions SET status='EXPIRED',invalidated_at=now(),invalidation_reason='TIMEOUT' WHERE status='ACTIVE' AND (expires_at<=now() OR idle_expires_at<=now())"); await pool.query("DELETE FROM private_portal.registration_contexts WHERE expires_at<now()-interval '1 day'"); } catch (error) { app.log.error({error}, 'portal session cleanup failed'); } }, 15 * MINUTE); cleanupTimer.unref();
   app.addHook('onClose', async () => { clearInterval(cleanupTimer); await pool.end(); });
-  return {database: 'postgres', ndaStatus: nda.status, privacyStatus, externalEnabled, workflowTestEnabled, health: async () => ({database: (await pool.query('SELECT 1')).rowCount === 1 ? 'ok' : 'error', portal: 'ok', mail: env('SMTP_HOST') ? 'configured' : 'disabled', encryption: 'configured'})};
+  return {database: 'postgres', ndaStatus: nda.status, privacyStatus, externalEnabled, workflowTestEnabled, health: async () => ({database: (await pool.query('SELECT 1')).rowCount === 1 ? 'ok' : 'error', portal: 'ok', mail: smtpConfigured ? 'configured' : env('SMTP_HOST') ? 'incomplete' : 'disabled', encryption: 'configured'})};
 }

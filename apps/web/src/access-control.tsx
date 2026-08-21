@@ -2,6 +2,8 @@ import type {FormEvent, ReactNode} from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import {Link, Navigate, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {runtimeConfig} from './runtime-config';
+import {portalApi as api} from './portal-api';
+import {DecisionsView, InvestorCrmView, MaterialsView, MeetingKitView, TeamView, type ProjectComment, type ProjectDecision, type Team} from './admin-collaboration';
 
 type AccessStatus = {granted: boolean; reason: string; role?: string; fullName?: string; email?: string};
 type NdaDocument = {
@@ -17,37 +19,15 @@ type Dashboard = {kpis: Record<string, number>; recentActivity: Array<{event_typ
 type Invitation = {id: string; public_id: string; name: string; organisation_name: string; policy: string; created_at: string; expires_at: string; registration_count: number; max_registrations: number | null; manual_approval_required: boolean; status: string; nda_version: string; visitor_count: number};
 type Visitor = {id: string; full_name: string; email: string; organisation: string; role: string; country: string; status: string; created_at: string; last_access_at: string | null; invitation_name: string; nda_version: string; accepted_at_utc: string; masked_ip: string; email_delivery_status: string; session_status: string};
 type Acceptance = {id: string; visitor_id: string; full_name: string; email: string; organisation: string; nda_version: string; accepted_at_utc: string; evidence_hash: string; pdf_sha256: string; email_delivery_status: string; masked_ip: string; revoked_at: string | null};
-type Security = {externalPortal: string; ndaLegalStatus: string; privacyLegalStatus: string; emailVerification: string; adminMfa: string; smtp: string; https: string; secureCookies: boolean; trustedProxy: string; activeSessions: number; securityEvents7d: number; productionReady: boolean};
+type Security = {externalPortal: string; ndaLegalStatus: string; privacyLegalStatus: string; emailVerification: string; adminMfa: string; smtp: string; temporaryDevAccess: string; https: string; secureCookies: boolean; trustedProxy: string; activeSessions: number; securityEvents7d: number; productionReady: boolean};
 type VisitorDetail = {identity: Visitor & {invitation_public_id: string; policy: string}; acceptances: Acceptance[]; sessions: Array<{id: string; status: string; created_at: string; expires_at: string; last_activity_at: string; invalidation_reason: string | null}>; activity: Array<{event_type: string; severity: string; timestamp_utc: string; masked_ip: string}>};
 type InvitationDetail = Invitation & {description: string; intended_recipient_email: string | null; allowed_email_domain: string | null; visitors: Array<{id: string; full_name: string; email: string; organisation: string; status: string; created_at: string; last_access_at: string | null}>};
 type ProjectEvent = {id: string; title: string; description: string; starts_at: string; ends_at: string | null; timezone: string; location: string; event_type: string; status: string; priority: string; owner_name: string; created_at: string; updated_at: string};
 type ProjectTask = {id: string; title: string; description: string; owner_name: string; due_at: string | null; status: string; priority: string; linked_event_id: string | null; created_at: string; updated_at: string};
 type ProjectNote = {id: string; title: string; body: string; category: string; pinned: boolean; status: string; created_at: string; updated_at: string};
-type Workspace = {events: ProjectEvent[]; tasks: ProjectTask[]; notes: ProjectNote[]};
+type Workspace = {events: ProjectEvent[]; tasks: ProjectTask[]; notes: ProjectNote[]; decisions: ProjectDecision[]; comments: ProjectComment[]; history: Array<{id: string; entity_type: string; entity_id: string; action: string; author_name: string; author_email: string; changed_at: string}>};
 
 const API = runtimeConfig.apiBase;
-
-function cookieValue(name: string) {
-  return document.cookie.split('; ').find((part) => part.startsWith(`${name}=`))?.slice(name.length + 1) ?? '';
-}
-
-async function api<T>(path: string, options?: RequestInit) {
-  const method = options?.method?.toUpperCase() ?? 'GET';
-  const csrf = cookieValue('__Host-ued-admin-csrf') || cookieValue('ued_admin_csrf');
-  const response = await fetch(`${API}${path}`, {
-    credentials: 'include',
-    ...options,
-    headers: {
-      ...(method !== 'GET' ? {'content-type': 'application/json'} : {}),
-      ...(csrf && method !== 'GET' ? {'x-csrf-token': csrf} : {}),
-      ...(options?.headers ?? {}),
-    },
-  });
-  const contentType = response.headers.get('content-type') ?? '';
-  const data = contentType.includes('json') ? await response.json().catch(() => ({})) : await response.text();
-  if (!response.ok) throw Object.assign(new Error((data as {error?: string}).error ?? `Request failed: ${response.status}`), {status: response.status, data});
-  return data as T;
-}
 
 const date = (value?: string | null) => value ? new Date(value).toLocaleString() : '—';
 const statusLabel = (value?: string | null) => (value || 'UNKNOWN').replaceAll('_', ' ');
@@ -155,18 +135,18 @@ export function NdaAccessPage() {
 }
 
 function AdminNav({logout}: {logout: () => void}) {
-  return <><header className="admin-topbar"><div><p>UP AI DOWN · ADMIN CONFIDENTIAL</p><h1>Project & Investor Operations</h1></div><div><Link to="/investor">Open investor room</Link><button onClick={logout}>Sign out</button></div></header><nav className="admin-suite-nav"><Link to="/admin">Control room</Link><Link to="/admin/agenda">Agenda</Link><Link to="/admin/tasks">Tasks</Link><Link to="/admin/notes">Notes</Link><Link to="/admin/invitations">Registration</Link><Link to="/admin/visitors">Visitors</Link><Link to="/admin/nda">NDA ledger</Link><Link to="/admin/meeting">Meeting kit</Link><Link to="/admin/security">Security</Link></nav></>;
+  return <><header className="admin-topbar"><div><p>UP AI DOWN · ADMIN CONFIDENTIAL</p><h1>Project & Investor Operations</h1></div><div><Link to="/investor">Open investor room</Link><button onClick={logout}>Sign out</button></div></header><nav className="admin-suite-nav"><Link to="/admin">Control room</Link><Link to="/admin/agenda">Agenda</Link><Link to="/admin/tasks">Tasks</Link><Link to="/admin/notes">Notes</Link><Link to="/admin/decisions">Decisions</Link><Link to="/admin/crm">Investor CRM</Link><Link to="/admin/materials">Materials</Link><Link to="/admin/meeting-kit">Editable meeting kit</Link><Link to="/admin/team">Team</Link><Link to="/admin/invitations">Registration</Link><Link to="/admin/visitors">Visitors</Link><Link to="/admin/nda">NDA ledger</Link><Link to="/admin/meeting">Reference kit</Link><Link to="/admin/security">Security</Link></nav></>;
 }
 
 function StatusPill({value}: {value: string}) { return <em className={`portal-status ${value.toLowerCase()}`}>{statusLabel(value)}</em>; }
 
 export function AdminPortal() {
   const nav = useNavigate(); const location = useLocation(); const section = location.pathname.split('/')[2] || 'dashboard';
-  const [briefing, setBriefing] = useState<Briefing | null>(null); const [dashboard, setDashboard] = useState<Dashboard | null>(null); const [workspace, setWorkspace] = useState<Workspace | null>(null); const [invitations, setInvitations] = useState<Invitation[]>([]); const [visitors, setVisitors] = useState<Visitor[]>([]); const [acceptances, setAcceptances] = useState<Acceptance[]>([]); const [security, setSecurity] = useState<Security | null>(null); const [selectedVisitor, setSelectedVisitor] = useState<VisitorDetail | null>(null); const [selectedInvitation, setSelectedInvitation] = useState<InvitationDetail | null>(null); const [newLink, setNewLink] = useState(''); const [error, setError] = useState('');
+  const [briefing, setBriefing] = useState<Briefing | null>(null); const [dashboard, setDashboard] = useState<Dashboard | null>(null); const [workspace, setWorkspace] = useState<Workspace | null>(null); const [team, setTeam] = useState<Team | null>(null); const [invitations, setInvitations] = useState<Invitation[]>([]); const [visitors, setVisitors] = useState<Visitor[]>([]); const [acceptances, setAcceptances] = useState<Acceptance[]>([]); const [security, setSecurity] = useState<Security | null>(null); const [selectedVisitor, setSelectedVisitor] = useState<VisitorDetail | null>(null); const [selectedInvitation, setSelectedInvitation] = useState<InvitationDetail | null>(null); const [newLink, setNewLink] = useState(''); const [error, setError] = useState('');
   const load = async () => {
     try {
-      const [b, d, w, i, v, a, s] = await Promise.all([api<Briefing>('/admin/briefing'), api<Dashboard>('/admin/dashboard'), api<Workspace>('/admin/workspace'), api<Invitation[]>('/admin/invitations'), api<Visitor[]>('/admin/visitors'), api<Acceptance[]>('/admin/nda'), api<Security>('/admin/security')]);
-      setBriefing(b); setDashboard(d); setWorkspace(w); setInvitations(i); setVisitors(v); setAcceptances(a); setSecurity(s); setError('');
+      const [b, d, w, tm, i, v, a, s] = await Promise.all([api<Briefing>('/admin/briefing'), api<Dashboard>('/admin/dashboard'), api<Workspace>('/admin/workspace'), api<Team>('/admin/team'), api<Invitation[]>('/admin/invitations'), api<Visitor[]>('/admin/visitors'), api<Acceptance[]>('/admin/nda'), api<Security>('/admin/security')]);
+      setBriefing(b); setDashboard(d); setWorkspace(w); setTeam(tm); setInvitations(i); setVisitors(v); setAcceptances(a); setSecurity(s); setError('');
     } catch (reason) { if ((reason as {status?: number}).status === 401) nav('/admin/login', {replace: true}); else setError('Private control data could not be loaded.'); }
   };
   useEffect(() => { void load(); }, []);
@@ -184,17 +164,22 @@ export function AdminPortal() {
   const createEvent = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const formElement = event.currentTarget; const form = new FormData(formElement); if (await mutate('/admin/events', 'POST', {title: form.get('title'), description: form.get('description'), startsAt: isoOrNull(form.get('startsAt')), endsAt: isoOrNull(form.get('endsAt')), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Madrid', location: form.get('location'), eventType: form.get('eventType'), priority: form.get('priority'), ownerName: form.get('ownerName')})) formElement.reset(); };
   const createTask = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const formElement = event.currentTarget; const form = new FormData(formElement); if (await mutate('/admin/tasks', 'POST', {title: form.get('title'), description: form.get('description'), ownerName: form.get('ownerName'), dueAt: isoOrNull(form.get('dueAt')), priority: form.get('priority'), linkedEventId: form.get('linkedEventId') || null})) formElement.reset(); };
   const createNote = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const formElement = event.currentTarget; const form = new FormData(formElement); if (await mutate('/admin/notes', 'POST', {title: form.get('title'), body: form.get('body'), category: form.get('category'), pinned: form.get('pinned') === 'on'})) formElement.reset(); };
-  if (!briefing || !dashboard || !workspace || !security) return <Loading text={error || 'Loading private control room…'}/>;
-  return <main className="admin-portal"><AdminNav logout={logout}/>{error && <div className="admin-error" role="alert">{error}</div>}
+  if (!briefing || !dashboard || !workspace || !team || !security) return <Loading text={error || 'Loading private control room…'}/>;
+  return <main className={`admin-portal ${team.current.role === 'VIEWER' ? 'viewer' : ''}`}><AdminNav logout={logout}/>{team.current.role === 'VIEWER' && <div className="admin-readonly">READ-ONLY ROLE · Changes and security actions are disabled.</div>}{error && <div className="admin-error" role="alert">{error}</div>}
     {section === 'dashboard' && <DashboardView dashboard={dashboard} security={security} workspace={workspace}/>}
     {section === 'agenda' && <AgendaView events={workspace.events} createEvent={createEvent} update={(id, body) => void mutate(`/admin/events/${id}`, 'PATCH', body)}/>}
     {section === 'tasks' && <TasksView tasks={workspace.tasks} events={workspace.events} createTask={createTask} update={(id, body) => void mutate(`/admin/tasks/${id}`, 'PATCH', body)}/>}
     {section === 'notes' && <NotesView notes={workspace.notes} createNote={createNote} update={(id, body) => void mutate(`/admin/notes/${id}`, 'PATCH', body)}/>}
-    {section === 'invitations' && <InvitationsView invitations={invitations} briefing={briefing} newLink={newLink} createInvitation={createInvitation} openInvitation={openInvitation} selected={selectedInvitation} close={() => setSelectedInvitation(null)} revoke={(id) => void reasonAction(`/admin/invitations/${id}/revoke`, 'Reason for revoking this invitation')}/>} 
-    {section === 'visitors' && <VisitorsView visitors={visitors} openVisitor={openVisitor} selected={selectedVisitor} close={() => setSelectedVisitor(null)} approve={approve} revoke={(id) => void reasonAction(`/admin/visitors/${id}/revoke`, 'Reason for revoking this visitor') } reverify={(id) => void api(`/admin/visitors/${id}/reverify`, {method: 'POST', body: '{}'}).then(load)}/>} 
-    {section === 'nda' && <NdaLedger acceptances={acceptances} revoke={(id) => void reasonAction(`/admin/nda/${id}/revoke`, 'Reason for revoking this NDA acceptance')}/>} 
-    {section === 'meeting' && <MeetingView briefing={briefing}/>} 
-    {section === 'security' && <SecurityView security={security} events={dashboard.recentActivity}/>} 
+    {section === 'decisions' && <DecisionsView decisions={workspace.decisions} comments={workspace.comments} team={team} mutate={mutate}/>}
+    {section === 'crm' && <InvestorCrmView role={team.current.role}/>}
+    {section === 'materials' && <MaterialsView role={team.current.role}/>}
+    {section === 'meeting-kit' && <MeetingKitView role={team.current.role}/>}
+    {section === 'team' && <TeamView team={team} reload={load} setError={setError}/>}
+    {section === 'invitations' && <InvitationsView invitations={invitations} briefing={briefing} newLink={newLink} createInvitation={createInvitation} openInvitation={openInvitation} selected={selectedInvitation} close={() => setSelectedInvitation(null)} revoke={(id) => void reasonAction(`/admin/invitations/${id}/revoke`, 'Reason for revoking this invitation')}/>}
+    {section === 'visitors' && <VisitorsView visitors={visitors} openVisitor={openVisitor} selected={selectedVisitor} close={() => setSelectedVisitor(null)} approve={approve} revoke={(id) => void reasonAction(`/admin/visitors/${id}/revoke`, 'Reason for revoking this visitor') } reverify={(id) => void api(`/admin/visitors/${id}/reverify`, {method: 'POST', body: '{}'}).then(load)}/>}
+    {section === 'nda' && <NdaLedger acceptances={acceptances} revoke={(id) => void reasonAction(`/admin/nda/${id}/revoke`, 'Reason for revoking this NDA acceptance')}/>}
+    {section === 'meeting' && <MeetingView briefing={briefing}/>}
+    {section === 'security' && <SecurityView security={security} events={dashboard.recentActivity}/>}
   </main>;
 }
 
@@ -237,7 +222,7 @@ function MeetingView({briefing}: {briefing: Briefing}) {
 }
 
 function SecurityView({security, events}: {security: Security; events: Dashboard['recentActivity']}) {
-  const checks = [['External portal', security.externalPortal], ['NDA legal status', security.ndaLegalStatus], ['Privacy legal status', security.privacyLegalStatus], ['Email verification', security.emailVerification], ['Admin MFA', security.adminMfa], ['SMTP', security.smtp], ['HTTPS', security.https], ['Trusted proxy', security.trustedProxy], ['Active sessions', String(security.activeSessions)], ['Security events · 7d', String(security.securityEvents7d)]];
+  const checks = [['External portal', security.externalPortal], ['NDA legal status', security.ndaLegalStatus], ['Privacy legal status', security.privacyLegalStatus], ['Email verification', security.emailVerification], ['Admin MFA', security.adminMfa], ['SMTP', security.smtp], ['Temporary DEV access', security.temporaryDevAccess], ['HTTPS', security.https], ['Trusted proxy', security.trustedProxy], ['Active sessions', String(security.activeSessions)], ['Security events · 7d', String(security.securityEvents7d)]];
   return <section className="admin-page"><header className="admin-page-heading"><div><p>FAIL-CLOSED CONFIGURATION</p><h2>Security center</h2></div><StatusPill value={security.productionReady ? 'PRODUCTION READY' : 'LOCAL TESTING ONLY'}/></header><div className="security-grid">{checks.map(([label, value]) => <article key={label}><span>{label}</span><b>{statusLabel(value)}</b></article>)}</div><div className="legal-warning"><b>EXTERNAL RELEASE GATE</b><p>External mode remains blocked until the NDA and privacy notice are approved, HTTPS and Secure cookies are enabled, unique production secrets are installed, and administrator MFA is mandatory.</p></div><section className="activity-panel"><header><div><p>RECENT</p><h3>Security-relevant activity</h3></div></header>{events.filter((event) => event.severity === 'SECURITY' || event.severity === 'WARNING').map((event, index) => <div className="activity-row" key={`${event.timestamp_utc}-${index}`}><StatusPill value={event.severity}/><b>{statusLabel(event.event_type)}</b><span>{event.actor_type}</span><code>{event.masked_ip}</code><time>{date(event.timestamp_utc)}</time></div>)}</section></section>;
 }
 

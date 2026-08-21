@@ -11,6 +11,9 @@ importers:
       '@types/node':
         specifier: 24.10.0
         version: 24.10.0
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
       tsx:
         specifier: 4.20.6
         version: 4.20.6
@@ -93,6 +96,9 @@ importers:
       motion:
         specifier: ^13.1.0
         version: 13.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      qrcode.react:
+        specifier: ^4.2.0
+        version: 4.2.0(react@19.2.7)
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -1093,6 +1099,11 @@ packages:
   potpack@2.1.0:
     resolution: {integrity: sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ==}
 
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   process-warning@4.0.1:
     resolution: {integrity: sha512-3c2LzQ3rY9d0hc1emcsHhfT9Jwz0cChib/QN89oME2R451w5fy3f0afAhERFZAwrbDU43wk12d0ORBpDVME50Q==}
 
@@ -1104,6 +1115,11 @@ packages:
 
   protocol-buffers-schema@3.6.1:
     resolution: {integrity: sha512-VG2K63Igkiv9p76tk1lilczEK1cT+kCjKtkdhw1dQZV3k3IXJbd3o6Ho8b9zJZaHSnT2hKe4I+ObmX9w6m5SmQ==}
+
+  qrcode.react@4.2.0:
+    resolution: {integrity: sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
@@ -2269,6 +2285,8 @@ snapshots:
 
   potpack@2.1.0: {}
 
+  prettier@3.9.6: {}
+
   process-warning@4.0.1: {}
 
   process-warning@5.1.0: {}
@@ -2279,6 +2297,10 @@ snapshots:
       lie: 3.3.0
 
   protocol-buffers-schema@3.6.1: {}
+
+  qrcode.react@4.2.0(react@19.2.7):
+    dependencies:
+      react: 19.2.7
 
   quick-format-unescaped@4.0.4: {}
 
