@@ -1,0 +1,76 @@
+import {randomBytes, scryptSync} from 'node:crypto';
+import {readFile, writeFile, chmod} from 'node:fs/promises';
+import {resolve} from 'node:path';
+
+const root = resolve(import.meta.dirname, '../..');
+const output = process.argv[2];
+if (!output) throw new Error('Usage: node scripts/gcp/create-production-env.mjs OUTPUT_PATH');
+
+const parse = (input) => Object.fromEntries(input.split(/\r?\n/).flatMap((line) => {
+  const clean = line.trim();
+  if (!clean || clean.startsWith('#') || !clean.includes('=')) return [];
+  const index = clean.indexOf('=');
+  return [[clean.slice(0, index), clean.slice(index + 1)]];
+}));
+
+const local = parse(await readFile(resolve(root, '.env'), 'utf8'));
+const adminEmail = local.ADMIN_EMAIL || 'upaidown@gmail.com';
+let adminPasswordHash = local.ADMIN_PASSWORD_HASH || '';
+if (!adminPasswordHash.startsWith('scrypt:')) {
+  const password = randomBytes(18).toString('base64url');
+  const salt = randomBytes(16);
+  adminPasswordHash = `scrypt:${salt.toString('hex')}:${scryptSync(password, salt, 64).toString('hex')}`;
+  process.stderr.write(`Generated one-time admin password (store securely): ${password}\n`);
+}
+
+const secret = (bytes = 48) => randomBytes(bytes).toString('base64url');
+const postgresPassword = secret(32);
+const rows = {
+  API_PORT: '4010',
+  DATABASE_URL: `postgresql://ued:${postgresPassword}@postgres:5432/ued_demo`,
+  REDIS_URL: '',
+  DEMO_LOCAL_ONLY: 'false',
+  ROVER_PRODUCT_NAME: 'UP-EYE-DAWN Rover',
+  INVESTOR_HTML_URL: '/demo/investor-demo',
+  PUBLIC_BASE_URL: 'https://demo.upaidown.com',
+  EXTERNAL_PORTAL_ENABLED: 'false',
+  ADMIN_EMAIL: adminEmail,
+  ADMIN_PASSWORD_HASH: adminPasswordHash,
+  ADMIN_TOTP_SECRET: local.ADMIN_TOTP_SECRET || '',
+  ADMIN_MFA_REQUIRED: 'false',
+  ADMIN_SESSION_IDLE_MINUTES: '30',
+  ADMIN_SESSION_MAX_HOURS: '8',
+  SESSION_SECRET: secret(),
+  INVITATION_TOKEN_HMAC_SECRET: secret(),
+  IP_FINGERPRINT_SECRET: secret(),
+  IP_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
+  IP_ENCRYPTION_KEY_VERSION: '1',
+  DEFAULT_INVITE_TOKEN: '',
+  VISITOR_SESSION_IDLE_MINUTES: '120',
+  VISITOR_SESSION_MAX_HOURS: '72',
+  COOKIE_SECURE: 'true',
+  NDA_LEGAL_STATUS: local.NDA_LEGAL_STATUS || 'DRAFT_FOR_WORKFLOW_TESTING',
+  PRIVACY_LEGAL_STATUS: local.PRIVACY_LEGAL_STATUS || 'DRAFT',
+  NDA_RETENTION_NOTICE: local.NDA_RETENTION_NOTICE || 'Retention period pending legal approval.',
+  PRIVACY_CONTACT_EMAIL: local.PRIVACY_CONTACT_EMAIL || adminEmail,
+  SMTP_HOST: '',
+  SMTP_PORT: '587',
+  SMTP_SECURE: 'false',
+  SMTP_USER: '',
+  SMTP_PASSWORD: '',
+  SMTP_FROM: 'UP-EYE-DAWN <nda@upaidown.com>',
+  SMTP_ARCHIVE: '',
+  NDA_ARCHIVE_EMAIL: '',
+  VISITOR_SESSION_RETENTION_DAYS: '30',
+  AUDIT_EVENT_RETENTION_DAYS: '365',
+  NDA_EVIDENCE_RETENTION_DAYS: '2555',
+  ENCRYPTED_IP_RETENTION_DAYS: '90',
+  POSTGRES_USER: 'ued',
+  POSTGRES_PASSWORD: postgresPassword,
+  POSTGRES_DB: 'ued_demo',
+  TLS_EMAIL: 'upaidown@gmail.com',
+};
+
+const content = Object.entries(rows).map(([key, value]) => `${key}=${value}`).join('\n') + '\n';
+await writeFile(output, content, {mode: 0o600});
+await chmod(output, 0o600);

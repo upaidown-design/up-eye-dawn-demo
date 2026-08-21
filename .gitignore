@@ -11,6 +11,7 @@ coverage/
 .env
 .env.*
 !.env.example
+infra/production/app.env
 *.local
 *.log
 
