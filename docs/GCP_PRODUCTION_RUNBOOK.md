@@ -1,6 +1,6 @@
 # UP-EYE-DAWN Google Cloud production runbook
 
-Status: infrastructure prepared; external NDA release remains legally blocked while the bundled NDA and privacy notice are drafts.
+Status: production runtime deployed at reserved IPv4 `34.77.12.150`; DNS cutover is pending. External NDA release remains legally blocked while the bundled NDA and privacy notice are drafts.
 
 ## Target
 
@@ -10,6 +10,7 @@ Status: infrastructure prepared; external NDA release remains legally blocked wh
 - Primary domain: `upaidown.com`
 - Demo domain: `demo.upaidown.com`
 - Redirect domains: `upaidown.app`, `upaidown.pro`, `upaidown.es`
+- Reserved public IPv4: `34.77.12.150`
 - Runtime: hardened Compute Engine VM, Docker Compose, Caddy-managed TLS, Nginx gateway, Fastify API and PostgreSQL/PostGIS
 
 ## Provision and deploy
@@ -24,9 +25,9 @@ The provisioning script prints the reserved public IPv4 address. Configure the f
 
 | Host | Type | Value |
 |---|---|---|
-| `@` for each domain | `A` | reserved server IPv4 |
+| `@` for each domain | `A` | `34.77.12.150` |
 | `www` for each domain | `CNAME` | corresponding apex domain |
-| `demo` on `upaidown.com` | `A` | reserved server IPv4 |
+| `demo` on `upaidown.com` | `A` | `34.77.12.150` |
 
 Use a 300-second TTL during rollout. Do not delete unrelated MX, TXT, DKIM, SPF, DMARC or verification records.
 
@@ -38,6 +39,7 @@ Use a 300-second TTL during rollout. Do not delete unrelated MX, TXT, DKIM, SPF,
 - Real secrets are never committed. The generated environment is stored in Secret Manager and copied to the VM with mode `0600`.
 - PostgreSQL is reachable only inside the Docker network.
 - HTTPS certificates and redirects are managed by Caddy after DNS propagation.
+- The VM disk has a daily `03:00 UTC` snapshot schedule with 14-day retention in `europe-west1`.
 - The current NDA and privacy documents remain `DRAFT`; `EXTERNAL_PORTAL_ENABLED` stays `false` until counsel approval, MFA and production SMTP are configured.
 
 ## Required release gates
