@@ -7,7 +7,6 @@ VM_NAME="${VM_NAME:-ued-prod-01}"
 SECRET_NAME="${SECRET_NAME:-ued-production-env}"
 BASE_SECRET_VERSION="${BASE_SECRET_VERSION:-latest}"
 
-test -f .env || { echo '.env is required locally to preserve the configured administrator identity.' >&2; exit 1; }
 git diff --quiet && git diff --cached --quiet || { echo 'Commit the deployment source before deploying.' >&2; exit 1; }
 
 TEMP_DIR="$(mktemp -d)"

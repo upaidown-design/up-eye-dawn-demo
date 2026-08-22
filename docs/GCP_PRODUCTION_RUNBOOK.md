@@ -32,12 +32,34 @@ The provisioning script prints the reserved public IPv4 address. DonDominio is c
 
 The rollout TTL is 10 minutes, the minimum exposed by DonDominio. Unrelated TXT, SPF, mail, webmail, FTP and database records were preserved.
 
+## Transactional mail
+
+The production sender is reserved as `nda@upaidown.com`. Use one real mailbox for authenticated SMTP and create `privacy@upaidown.com` plus `nda-archive@upaidown.com` as aliases where the DonDominio plan permits it. The visitor is the direct recipient; the archive is sent as BCC and is therefore not disclosed.
+
+DonDominio requires a mail or hosting plan before a mailbox can be created. Do not purchase a plan automatically. Once the plan and mailbox exist, apply the credentials without putting the password in shell history:
+
+```bash
+read -s SMTP_PASSWORD_VALUE
+printf %s "$SMTP_PASSWORD_VALUE" | pnpm gcp:smtp:configure -- \
+  --password-stdin \
+  --user nda@upaidown.com \
+  --archive nda-archive@upaidown.com \
+  --reply-to privacy@upaidown.com \
+  --apply-vm
+unset SMTP_PASSWORD_VALUE
+```
+
+This creates a new `ued-production-env` version in Secret Manager, configures authenticated STARTTLS on `smtp.dondominio.com:587`, copies the complete environment to the VM with mode `0600`, and restarts the application service. It never prints the password.
+
+After DonDominio activates mail, verify that MX, SPF, DKIM and DMARC match the provider's current control-panel values. Preserve the existing web records and do not create a second SPF record. External investor access remains disabled until a real NDA delivery reaches both the test recipient and the archive mailbox.
+
 ## Security model
 
 - Only ports 80/443 are public.
 - SSH is restricted to Google IAP.
 - The VM uses OS Login, Shielded VM controls and a dedicated service account.
 - Real secrets are never committed. The generated environment is stored in Secret Manager and copied to the VM with mode `0600`.
+- Deployments preserve the existing administrator identity and credentials from Secret Manager; a local `.env` file is optional.
 - PostgreSQL is reachable only inside the Docker network.
 - HTTPS certificates and redirects are managed by Caddy after DNS propagation.
 - The VM disk has a daily `03:00 UTC` snapshot schedule with 14-day retention in `europe-west1`.
@@ -48,7 +70,7 @@ The rollout TTL is 10 minutes, the minimum exposed by DonDominio. Unrelated TXT,
 1. Replace the NDA workflow draft with counsel-approved text.
 2. Approve privacy, retention and controller details.
 3. Configure administrator TOTP and require MFA.
-4. Configure and server-verify email ownership (recommended candidate: Google Identity Platform/Firebase email-link authentication).
+4. Server-verify the configured Google Identity Platform/Firebase email-link authentication.
 5. Configure an approved transactional SMTP provider and archive mailbox.
 6. Create production invitations individually; never ship a default invitation token.
 7. Test registration, shared-link use in a second browser, IP-change re-verification, NDA PDF delivery, revocation and audit export.

@@ -14,7 +14,12 @@ const parse = (input) => Object.fromEntries(input.split(/\r?\n/).flatMap((line) 
   return [[clean.slice(0, index), clean.slice(index + 1)]];
 }));
 
-const local = parse(await readFile(resolve(root, '.env'), 'utf8'));
+let local = {};
+try {
+  local = parse(await readFile(resolve(root, '.env'), 'utf8'));
+} catch (error) {
+  if (error?.code !== 'ENOENT') throw error;
+}
 let previous = {};
 if (previousPath) {
   previous = parse(await readFile(previousPath, 'utf8'));
@@ -73,9 +78,11 @@ const rows = {
   SMTP_HOST: previous.SMTP_HOST || '',
   SMTP_PORT: previous.SMTP_PORT || '587',
   SMTP_SECURE: previous.SMTP_SECURE || 'false',
+  SMTP_REQUIRE_TLS: previous.SMTP_REQUIRE_TLS || 'true',
   SMTP_USER: previous.SMTP_USER || '',
   SMTP_PASSWORD: previous.SMTP_PASSWORD || '',
-  SMTP_FROM: previous.SMTP_FROM || 'UP-EYE-DAWN <nda@upaidown.com>',
+  SMTP_FROM: previous.SMTP_FROM || 'UP AI DOWN <nda@upaidown.com>',
+  SMTP_REPLY_TO: previous.SMTP_REPLY_TO || 'privacy@upaidown.com',
   SMTP_ARCHIVE: previous.SMTP_ARCHIVE || '',
   NDA_ARCHIVE_EMAIL: previous.NDA_ARCHIVE_EMAIL || '',
   VISITOR_SESSION_RETENTION_DAYS: previous.VISITOR_SESSION_RETENTION_DAYS || '30',

@@ -5,6 +5,7 @@ import {randomBytes, randomUUID, scryptSync} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import nodemailer from 'nodemailer';
+import {ndaEvidenceMessage, smtpTransportConfig} from './smtp.js';
 import {PDFDocument, StandardFonts, rgb} from 'pdf-lib';
 import pg from 'pg';
 import {z} from 'zod';
@@ -354,11 +355,11 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     return {granted: true, reason: 'ACCEPTED', visitorId: row.visitor_id, sessionId: row.id, acceptanceId: row.nda_acceptance_id, fullName: row.full_name, email: row.email, scopes: row.scopes};
   };
 
-  const mailTransport = () => { const host = env('SMTP_HOST'); if (!host) return null; const user = env('SMTP_USER'); return nodemailer.createTransport({host, port: intEnv('SMTP_PORT', 1025), secure: env('SMTP_SECURE', 'false') === 'true', auth: user ? {user, pass: env('SMTP_PASSWORD')} : undefined}); };
+  const mailTransport = () => { const config = smtpTransportConfig(); return config.host ? nodemailer.createTransport(config) : null; };
   const recordEmail = async (kind: string, recipient: string, status: string, ids: {visitorId?: string; invitationId?: string; acceptanceId?: string}, providerMessageId?: string, errorCode?: string) => pool.query(`INSERT INTO private_portal.email_deliveries(id,kind,recipient,visitor_id,invitation_id,nda_acceptance_id,status,provider_message_id,sent_at,error_code) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [randomUUID(), kind, recipient, ids.visitorId ?? null, ids.invitationId ?? null, ids.acceptanceId ?? null, status, providerMessageId ?? null, status === 'SENT' ? new Date() : null, errorCode ?? null]);
   const sendNdaEvidence = async (recipient: string, name: string, pdf: Buffer, version: string, acceptedAt: string, evidence: string, ids: {visitorId: string; invitationId: string; acceptanceId: string}) => {
     const transport = mailTransport(); if (!transport) { await recordEmail('NDA_EVIDENCE', recipient, 'SKIPPED_NO_SMTP', ids); return 'SKIPPED_NO_SMTP'; }
-    try { const result = await transport.sendMail({from: env('SMTP_FROM', env('MAIL_FROM', 'UP AI DOWN <nda@up-ai-down.local>')), to: recipient, cc: env('SMTP_ARCHIVE', env('NDA_ARCHIVE_EMAIL')) || undefined, subject: `${nda.status === 'APPROVED' ? 'NDA acceptance' : 'Workflow-test acknowledgement'} · UP AI DOWN`, text: `Hello ${name},\n\nAttached is your acknowledgement record.\nVersion: ${version}\nAccepted at UTC: ${acceptedAt}\nEvidence: ${evidence}\nLegal status: ${nda.status}\n`, attachments: [{filename: `UP AI DOWN-${version}-${evidence.slice(0, 12)}.pdf`, content: pdf, contentType: 'application/pdf'}]}); await recordEmail('NDA_EVIDENCE', recipient, 'SENT', ids, result.messageId); return 'SENT'; }
+    try { const result = await transport.sendMail(ndaEvidenceMessage({recipient, name, pdf, version, acceptedAt, evidence, legalStatus: nda.status})); await recordEmail('NDA_EVIDENCE', recipient, 'SENT', ids, result.messageId); return 'SENT'; }
     catch (error) { app.log.error({acceptanceId: ids.acceptanceId, error}, 'NDA email delivery failed'); await recordEmail('NDA_EVIDENCE', recipient, 'FAILED', ids, undefined, 'SMTP_DELIVERY_FAILED'); return 'FAILED'; }
   };
   const identityPlatformRequest = async (method: string, body: Record<string, unknown>) => {
