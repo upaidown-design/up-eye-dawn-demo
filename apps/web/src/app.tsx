@@ -145,6 +145,8 @@ function useSimulation() {
     const response = await fetch(`${API}/demo/runs/${runId}/${path}`, options);
     if (!response.ok)
       throw new Error(`Demo command ${action} failed: ${response.status}`);
+    const snapshot = (await response.json()) as SimulationSnapshot;
+    setS(snapshot);
   };
   return { s, connected, command };
 }
@@ -302,7 +304,7 @@ function Timeline({
   command,
 }: {
   s: SimulationSnapshot;
-  command: (a: string, v?: number) => void;
+  command: (a: string, v?: number) => Promise<void>;
 }) {
   const labels = [
     "Sentinel Ready",
@@ -349,7 +351,7 @@ function Demo({
   t,
 }: {
   s: SimulationSnapshot;
-  command: (a: string, v?: number) => void;
+  command: (a: string, v?: number) => Promise<void>;
   t: typeof en;
 }) {
   const drone = s.actors.find((a) => a.type === "drone"),
@@ -450,25 +452,25 @@ function Controls({
   command,
 }: {
   s: SimulationSnapshot;
-  command: (a: string, v?: number) => void;
+  command: (a: string, v?: number) => Promise<void>;
 }) {
   return (
     <div className="controls">
       <button
-        onClick={() => command(s.status === "RUNNING" ? "PAUSE" : "PLAY")}
+        onClick={() => void command(s.status === "RUNNING" ? "PAUSE" : "PLAY")}
       >
         {s.status === "RUNNING" ? "PAUSE" : "PLAY"}
       </button>
       {[1, 2, 5, 10, 20].map((v) => (
         <button
           className={s.speed === v ? "active" : ""}
-          onClick={() => command("SET_SPEED", v)}
+          onClick={() => void command("SET_SPEED", v)}
           key={v}
         >
           {v}×
         </button>
       ))}
-      <button onClick={() => command("RESET")}>RESET</button>
+      <button onClick={() => void command("RESET")}>RESET</button>
       <button onClick={() => document.documentElement.requestFullscreen?.()}>
         FULLSCREEN
       </button>
@@ -525,7 +527,7 @@ function Operator({
   command,
 }: {
   s: SimulationSnapshot;
-  command: (a: string, v?: number) => void;
+  command: (a: string, v?: number) => Promise<void>;
 }) {
   const [focus, setFocus] = useState("Overview");
   const drone = s.actors.find((a) => a.type === "drone"),

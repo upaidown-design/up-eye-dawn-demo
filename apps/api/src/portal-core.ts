@@ -118,7 +118,8 @@ export function invitationAllowsEmail(invitation: {intendedRecipientEmail?: stri
 
 export function base32Decode(input: string) {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  const clean = input.toUpperCase().replace(/[^A-Z2-7]/g, '');
+  const clean = input.toUpperCase().replace(/[\s=-]/g, '');
+  if (!clean || /[^A-Z2-7]/.test(clean)) throw new Error('Invalid base32');
   let bits = '';
   for (const character of clean) {
     const index = alphabet.indexOf(character);

@@ -176,7 +176,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
 
   const pool = new Pool({connectionString: databaseUrl, max: 8}); await runPortalMigrations(pool, root); await app.register(cookie); await app.register(rateLimit, {global: false});
   await pool.query(`INSERT INTO private_portal.admin_users AS target(id,email,password_hash,role,status,mfa_enabled,mfa_secret_encrypted) VALUES($1,$2,$3,'OWNER','ACTIVE',$4,$5)
-    ON CONFLICT ((lower(email))) DO UPDATE SET password_hash=excluded.password_hash,mfa_enabled=target.mfa_enabled OR excluded.mfa_enabled,mfa_secret_encrypted=COALESCE(target.mfa_secret_encrypted,excluded.mfa_secret_encrypted)`, [randomUUID(), adminEmail, adminPasswordHash, Boolean(adminTotpSecret), adminTotpSecret ? encryptSecret(adminTotpSecret, adminMfaEncryptionKey) : null]);
+    ON CONFLICT ((lower(email))) DO UPDATE SET mfa_enabled=target.mfa_enabled OR excluded.mfa_enabled,mfa_secret_encrypted=COALESCE(target.mfa_secret_encrypted,excluded.mfa_secret_encrypted)`, [randomUUID(), adminEmail, adminPasswordHash, Boolean(adminTotpSecret), adminTotpSecret ? encryptSecret(adminTotpSecret, adminMfaEncryptionKey) : null]);
   const seededAdminId = (await pool.query('SELECT id FROM private_portal.admin_users WHERE lower(email)=lower($1)', [adminEmail])).rows[0].id as string;
   if (externalEnabled && !(await pool.query("SELECT 1 FROM private_portal.admin_users WHERE role='OWNER' AND status='ACTIVE' AND mfa_enabled=true AND mfa_secret_encrypted IS NOT NULL LIMIT 1")).rowCount) throw new Error('External portal safety gate failed: at least one active owner must have MFA enrolled');
   for (const document of ndaFiles) {
@@ -207,6 +207,94 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     for (const item of initialNotes) await pool.query(`INSERT INTO private_portal.project_notes(id,title,body,category,pinned,status,created_by,updated_by) VALUES($1,$2,$3,$4,true,'ACTIVE',$5,$5)`, [randomUUID(), ...item, seededAdminId]);
   }
 
+  // ── NY Meeting Kit seed ────────────────────────────────────────────────────
+  // Idempotent: only inserts if the meeting kit is completely empty.
+  // Items are ordered by sort_order (ascending) within each type.
+  if (Number((await pool.query('SELECT count(*)::int AS count FROM private_portal.meeting_kit_items')).rows[0].count) === 0) {
+    const mkItems: [string, string, string, string, string, number][] = [
+      // [item_type, language, title, body, classification, sort_order]
+      // AGENDA — 5 blocks, 10-minute increments
+      ['AGENDA', 'BOTH', '00–05 · Conviction', 'Open with the field-memory thesis and establish why fixed, aerial and ground evidence belong in one system.', 'INTERNAL', 10],
+      ['AGENDA', 'BOTH', '05–15 · System', 'Explain Sentinel, drone, rover, soil probe and Data & AI Engine. Separate what exists today from the funded roadmap.', 'INTERNAL', 20],
+      ['AGENDA', 'BOTH', '15–25 · Evidence and risk', 'Show only verifiable evidence. Address maturity, IP ownership and unit economics as explicit validation plans.', 'INTERNAL', 30],
+      ['AGENDA', 'BOTH', '25–35 · Value creation', 'Connect capital to instrumented prototypes, deployments, rights-cleared data, validated models and recurring revenue.', 'INTERNAL', 40],
+      ['AGENDA', 'BOTH', '35–45 · Investment conversation', 'Ask what evidence is required to lead diligence, review scenarios and lock next steps, owners and dates.', 'INTERNAL', 50],
+      // SPEECH — 4 cues
+      ['SPEECH', 'EN', 'Opening', 'Agriculture has data, but it still lacks a persistent memory of the field. UP AI DOWN is designed to connect autonomous observation, physical ground truth and learning over time.', 'INTERNAL', 10],
+      ['SPEECH', 'EN', 'System', 'Sentinel provides persistent fixed observation. The drone adds repeatable aerial coverage. The rover investigates selected locations and the soil probe anchors remote signals in physical measurements. The data layer preserves the evidence chain.', 'INTERNAL', 20],
+      ['SPEECH', 'EN', 'Truth', 'Today we are showing a working deterministic software demo and approved concept imagery. We will distinguish those assets from physical validation, real integrated NDVI and production readiness.', 'INTERNAL', 30],
+      ['SPEECH', 'EN', 'Close', 'Rather than asking you to accept an unsupported claim, we want to agree the evidence that would make this opportunity diligence-ready, who owns each proof point and when it can be delivered.', 'INTERNAL', 40],
+      // QUESTION — 5 investor questions
+      ['QUESTION', 'EN', 'Evidence gate', 'What evidence would you need to sponsor or lead technical diligence?', 'INTERNAL', 10],
+      ['QUESTION', 'EN', 'Risk priority', 'Which risk matters most at this stage: hardware maturity, data rights, commercial adoption or unit economics?', 'INTERNAL', 20],
+      ['QUESTION', 'EN', 'Milestone value', 'Would a field-validation milestone or a rights-cleared longitudinal dataset change your underwriting view?', 'INTERNAL', 30],
+      ['QUESTION', 'EN', 'Review circle', 'Who else should review the technical, agronomic and legal evidence?', 'INTERNAL', 40],
+      ['QUESTION', 'EN', 'Next step', 'What is the clearest next step, owner and date?', 'INTERNAL', 50],
+      // CHECKLIST — 7 presentation steps
+      ['CHECKLIST', 'EN', '01 · Preflight', 'The presentation runtime is deterministic and can run locally.', 'INTERNAL', 10],
+      ['CHECKLIST', 'EN', '02 · Investor demo', 'Fixed sensing, aerial observation and ground truth form one evidence loop.', 'INTERNAL', 20],
+      ['CHECKLIST', 'EN', '03 · Rover and Sentinel', 'Concept renders communicate intended product architecture; they are not physical prototype evidence.', 'INTERNAL', 30],
+      ['CHECKLIST', 'EN', '04 · Mission Control', 'Demonstrate the operational workflow and identify simulated elements clearly.', 'INTERNAL', 40],
+      ['CHECKLIST', 'EN', '05 · NDVI', 'The visible dataset is synthetic. Related Red/NIR code exists in INSECE but is not yet integrated.', 'INTERNAL', 50],
+      ['CHECKLIST', 'EN', '06 · Capital', 'Scenarios are planning envelopes until founder terms and operating assumptions are approved.', 'INTERNAL', 60],
+      ['CHECKLIST', 'EN', '07 · Close', 'Ask which evidence gates would support the investor\'s diligence process.', 'INTERNAL', 70],
+      // CHECKLIST — 5 pre-visit operational checks
+      ['CHECKLIST', 'BOTH', 'Pre-visit · Attendees', 'Confirm attendees, roles, pronunciation and decision authority 24 hours before the meeting.', 'INTERNAL', 110],
+      ['CHECKLIST', 'BOTH', 'Pre-visit · Room and tech', 'Confirm room, display resolution, HDMI/USB-C adapters, power, Wi-Fi policy and offline fallback.', 'INTERNAL', 120],
+      ['CHECKLIST', 'BOTH', 'Pre-visit · Demo preflight', 'Open the local demo, run preflight, reset the scenario and verify fullscreen before attendees enter.', 'INTERNAL', 130],
+      ['CHECKLIST', 'BOTH', 'Pre-visit · Materials', 'Carry the approved deck, NDA link, offline PDF and evidence index on two independent devices.', 'INTERNAL', 140],
+      ['CHECKLIST', 'BOTH', 'Pre-visit · Follow-ups', 'Record agreed follow-ups, owner and date before leaving the room. Do not record people without permission.', 'INTERNAL', 150],
+    ];
+    for (const [itemType, language, title, body, classification, sortOrder] of mkItems) {
+      await pool.query(
+        `INSERT INTO private_portal.meeting_kit_items(id,item_type,language,title,body,classification,sort_order,status,created_by,updated_by)
+         VALUES($1,$2,$3,$4,$5,$6,$7,'ACTIVE',$8,$8)`,
+        [randomUUID(), itemType, language, title, body, classification, sortOrder, seededAdminId],
+      );
+    }
+  }
+
+  // ── Material Registry seed ─────────────────────────────────────────────────
+  // Three NY materials from the briefing. status=DRAFT pending truth-review.
+  if (Number((await pool.query('SELECT count(*)::int AS count FROM private_portal.material_registry')).rows[0].count) === 0) {
+    const materials: [string, string, string, string, string, string][] = [
+      // [title, material_type, version, language, classification, notes]
+      [
+        'UPAIDOWN Autonomous Farming',
+        'PRESENTATION', '1.0', 'ES', 'REVIEW_REQUIRED',
+        'User-supplied visual deck · PDF 10 pages · Spanish. Image-only PDF; claims, product geometry and specifications require truth and ownership review before investor distribution.',
+      ],
+      [
+        'UPAIDOWN Autonomous Agricultural Ecosystem',
+        'PRESENTATION', '1.0', 'EN', 'REVIEW_REQUIRED',
+        'User-supplied visual deck · PDF 10 pages · English. Autonomous-operation, proprietary-platform and hardware claims are not treated as validated evidence.',
+      ],
+      [
+        'UPAIDOWN overview board · 19 August 2026',
+        'IMAGE', '1.0', 'ES', 'REVIEW_REQUIRED',
+        'Contact-sheet visual reference · JPEG · Spanish. Contains historical WALL-AI/Sentinel naming and visible specifications that must not override the approved product truth.',
+      ],
+    ];
+    for (const [title, materialType, version, language, classification, notes] of materials) {
+      await pool.query(
+        `INSERT INTO private_portal.material_registry(id,title,material_type,version,language,classification,status,provenance,notes,metadata,created_by,updated_by)
+         VALUES($1,$2,$3,$4,$5,$6,'DRAFT','data/admin/new-york-private-briefing.json',$7,'{}',$8,$8)`,
+        [randomUUID(), title, materialType, version, language, classification, notes, seededAdminId],
+      );
+    }
+  }
+
+  // ── CRM seed — NY investor placeholder ────────────────────────────────────
+  // Creates an empty "New York 2026" umbrella organisation so the team can
+  // attach contacts immediately after the meeting without starting from zero.
+  if (Number((await pool.query('SELECT count(*)::int AS count FROM private_portal.crm_organisations')).rows[0].count) === 0) {
+    await pool.query(
+      `INSERT INTO private_portal.crm_organisations(id,name,org_type,country,stage,next_action,notes,status,created_by,updated_by)
+       VALUES($1,'New York 2026 — Investor TBC','INVESTOR','United States','PROSPECT','Identify lead investor and confirm organisation name after the meeting.','Placeholder created from the NY briefing. Update name and org_type after the first meeting.','ACTIVE',$2,$2)`,
+      [randomUUID(), seededAdminId],
+    );
+  }
+
   const audit = async (eventType: string, severity: 'INFO' | 'NOTICE' | 'WARNING' | 'SECURITY', actorType: 'SYSTEM' | 'ADMIN' | 'VISITOR' | 'ANONYMOUS', request: FastifyRequest, links: {actorId?: string; visitorId?: string; adminId?: string; invitationId?: string; sessionId?: string} = {}, metadata: Record<string, unknown> = {}) => {
     const ip = sourceIp(request); await pool.query(`INSERT INTO private_portal.audit_events(id,event_type,severity,actor_type,actor_id,visitor_id,admin_id,invitation_id,session_id,ip_fingerprint,masked_ip,user_agent,metadata)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`, [randomUUID(), eventType, severity, actorType, links.actorId ?? null, links.visitorId ?? null, links.adminId ?? null, links.invitationId ?? null, links.sessionId ?? null, hmacHex(ip, ipFingerprintSecret), maskIp(ip), userAgent(request), JSON.stringify(metadata)]);
@@ -231,6 +319,12 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   };
   const recordProjectChange = async (entityType: string, entityId: string, action: string, adminId: string, changes: Record<string, unknown>) => {
     await pool.query('INSERT INTO private_portal.project_change_history(id,entity_type,entity_id,action,changed_by,changes) VALUES($1,$2,$3,$4,$5,$6)', [randomUUID(), entityType, entityId, action, adminId, JSON.stringify(changes)]);
+  };
+  const recordProjectVersion = async (entityType: 'NOTE' | 'DECISION', entityId: string, adminId: string, snapshot: Record<string, unknown>) => {
+    const table = entityType === 'NOTE' ? 'project_note_versions' : 'project_decision_versions';
+    const foreignKey = entityType === 'NOTE' ? 'note_id' : 'decision_id';
+    await pool.query(`INSERT INTO private_portal.${table}(id,${foreignKey},version_number,snapshot,changed_by)
+      SELECT $1,$2,COALESCE(MAX(version_number),0)+1,$3,$4 FROM private_portal.${table} WHERE ${foreignKey}=$2`, [randomUUID(), entityId, JSON.stringify(snapshot), adminId]);
   };
   const createRegistrationContext = async (reply: FastifyReply, invitationId: string, visitorId: string | null, purpose: 'REGISTRATION' | 'REVERIFY' | 'PENDING_APPROVAL', request: FastifyRequest) => {
     const raw = randomOpaqueToken(); const expiresMs = 30 * MINUTE; await pool.query(`INSERT INTO private_portal.registration_contexts(id,context_token_hash,invitation_id,visitor_id,purpose,expires_at,ip_fingerprint,user_agent_hash) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [randomUUID(), hmacHex(raw, sessionSecret), invitationId, visitorId, purpose, new Date(Date.now() + expiresMs), hmacHex(sourceIp(request), ipFingerprintSecret), sha256(userAgent(request))]); reply.setCookie(registrationCookie, raw, cookieOptions(cookieSecure, expiresMs));
@@ -384,7 +478,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     if (!user) return reply.code(404).send({error: 'DEV_ACCESS_UNAVAILABLE'});
     return createAdminSession(user, request, reply, 'ADMIN_DEV_LOGIN_SUCCESS');
   });
-  app.get('/api/v1/admin/session', async (request, reply) => { const session = await requireAdmin(request, reply); if (!session) return; const profile = (await pool.query('SELECT display_name,mfa_enabled FROM private_portal.admin_users WHERE id=$1', [session.admin_user_id])).rows[0]; return {authenticated: true, email: session.email, role: session.role, displayName: profile?.display_name ?? '', mfa: Boolean(profile?.mfa_enabled)}; });
+  app.get('/api/v1/admin/session', async (request) => { const session = await adminSession(request); if (!session) return {authenticated: false}; const profile = (await pool.query('SELECT display_name,mfa_enabled FROM private_portal.admin_users WHERE id=$1', [session.admin_user_id])).rows[0]; return {authenticated: true, email: session.email, role: session.role, displayName: profile?.display_name ?? '', mfa: Boolean(profile?.mfa_enabled)}; });
   app.post('/api/v1/admin/logout', async (request, reply) => { const session = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR', 'VIEWER']); if (!session) return; await pool.query("UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='LOGOUT' WHERE id=$1", [session.id]); reply.clearCookie(adminCookie, {path: '/'}).clearCookie(csrfCookie, {path: '/'}); await audit('ADMIN_LOGOUT', 'INFO', 'ADMIN', request, {actorId: session.admin_user_id, adminId: session.admin_user_id, sessionId: session.id}); return {authenticated: false}; });
   app.get('/api/v1/admin/team', async (request, reply) => {
     const admin = await requireAdmin(request, reply); if (!admin) return;
@@ -446,6 +540,11 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return;
     const parsed = UpdateProjectEventBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_EVENT_UPDATE', issues: parsed.error.flatten()});
     const id = (request.params as {id: string}).id; const input = parsed.data; const hasEndsAt = Object.hasOwn(input, 'endsAt');
+    const current = (await pool.query('SELECT starts_at,ends_at FROM private_portal.project_events WHERE id=$1', [id])).rows[0];
+    if (!current) return reply.code(404).send({error: 'NOT_FOUND'});
+    const nextStartsAt = input.startsAt ? new Date(input.startsAt) : new Date(current.starts_at);
+    const nextEndsAt = hasEndsAt ? (input.endsAt ? new Date(input.endsAt) : null) : (current.ends_at ? new Date(current.ends_at) : null);
+    if (nextEndsAt && nextEndsAt <= nextStartsAt) return reply.code(400).send({error: 'INVALID_EVENT_INTERVAL'});
     const result = await pool.query(`UPDATE private_portal.project_events SET title=COALESCE($2,title),description=COALESCE($3,description),starts_at=COALESCE($4,starts_at),ends_at=CASE WHEN $5 THEN $6 ELSE ends_at END,timezone=COALESCE($7,timezone),location=COALESCE($8,location),event_type=COALESCE($9,event_type),status=COALESCE($10,status),priority=COALESCE($11,priority),owner_name=COALESCE($12,owner_name),updated_by=$13,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.description ?? null, input.startsAt ? new Date(input.startsAt) : null, hasEndsAt, input.endsAt ? new Date(input.endsAt) : null, input.timezone ?? null, input.location ?? null, input.eventType ?? null, input.status ?? null, input.priority ?? null, input.ownerName ?? null, admin.admin_user_id]);
     if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
     await recordProjectChange('EVENT', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_EVENT_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {eventId: id, changed: Object.keys(input)});
@@ -473,7 +572,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     const parsed = CreateProjectNoteBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_NOTE', issues: parsed.error.flatten()});
     const input = parsed.data; const id = randomUUID();
     const result = await pool.query(`INSERT INTO private_portal.project_notes(id,title,body,category,pinned,status,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$7) RETURNING *`, [id, input.title, input.body, input.category, input.pinned, input.status, admin.admin_user_id]);
-    await recordProjectChange('NOTE', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_NOTE_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, category: input.category});
+    await recordProjectVersion('NOTE', id, admin.admin_user_id, result.rows[0]); await recordProjectChange('NOTE', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_NOTE_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, category: input.category});
     return reply.code(201).send(result.rows[0]);
   });
   app.patch('/api/v1/admin/notes/:id', async (request, reply) => {
@@ -482,17 +581,22 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
     const id = (request.params as {id: string}).id; const input = parsed.data; const hasPinned = Object.hasOwn(input, 'pinned');
     const result = await pool.query(`UPDATE private_portal.project_notes SET title=COALESCE($2,title),body=COALESCE($3,body),category=COALESCE($4,category),pinned=CASE WHEN $5 THEN $6 ELSE pinned END,status=COALESCE($7,status),updated_by=$8,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.body ?? null, input.category ?? null, hasPinned, input.pinned ?? false, input.status ?? null, admin.admin_user_id]);
     if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'});
-    await recordProjectChange('NOTE', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_NOTE_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, changed: Object.keys(input)});
+    await recordProjectVersion('NOTE', id, admin.admin_user_id, result.rows[0]); await recordProjectChange('NOTE', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_NOTE_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {noteId: id, changed: Object.keys(input)});
     return result.rows[0];
+  });
+  app.get('/api/v1/admin/notes/:id/versions', async (request, reply) => {
+    if (!await requireAdmin(request, reply)) return; const id = (request.params as {id: string}).id;
+    return (await pool.query('SELECT version_number,snapshot,changed_by,changed_at FROM private_portal.project_note_versions WHERE note_id=$1 ORDER BY version_number DESC', [id])).rows;
   });
   app.post('/api/v1/admin/decisions', async (request, reply) => {
     const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return; const parsed = CreateProjectDecisionBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_DECISION', issues: parsed.error.flatten()}); const input = parsed.data; const id = randomUUID();
-    const result = await pool.query(`INSERT INTO private_portal.project_decisions(id,title,context,decision,alternatives,consequences,owner_admin_id,status,decision_at,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10) RETURNING *`, [id, input.title, input.context, input.decision, input.alternatives, input.consequences, input.ownerAdminId ?? null, input.status, input.decisionAt ? new Date(input.decisionAt) : input.status === 'DECIDED' ? new Date() : null, admin.admin_user_id]); await recordProjectChange('DECISION', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_DECISION_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {decisionId: id, status: input.status}); return reply.code(201).send(result.rows[0]);
+    const result = await pool.query(`INSERT INTO private_portal.project_decisions(id,title,context,decision,alternatives,consequences,owner_admin_id,status,decision_at,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10) RETURNING *`, [id, input.title, input.context, input.decision, input.alternatives, input.consequences, input.ownerAdminId ?? null, input.status, input.decisionAt ? new Date(input.decisionAt) : input.status === 'DECIDED' ? new Date() : null, admin.admin_user_id]); await recordProjectVersion('DECISION', id, admin.admin_user_id, result.rows[0]); await recordProjectChange('DECISION', id, 'CREATED', admin.admin_user_id, input); await audit('PROJECT_DECISION_CREATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {decisionId: id, status: input.status}); return reply.code(201).send(result.rows[0]);
   });
   app.patch('/api/v1/admin/decisions/:id', async (request, reply) => {
     const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return; const parsed = UpdateProjectDecisionBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_DECISION_UPDATE', issues: parsed.error.flatten()}); const id = (request.params as {id: string}).id; const input = parsed.data; const hasOwner = Object.hasOwn(input, 'ownerAdminId'); const hasDecisionAt = Object.hasOwn(input, 'decisionAt');
-    const result = await pool.query(`UPDATE private_portal.project_decisions SET title=COALESCE($2,title),context=COALESCE($3,context),decision=COALESCE($4,decision),alternatives=COALESCE($5,alternatives),consequences=COALESCE($6,consequences),owner_admin_id=CASE WHEN $7 THEN $8 ELSE owner_admin_id END,status=COALESCE($9,status),decision_at=CASE WHEN $10 THEN $11 WHEN $9='DECIDED' AND decision_at IS NULL THEN now() ELSE decision_at END,updated_by=$12,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.context ?? null, input.decision ?? null, input.alternatives ?? null, input.consequences ?? null, hasOwner, input.ownerAdminId ?? null, input.status ?? null, hasDecisionAt, input.decisionAt ? new Date(input.decisionAt) : null, admin.admin_user_id]); if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'}); await recordProjectChange('DECISION', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_DECISION_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {decisionId: id, changed: Object.keys(input)}); return result.rows[0];
+    const result = await pool.query(`UPDATE private_portal.project_decisions SET title=COALESCE($2,title),context=COALESCE($3,context),decision=COALESCE($4,decision),alternatives=COALESCE($5,alternatives),consequences=COALESCE($6,consequences),owner_admin_id=CASE WHEN $7 THEN $8 ELSE owner_admin_id END,status=COALESCE($9,status),decision_at=CASE WHEN $10 THEN $11 WHEN $9='DECIDED' AND decision_at IS NULL THEN now() ELSE decision_at END,updated_by=$12,updated_at=now() WHERE id=$1 RETURNING *`, [id, input.title ?? null, input.context ?? null, input.decision ?? null, input.alternatives ?? null, input.consequences ?? null, hasOwner, input.ownerAdminId ?? null, input.status ?? null, hasDecisionAt, input.decisionAt ? new Date(input.decisionAt) : null, admin.admin_user_id]); if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'}); await recordProjectVersion('DECISION', id, admin.admin_user_id, result.rows[0]); await recordProjectChange('DECISION', id, 'UPDATED', admin.admin_user_id, input); await audit('PROJECT_DECISION_UPDATED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {decisionId: id, changed: Object.keys(input)}); return result.rows[0];
   });
+  app.get('/api/v1/admin/decisions/:id/versions', async (request, reply) => { if (!await requireAdmin(request, reply)) return; const id = (request.params as {id: string}).id; return (await pool.query('SELECT version_number,snapshot,changed_by,changed_at FROM private_portal.project_decision_versions WHERE decision_id=$1 ORDER BY version_number DESC', [id])).rows; });
   app.post('/api/v1/admin/comments', async (request, reply) => {
     const admin = await requireAdminMutation(request, reply, ['OWNER', 'ADMIN', 'EDITOR']); if (!admin) return; const parsed = CreateProjectCommentBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'INVALID_COMMENT', issues: parsed.error.flatten()}); const input = parsed.data; const tables = {EVENT: 'project_events', TASK: 'project_tasks', NOTE: 'project_notes', DECISION: 'project_decisions'} as const; if (!(await pool.query(`SELECT 1 FROM private_portal.${tables[input.entityType]} WHERE id=$1`, [input.entityId])).rowCount) return reply.code(404).send({error: 'NOT_FOUND'}); const id = randomUUID(); const result = await pool.query(`INSERT INTO private_portal.project_comments(id,entity_type,entity_id,body,created_by) VALUES($1,$2,$3,$4,$5) RETURNING *`, [id, input.entityType, input.entityId, input.body, admin.admin_user_id]); await recordProjectChange(input.entityType, input.entityId, 'COMMENTED', admin.admin_user_id, {commentId: id}); await audit('PROJECT_COMMENT_CREATED', 'INFO', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {commentId: id, entityType: input.entityType, entityId: input.entityId}); return reply.code(201).send(result.rows[0]);
   });
@@ -510,7 +614,7 @@ export async function registerPrivateAccess(app: FastifyInstance, {root}: {root:
   app.post('/api/v1/admin/visitors/:id/approve', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const id = (request.params as {id: string}).id; await pool.query("UPDATE private_portal.visitors SET status='ACTIVE',approved_at=now(),approved_by=$2 WHERE id=$1 AND status='PENDING_APPROVAL'", [id, admin.admin_user_id]); await audit('VISITOR_APPROVED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, visitorId: id}); return {approved: true}; });
   app.post('/api/v1/admin/visitors/:id/revoke', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = ReasonBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'REASON_REQUIRED'}); const id = (request.params as {id: string}).id; await pool.query("UPDATE private_portal.visitors SET status='REVOKED',revoked_at=now(),revoked_by=$2,revocation_reason=$3 WHERE id=$1", [id, admin.admin_user_id, parsed.data.reason]); await pool.query("UPDATE private_portal.visitor_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='VISITOR_REVOKED' WHERE visitor_id=$1 AND status='ACTIVE'", [id]); await audit('VISITOR_REVOKED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, visitorId: id}, {reason: parsed.data.reason}); return {revoked: true}; });
   app.post('/api/v1/admin/visitors/:id/reverify', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const id = (request.params as {id: string}).id; await pool.query("UPDATE private_portal.visitor_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='ADMIN_REVERIFY' WHERE visitor_id=$1 AND status='ACTIVE'", [id]); await audit('SESSION_REVERIFICATION_REQUIRED', 'WARNING', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, visitorId: id}); return {reverificationRequired: true}; });
-  app.post('/api/v1/admin/sessions/:id/revoke', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = ReasonBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'REASON_REQUIRED'}); const id = (request.params as {id: string}).id; await pool.query("UPDATE private_portal.visitor_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason=$2 WHERE id=$1", [id, parsed.data.reason]); await audit('SESSION_REVOKED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, sessionId: id}, {reason: parsed.data.reason}); return {revoked: true}; });
+  app.post('/api/v1/admin/sessions/:id/revoke', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = ReasonBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'REASON_REQUIRED'}); const id = (request.params as {id: string}).id; if (!z.string().uuid().safeParse(id).success) return reply.code(400).send({error: 'INVALID_SESSION_ID'}); const result = await pool.query("UPDATE private_portal.visitor_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason=$2 WHERE id=$1 RETURNING id", [id, parsed.data.reason]); if (!result.rowCount) return reply.code(404).send({error: 'NOT_FOUND'}); await audit('SESSION_REVOKED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, sessionId: id}, {reason: parsed.data.reason}); return {revoked: true}; });
   app.get('/api/v1/admin/nda', async (request, reply) => { if (!await requireAdmin(request, reply)) return; return (await pool.query('SELECT a.id,a.visitor_id,a.full_name,a.email,a.organisation,a.nda_version,a.accepted_at_utc,a.evidence_hash,a.pdf_sha256,a.email_delivery_status,a.masked_ip,a.revoked_at FROM private_portal.nda_acceptances a ORDER BY a.accepted_at_utc DESC LIMIT 500')).rows; });
   app.get('/api/v1/admin/nda/:id/pdf', async (request, reply) => { const admin = await requireAdmin(request, reply); if (!admin) return; const id = (request.params as {id: string}).id; const row = (await pool.query('SELECT nda_version,evidence_hash,pdf_bytes FROM private_portal.nda_acceptances WHERE id=$1', [id])).rows[0]; if (!row?.pdf_bytes) return reply.code(404).send({error: 'DOCUMENT_UNAVAILABLE'}); await audit('NDA_EVIDENCE_DOWNLOADED', 'NOTICE', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id}, {acceptanceId: id}); return reply.type('application/pdf').header('Content-Disposition', `attachment; filename="UP AI DOWN-${row.nda_version}-${row.evidence_hash.slice(0, 12)}.pdf"`).send(row.pdf_bytes); });
   app.post('/api/v1/admin/nda/:id/revoke', async (request, reply) => { const admin = await requireAdminMutation(request, reply); if (!admin) return; const parsed = ReasonBody.safeParse(request.body); if (!parsed.success) return reply.code(400).send({error: 'REASON_REQUIRED'}); const id = (request.params as {id: string}).id; const result = await pool.query('UPDATE private_portal.nda_acceptances SET revoked_at=now(),revoked_by=$2,revocation_reason=$3 WHERE id=$1 RETURNING visitor_id', [id, admin.admin_user_id, parsed.data.reason]); if (result.rowCount) await pool.query("UPDATE private_portal.visitor_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='NDA_REVOKED' WHERE nda_acceptance_id=$1 AND status='ACTIVE'", [id]); await audit('NDA_ACCEPTANCE_REVOKED', 'SECURITY', 'ADMIN', request, {actorId: admin.admin_user_id, adminId: admin.admin_user_id, visitorId: result.rows[0]?.visitor_id}, {acceptanceId: id, reason: parsed.data.reason}); return {revoked: true}; });

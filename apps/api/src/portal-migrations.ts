@@ -1,8 +1,21 @@
 import {readdir, readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
+import {setTimeout as delay} from 'node:timers/promises';
 import type pg from 'pg';
 
 export async function runPortalMigrations(pool: pg.Pool, root: string) {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 30; attempt += 1) {
+    try {
+      await pool.query('SELECT 1');
+      lastError = undefined;
+      break;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 30) await delay(Math.min(250 * attempt, 1_500));
+    }
+  }
+  if (lastError) throw lastError;
   await pool.query('CREATE SCHEMA IF NOT EXISTS private_portal');
   await pool.query(`CREATE TABLE IF NOT EXISTS private_portal.schema_migrations (
     version text PRIMARY KEY,

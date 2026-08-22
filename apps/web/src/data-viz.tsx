@@ -3,15 +3,11 @@ import type{SimulationSnapshot}from'@ued/contracts';
 import{financialModel,truth}from'@ued/configuration';
 import{visualAssets}from'./visual-assets';
 import{IndustrialChart,chartTheme}from'./industrial-chart';
+import{formatValue}from'./formatters';
 const NdviSurface3D=lazy(()=>import('./ndvi-surface-3d').then(module=>({default:module.NdviSurface3D})));
 
 export type Classification='REAL'|'DERIVED'|'SIMULATED'|'SYNTHETIC'|'FORECAST'|'TARGET'|'SCENARIO';
-export const formatValue=(value:number,kind:'currency'|'percent'|'area'|'speed'|'temperature'|'ec'|'number'='number',locale='en-US')=>{
-  if(kind==='currency')return new Intl.NumberFormat(locale,{style:'currency',currency:'EUR',notation:'compact',maximumFractionDigits:1}).format(value);
-  if(kind==='percent')return `${new Intl.NumberFormat(locale,{maximumFractionDigits:1}).format(value)}%`;
-  const unit={area:' ha',speed:' m/s',temperature:' °C',ec:' dS/m',number:''}[kind];
-  return `${new Intl.NumberFormat(locale,{maximumFractionDigits:2}).format(value)}${unit}`;
-};
+export{formatValue}from'./formatters';
 
 export function DataProvenanceBadge({kind}: {kind:Classification}){return <span className={`provenance provenance-${kind.toLowerCase()}`}>{kind}</span>}
 export function KpiMetric({value,label,period,badge,context}:{value:string;label:string;period:string;badge:Classification;context?:string}){return <article className="kpi-metric"><div><strong>{value}</strong><DataProvenanceBadge kind={badge}/></div><h3>{label}</h3><p>{period}</p>{context&&<small>{context}</small>}</article>}

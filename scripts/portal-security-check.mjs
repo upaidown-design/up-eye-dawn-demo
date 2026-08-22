@@ -1,8 +1,10 @@
 import {readFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
 
 const values = {...process.env};
 try {
-  const file = await readFile(new URL('../.env', import.meta.url), 'utf8');
+  const envFile = process.env.PORTAL_ENV_FILE ? resolve(process.env.PORTAL_ENV_FILE) : new URL('../.env', import.meta.url);
+  const file = await readFile(envFile, 'utf8');
   for (const line of file.split(/\r?\n/)) {
     const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
     if (match && values[match[1]] === undefined) values[match[1]] = match[2];
