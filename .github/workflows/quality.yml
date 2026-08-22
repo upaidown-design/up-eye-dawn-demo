@@ -2,7 +2,7 @@ name: Quality gate
 
 on:
   push:
-    branches: [main, infra/gcp-production]
+    branches: [main]
   pull_request:
 
 concurrency:
