@@ -340,6 +340,29 @@ export const spanishExact: Record<string, string> = {
   "Revision history": "Historial de revisiones",
   "Create a new independent NDA draft": "Crear un nuevo borrador de NDA independiente",
   "CREATE CONTROLLED DRAFT": "CREAR BORRADOR CONTROLADO",
+  "Public navigation": "Navegación pública",
+  FIXED: "FIJO",
+  AERIAL: "AÉREO",
+  GROUND: "TERRESTRE",
+  DATA: "DATOS",
+  "DEMO ENVIRONMENT": "ENTORNO DE DEMOSTRACIÓN",
+  Analytics: "Analítica",
+  "A deterministic digital prototype of the operating system we are building.":
+    "Un prototipo digital determinista del sistema operativo que estamos construyendo.",
+  "Deterministic clock, replayable state, route interpolation, telemetry invariants, API and WebSocket transport.":
+    "Reloj determinista, estado reproducible, interpolación de rutas, invariantes de telemetría y transporte mediante API y WebSocket.",
+  "Deterministic NDVI demonstration using synthetic data. Farm, anomaly, soil readings and mission report are also synthetic or simulated.":
+    "Demostración determinista de NDVI con datos sintéticos. La explotación, la anomalía, las lecturas del suelo y el informe de misión también son sintéticos o simulados.",
+  "SENTINEL and ROVER_001 procedural representations are not evidence of physical prototypes.":
+    "Las representaciones procedurales de SENTINEL y ROVER_001 no constituyen evidencia de prototipos físicos.",
+  "NDVI processing capability exists in related technology; UP AI DOWN integration is planned, subject to reuse rights and technical integration.":
+    "Existe capacidad de procesamiento NDVI en tecnología relacionada; la integración en UP AI DOWN está planificada y sujeta a derechos de reutilización e integración técnica.",
+  SOFTWARE_WORKING: "SOFTWARE OPERATIVO",
+  DEMO_SIMULATION: "SIMULACIÓN DE DEMOSTRACIÓN",
+  CONCEPT: "CONCEPTO",
+  "RELATED TECHNOLOGY": "TECNOLOGÍA RELACIONADA",
+  "The temporary DEV control exists only when a private fragment is supplied and is removed from browser history immediately. It creates a normal, audited, time-limited session bound to this network and browser.":
+    "El control DEV temporal solo existe cuando se proporciona un fragmento privado y se elimina inmediatamente del historial del navegador. Crea una sesión normal, auditada, de duración limitada y vinculada a esta red y navegador.",
 };
 
 const spanishTerms: Array<[string, string]> = [
