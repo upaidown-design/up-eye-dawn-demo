@@ -70,6 +70,21 @@ export function decryptIp(payload: string, keyHex: string) {
   return Buffer.concat([decipher.update(Buffer.from(ciphertextHex, 'hex')), decipher.final()]).toString('utf8');
 }
 
+export function encryptSecret(value: string, keyHex: string, keyVersion = 1) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', Buffer.from(keyHex, 'hex'), iv);
+  const ciphertext = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
+  return [keyVersion, iv.toString('hex'), cipher.getAuthTag().toString('hex'), ciphertext.toString('hex')].join(':');
+}
+
+export function decryptSecret(payload: string, keyHex: string) {
+  const [, ivHex, tagHex, ciphertextHex] = payload.split(':');
+  if (!ivHex || !tagHex || !ciphertextHex) throw new Error('Invalid encrypted secret payload');
+  const decipher = createDecipheriv('aes-256-gcm', Buffer.from(keyHex, 'hex'), Buffer.from(ivHex, 'hex'));
+  decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
+  return Buffer.concat([decipher.update(Buffer.from(ciphertextHex, 'hex')), decipher.final()]).toString('utf8');
+}
+
 export function stableJson(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
@@ -103,7 +118,8 @@ export function invitationAllowsEmail(invitation: {intendedRecipientEmail?: stri
 
 export function base32Decode(input: string) {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  const clean = input.toUpperCase().replace(/[^A-Z2-7]/g, '');
+  const clean = input.toUpperCase().replace(/[\s=-]/g, '');
+  if (!clean || /[^A-Z2-7]/.test(clean)) throw new Error('Invalid base32');
   let bits = '';
   for (const character of clean) {
     const index = alphabet.indexOf(character);
@@ -113,6 +129,19 @@ export function base32Decode(input: string) {
   const bytes: number[] = [];
   for (let index = 0; index + 8 <= bits.length; index += 8) bytes.push(Number.parseInt(bits.slice(index, index + 8), 2));
   return Buffer.from(bytes);
+}
+
+export function base32Encode(input: Buffer) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = '';
+  for (const byte of input) bits += byte.toString(2).padStart(8, '0');
+  let output = '';
+  for (let index = 0; index < bits.length; index += 5) output += alphabet[Number.parseInt(bits.slice(index, index + 5).padEnd(5, '0'), 2)];
+  return output;
+}
+
+export function generateTotpSecret(bytes = 20) {
+  return base32Encode(randomBytes(bytes));
 }
 
 export function totp(secret: string, at = Date.now(), stepSeconds = 30) {

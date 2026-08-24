@@ -4,7 +4,7 @@
     "title": "New York investor meeting",
     "duration": "45 minutes",
     "status": "WORKING_BRIEF",
-    "owner": "UP-EYE-DAWN founding team"
+    "owner": "UP AI DOWN founding team"
   },
   "agenda": [
     {"time": "00–05", "title": "Conviction", "objective": "Open with the field-memory thesis and establish why fixed, aerial and ground evidence belong in one system."},
@@ -30,7 +30,7 @@
     {"step": "07", "screen": "Close", "message": "Ask which evidence gates would support the investor's diligence process."}
   ],
   "speech": {
-    "opening": "Agriculture has data, but it still lacks a persistent memory of the field. UP-EYE-DAWN is designed to connect autonomous observation, physical ground truth and learning over time.",
+    "opening": "Agriculture has data, but it still lacks a persistent memory of the field. UP AI DOWN is designed to connect autonomous observation, physical ground truth and learning over time.",
     "system": "Sentinel provides persistent fixed observation. The drone adds repeatable aerial coverage. The rover investigates selected locations and the soil probe anchors remote signals in physical measurements. The data layer preserves the evidence chain.",
     "truth": "Today we are showing a working deterministic software demo and approved concept imagery. We will distinguish those assets from physical validation, real integrated NDVI and production readiness.",
     "close": "Rather than asking you to accept an unsupported claim, we want to agree the evidence that would make this opportunity diligence-ready, who owns each proof point and when it can be delivered."
@@ -41,5 +41,28 @@
     "Would a field-validation milestone or a rights-cleared longitudinal dataset change your underwriting view?",
     "Who else should review the technical, agronomic and legal evidence?",
     "What is the clearest next step, owner and date?"
+  ],
+  "materials": [
+    {
+      "title": "UPAIDOWN Autonomous Farming",
+      "format": "PDF · 10 pages · Spanish",
+      "status": "INTERNAL_REVIEW",
+      "classification": "PRESENTATION_REFERENCE",
+      "note": "User-supplied visual deck. Image-only PDF; claims, product geometry and specifications require truth and ownership review before investor distribution."
+    },
+    {
+      "title": "UPAIDOWN Autonomous Agricultural Ecosystem",
+      "format": "PDF · 10 pages · English",
+      "status": "INTERNAL_REVIEW",
+      "classification": "PRESENTATION_REFERENCE",
+      "note": "User-supplied visual deck. Image-only PDF; autonomous-operation, proprietary-platform and hardware claims are not treated as validated evidence."
+    },
+    {
+      "title": "UPAIDOWN overview board · 19 August 2026",
+      "format": "JPEG · Spanish",
+      "status": "INTERNAL_REVIEW",
+      "classification": "VISUAL_REFERENCE",
+      "note": "Contact-sheet reference only. Contains historical WALL-AI/Sentinel naming and visible specifications that must not override the approved product truth."
+    }
   ]
 }

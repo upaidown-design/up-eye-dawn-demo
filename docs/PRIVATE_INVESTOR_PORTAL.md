@@ -21,7 +21,7 @@ The workflow records electronic acknowledgement evidence. It is not described as
 
 Public:
 
-- `/demo/preflight`
+- `/demo/`
 - `/demo/about-demo`
 - `/demo/transparency`
 - `/demo/access`
@@ -30,6 +30,7 @@ Public:
 
 Visitor-controlled:
 
+- `/demo/preflight`
 - `/demo/investor`
 - `/demo/investor-financials`
 - `/demo/mission-control`
@@ -41,6 +42,9 @@ Visitor-controlled:
 Administrator only:
 
 - `/demo/admin`
+- `/demo/admin/agenda`
+- `/demo/admin/tasks`
+- `/demo/admin/notes`
 - `/demo/admin/invitations`
 - `/demo/admin/visitors`
 - `/demo/admin/nda`
@@ -59,9 +63,17 @@ PostgreSQL schema `private_portal` persists:
 - `visitors`, `visitor_sessions`;
 - `nda_documents`, `nda_acceptances`;
 - `audit_events`, `email_deliveries`;
+- `project_events`, `project_tasks`, `project_notes`;
 - `schema_migrations`.
 
-The versioned migration is `infra/migrations/001_private_investor_portal.sql`. Application startup runs pending migrations transactionally. The access subsystem no longer uses demo memory.
+The base access migration is `infra/migrations/001_private_investor_portal.sql`; the operational workspace is added by `infra/migrations/002_admin_project_workspace.sql`; multi-jurisdiction NDA evidence fields are added by `infra/migrations/003_multijurisdiction_nda.sql`. Application startup runs pending migrations transactionally. The access and administrator workspace no longer use demo memory.
+
+The administrator control room combines two deliberately separate concerns:
+
+- project operations: dated agenda, task board, owners, priorities and persistent notes;
+- investor access governance: invitations, registration, visitors, NDA evidence, sessions and audit events.
+
+All workspace writes require an authenticated Owner/Admin session and the same CSRF and trusted-origin checks as invitation and visitor mutations. Changes are recorded in the security audit ledger. Records are archived through status changes rather than deleted from the interface.
 
 ## Invitation flow
 
@@ -89,14 +101,19 @@ Each acceptance is append-only and stores:
 
 - NDA ID/version and exact document SHA-256;
 - immutable document, privacy and recipient snapshot;
-- typed acknowledgement plus two independent confirmations;
+- registered address, signatory title and typed legal-name signature;
+- affirmative electronic-signature intent, electronic-record consent, NDA acceptance and privacy acknowledgement;
 - UTC timestamp and deterministic evidence SHA-256;
 - encrypted IP, HMAC IP fingerprint and masked IP;
 - user agent;
 - generated PDF bytes and PDF SHA-256;
 - email delivery state and optional revocation record.
 
-The PDF is generated from the stored acceptance snapshot and never includes a full IP. It contains the masked network evidence, document hash, version, recipient, timestamp and evidence identifier. Downloads re-check an active visitor or administrator session.
+The PDF is generated from the stored acceptance snapshot and never includes a full IP. It contains the jurisdiction profile, governing-law field, signature method, masked network evidence, document hash, version, recipient, timestamp and evidence identifier. Downloads re-check an active visitor or administrator session.
+
+Three workflow documents are seeded: the original generic draft, an EU/EEA legal-review draft and a United States legal-review draft. An administrator assigns one exact version when creating an invitation. The two jurisdiction profiles deliberately retain unresolved governing-law and company-detail fields and cannot be described as approved agreements until qualified counsel supplies and approves the final text.
+
+Firebase/Google Identity Platform is treated as a possible **email ownership verification** layer, not as the NDA evidence store or signature system. PostgreSQL remains authoritative for invitations, visitors, document snapshots, acceptances, sessions and audit evidence. External startup fails closed while `EMAIL_VERIFICATION_PROVIDER=NONE`; enabling a named provider also requires a completed, server-verified email-link/token integration.
 
 Manual approval follows `REGISTER -> NDA ACCEPTED -> PENDING_APPROVAL`. The pending browser context polls status without receiving confidential content. Approval marks the visitor active; the next status check rotates/creates the visitor session.
 
@@ -170,7 +187,8 @@ Retention values are configuration placeholders. No NDA evidence is automaticall
 1. Monitor pending approvals and individual registrations.
 2. Approve only identities expected for the meeting.
 3. Check active sessions and security events.
-4. Use `/demo/admin/meeting` for agenda, visit, presentation and speech.
+4. Use `/demo/admin/agenda` for dated events and `/demo/admin/meeting` for the presentation run, visit checklist and speech.
+5. Capture commitments in `/demo/admin/tasks` and decisions or investor signals in `/demo/admin/notes`.
 
 ### After a meeting
 
@@ -178,10 +196,17 @@ Retention values are configuration placeholders. No NDA evidence is automaticall
 2. Revoke individual visitors or sessions where access should end.
 3. Export the masked ledger if operationally required and record the export.
 4. Verify email/PDF evidence and backups according to the approved policy.
+5. Close or archive completed agenda items, tasks and working notes without deleting the audit trail.
 
 ### Network re-verification
 
 A network mismatch invalidates the active session. The browser receives a re-verification context and shows `/demo/access/reverify`. The visitor submits identity and acknowledgement again; the invitation registration count does not increase for the existing identity.
+
+The session is also bound to the browser user-agent fingerprint. Copying an HttpOnly cookie to a different client invalidates the session with `CLIENT_CHANGED`, creates a controlled re-verification context and records a security audit event.
+
+An invitation is not an investor password. A shared `MULTI_VISITOR` invitation creates a separate identity record for each new business email. A fresh registration context cannot reuse an email that is already registered under that invitation; it receives `IDENTITY_ALREADY_REGISTERED` and must use an administrator-controlled, email-verified recovery flow. In workflow-testing mode every newly created invitation forces manual administrator approval.
+
+Temporary administrator access uses `/demo/admin/login#dev=<private-token>`. The fragment is removed from browser history immediately and the button is rendered only when that private fragment exists. The backend checks enablement, expiry and the server-held token, then issues a normal audited admin session bound to the current client. The clean admin URL never displays a DEV bypass.
 
 ### Changing NDA
 
@@ -206,6 +231,7 @@ Before external use, implement encrypted PostgreSQL backups, restore drills, res
 
 - [ ] NDA approved by counsel
 - [ ] Privacy notice approved
+- [ ] Email ownership verification configured and server-verified
 - [ ] Company legal identity inserted
 - [ ] Authorised signatory confirmed
 - [ ] Retention policy approved
@@ -221,4 +247,4 @@ Before external use, implement encrypted PostgreSQL backups, restore drills, res
 - [ ] Trusted-proxy topology verified
 - [ ] Security, visitor, admin, mail, PDF and Playwright suites passed
 
-External startup fails closed when the legal/privacy/MFA/Secure-cookie gate is incomplete. Localhost deliberately does not send HSTS.
+External startup fails closed when the legal/privacy/email-verification/MFA/Secure-cookie gate is incomplete. Localhost deliberately does not send HSTS.

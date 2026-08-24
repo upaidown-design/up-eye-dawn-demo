@@ -2,14 +2,28 @@
   "version": "NDA-DRAFT-2026-08-18",
   "status": "DRAFT_FOR_WORKFLOW_TESTING",
   "title": "Confidentiality acknowledgement",
-  "disclosingParty": "UP-EYE-DAWN SL",
+  "disclosingParty": "UP AI DOWN SL",
   "notice": "WORKFLOW TEST ONLY — this draft has not been approved by legal counsel and must be replaced before external use.",
   "paragraphs": [
-    "The recipient wishes to review confidential business, technical, product, financial and commercial information relating to UP-EYE-DAWN for the sole purpose of evaluating a potential business or investment relationship.",
+    "The recipient wishes to review confidential business, technical, product, financial and commercial information relating to UP AI DOWN for the sole purpose of evaluating a potential business or investment relationship.",
     "The recipient will keep non-public information confidential, use it only for that evaluation, and disclose it only to professional advisers or representatives who need to know it and are subject to equivalent confidentiality duties.",
     "Confidential information does not include information that the recipient can demonstrate was already lawfully known, becomes public without breach, is received lawfully from a third party without duty of confidence, or is independently developed without use of the confidential information.",
     "If disclosure is required by law, the recipient will, where legally permitted, provide prompt notice and disclose only what is required.",
     "No intellectual-property licence, warranty, commitment to transact or representation about future performance is granted by access to the materials.",
     "The retention period, governing law, venue, confidentiality term, legal entity details and authorised signatory language require counsel approval before this document is used externally."
-  ]
+  ],
+  "translations": {
+    "es": {
+      "title": "Reconocimiento de confidencialidad",
+      "notice": "SOLO PRUEBA DEL FLUJO DE TRABAJO — este borrador no ha sido aprobado por un abogado y debe sustituirse antes de cualquier uso externo.",
+      "paragraphs": [
+        "El destinatario desea revisar información empresarial, técnica, de producto, financiera y comercial confidencial relativa a UP AI DOWN con la única finalidad de evaluar una posible relación comercial o de inversión.",
+        "El destinatario mantendrá confidencial la información no pública, la utilizará únicamente para dicha evaluación y solo la comunicará a asesores profesionales o representantes que necesiten conocerla y estén sujetos a obligaciones de confidencialidad equivalentes.",
+        "La información confidencial no incluye la información que el destinatario pueda demostrar que ya conocía lícitamente, que se haga pública sin incumplimiento, que reciba lícitamente de un tercero sin deber de confidencialidad o que desarrolle de forma independiente sin utilizar la información confidencial.",
+        "Si una ley exige la divulgación, el destinatario, cuando sea legalmente posible, lo notificará con prontitud y divulgará únicamente lo exigido.",
+        "El acceso a los materiales no concede licencia de propiedad intelectual, garantía, compromiso de transacción ni declaración sobre resultados futuros.",
+        "El plazo de conservación, la ley aplicable, la jurisdicción, el plazo de confidencialidad, los datos de la entidad legal y el lenguaje del firmante autorizado requieren aprobación jurídica antes de utilizar este documento externamente."
+      ]
+    }
+  }
 }

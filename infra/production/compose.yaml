@@ -1,0 +1,87 @@
+version: "2.4"
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    environment:
+      TLS_EMAIL: ${TLS_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: infra/docker/gateway.Dockerfile
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    expose:
+      - "8088"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8088/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 18
+    restart: unless-stopped
+    logging: *default-logging
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+    env_file:
+      - ${APP_ENV_FILE:-/etc/up-eye-dawn/app.env}
+    environment:
+      API_PORT: "4010"
+    expose:
+      - "4010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/api/v1/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 18
+    restart: unless-stopped
+    logging: *default-logging
+
+  postgres:
+    image: postgis/postgis:17-3.5-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}
+  postgres_data: {}

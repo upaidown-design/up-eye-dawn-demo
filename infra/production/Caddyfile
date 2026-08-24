@@ -1,0 +1,23 @@
+{
+  email {$TLS_EMAIL}
+  admin off
+}
+
+(ued_proxy) {
+  encode zstd gzip
+  header {
+    -Server
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "no-referrer"
+  }
+  reverse_proxy gateway:8088
+}
+
+upaidown.com, www.upaidown.com, demo.upaidown.com {
+  import ued_proxy
+}
+
+upaidown.app, www.upaidown.app, upaidown.pro, www.upaidown.pro, upaidown.es, www.upaidown.es {
+  redir https://upaidown.com{uri} permanent
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily UP AI DOWN off-site mail backup
+
+[Timer]
+OnCalendar=*-*-* 04:17:00 UTC
+Persistent=true
+RandomizedDelaySec=900
+Unit=upaidown-mail-offsite-backup.service
+
+[Install]
+WantedBy=timers.target

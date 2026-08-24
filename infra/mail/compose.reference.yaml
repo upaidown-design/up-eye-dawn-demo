@@ -1,0 +1,66 @@
+# Production architecture reference. Do not expose this stack until the checklist
+# in README.md is complete: static IP, PTR, DNS, relay, TLS, backups and security tests.
+services:
+  stalwart:
+    image: stalwartlabs/stalwart:v0.16.0
+    restart: unless-stopped
+    hostname: ${MAIL_HOSTNAME:-mail.upaidown.com}
+    volumes:
+      - stalwart-data:/opt/stalwart
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    ports:
+      - "25:25"       # inbound SMTP only; GCP blocks external outbound TCP/25
+      - "465:465"     # authenticated SMTP over TLS
+      - "587:587"     # authenticated submission / outbound relay
+      - "993:993"     # IMAP over TLS for Roundcube and desktop clients
+      - "4190:4190"   # ManageSieve
+    expose:
+      - "8080"        # JMAP and management HTTP; never bind directly to the public host
+    networks: [mail_private]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  roundcube:
+    image: roundcube/roundcubemail:1.7.3-apache
+    restart: unless-stopped
+    depends_on: [stalwart]
+    environment:
+      ROUNDCUBEMAIL_DEFAULT_HOST: ssl://${MAIL_HOSTNAME:-mail.upaidown.com}
+      ROUNDCUBEMAIL_DEFAULT_PORT: "993"
+      ROUNDCUBEMAIL_SMTP_SERVER: tls://${MAIL_HOSTNAME:-mail.upaidown.com}
+      ROUNDCUBEMAIL_SMTP_PORT: "587"
+      ROUNDCUBEMAIL_DB_TYPE: sqlite
+      ROUNDCUBEMAIL_DES_KEY: ${ROUNDCUBE_DES_KEY:?set ROUNDCUBE_DES_KEY}
+    volumes:
+      - roundcube-db:/var/roundcube/db
+      - roundcube-config:/var/roundcube/config
+    expose: ["80"]
+    networks: [mail_private]
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    depends_on: [roundcube, stalwart]
+    ports: ["80:80", "443:443"]
+    environment:
+      MAIL_HOSTNAME: ${MAIL_HOSTNAME:-mail.upaidown.com}
+      JMAP_HOSTNAME: ${JMAP_HOSTNAME:-jmap.upaidown.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [mail_private]
+
+networks:
+  mail_private:
+    driver: bridge
+
+volumes:
+  stalwart-data:
+  roundcube-db:
+  roundcube-config:
+  caddy-data:
+  caddy-config:

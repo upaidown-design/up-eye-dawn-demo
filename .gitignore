@@ -11,6 +11,7 @@ coverage/
 .env
 .env.*
 !.env.example
+infra/production/app.env
 *.local
 *.log
 
@@ -19,6 +20,7 @@ data/generated/*
 !data/generated/.gitkeep
 test-results/
 playwright-report/
+graphify-out/
 
 # Editor and operating-system files
 .DS_Store

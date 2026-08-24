@@ -1,0 +1,76 @@
+name: up-eye-dawn-e2e
+services:
+  gateway:
+    build: {context: ., dockerfile: infra/docker/gateway.Dockerfile}
+    ports: ["127.0.0.1:8090:8088"]
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck: {test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8088/demo/admin/login"], interval: 5s, timeout: 2s, retries: 20}
+
+  api:
+    build: {context: ., dockerfile: infra/docker/api.Dockerfile}
+    ports: ["127.0.0.1:4011:4010"]
+    environment:
+      API_PORT: 4010
+      DATABASE_URL: postgresql://ued:ued_test@postgres:5432/ued_test
+      REDIS_URL: redis://redis:6379
+      DEMO_LOCAL_ONLY: "true"
+      PUBLIC_BASE_URL: http://127.0.0.1:8090
+      EXTERNAL_PORTAL_ENABLED: "false"
+      WORKFLOW_TEST_PORTAL_ENABLED: "true"
+      EMAIL_VERIFICATION_PROVIDER: NONE
+      ADMIN_EMAIL: e2e-owner@example.invalid
+      ADMIN_PASSWORD_HASH: scrypt:f3aedcced133a559d394f2e94dd1798b:a8506ec550d85fde3cd86d07207c3b3f25e5a5f34b209ab369652e5cf944d565d0c82b4868c62311795406ab44aa503eadf6efe39f510197bfe7b09f731a84e2
+      ADMIN_MFA_REQUIRED: "false"
+      ADMIN_SESSION_IDLE_MINUTES: 30
+      ADMIN_SESSION_MAX_HOURS: 8
+      ADMIN_MFA_ENCRYPTION_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      SESSION_SECRET: e2e-session-secret-only-never-use-in-production-2026
+      INVITATION_TOKEN_HMAC_SECRET: e2e-invitation-secret-only-never-use-in-production-2026
+      IP_FINGERPRINT_SECRET: e2e-ip-fingerprint-only-never-use-in-production-2026
+      IP_ENCRYPTION_KEY: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      IP_ENCRYPTION_KEY_VERSION: 1
+      VISITOR_SESSION_IDLE_MINUTES: 120
+      VISITOR_SESSION_MAX_HOURS: 72
+      COOKIE_SECURE: "false"
+      NDA_LEGAL_STATUS: DRAFT_FOR_WORKFLOW_TESTING
+      PRIVACY_LEGAL_STATUS: DRAFT
+      NDA_RETENTION_NOTICE: E2E workflow only
+      PRIVACY_CONTACT_EMAIL: privacy@example.invalid
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_FROM: UP AI DOWN E2E <nda@example.invalid>
+      SMTP_ARCHIVE: archive@example.invalid
+      TEMP_ADMIN_DEV_LOGIN_ENABLED: "false"
+      DEFAULT_INVITE_TOKEN: ""
+    healthcheck: {test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/api/v1/health/live"], interval: 5s, timeout: 2s, retries: 20}
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      mailpit: {condition: service_started}
+
+  worker:
+    build: {context: ., dockerfile: infra/docker/api.Dockerfile}
+    command: ["node", "--import", "tsx", "apps/worker/src/worker.ts"]
+    depends_on: {redis: {condition: service_healthy}}
+
+  postgres:
+    image: postgis/postgis:17-3.5-alpine
+    platform: linux/amd64
+    environment: {POSTGRES_USER: ued, POSTGRES_PASSWORD: ued_test, POSTGRES_DB: ued_test}
+    volumes: ["ued_e2e_pg:/var/lib/postgresql/data"]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U ued -d ued_test"], interval: 3s, timeout: 3s, retries: 20}
+
+  redis:
+    image: redis:8.2.1-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 3s, timeout: 2s, retries: 20}
+
+  mailpit:
+    image: axllent/mailpit:v1.27.7
+    ports: ["127.0.0.1:8026:8025"]
+
+volumes: {ued_e2e_pg: {}}
