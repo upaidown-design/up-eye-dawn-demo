@@ -1,4 +1,7 @@
-import nodemailer from 'nodemailer';
+import {createRequire} from 'node:module';
+
+const requireFromApi = createRequire(new URL('../apps/api/package.json', import.meta.url));
+const nodemailer = requireFromApi('nodemailer');
 
 const required = (name) => {
   const value = process.env[name]?.trim();

@@ -1,6 +1,6 @@
 # UP-EYE-DAWN Google Cloud production runbook
 
-Status: production runtime, DNS and HTTPS are active at reserved IPv4 `34.77.12.150`. External NDA release remains legally blocked while the bundled NDA and privacy notice are drafts.
+Status: production runtime, DNS and HTTPS are active at reserved IPv4 `34.77.12.150`. A controlled workflow-test portal may be opened while the bundled NDA and privacy notice remain visibly marked as drafts; this does not change their legal status.
 
 ## Target
 
@@ -23,12 +23,12 @@ gcloud config configurations activate up-eye-dawn
 
 The provisioning script prints the reserved public IPv4 address. DonDominio is configured as follows:
 
-| Host | Type | Value |
-|---|---|---|
-| `origin` for each domain | `A` | `34.77.12.150` |
-| `@` for each domain | `ANAME` | corresponding `origin` hostname |
-| `www` for each domain | `CNAME` | corresponding `origin` hostname |
-| `demo` on `upaidown.com` | `A` | `34.77.12.150` |
+| Host                     | Type    | Value                           |
+| ------------------------ | ------- | ------------------------------- |
+| `origin` for each domain | `A`     | `34.77.12.150`                  |
+| `@` for each domain      | `ANAME` | corresponding `origin` hostname |
+| `www` for each domain    | `CNAME` | corresponding `origin` hostname |
+| `demo` on `upaidown.com` | `A`     | `34.77.12.150`                  |
 
 The rollout TTL is 10 minutes, the minimum exposed by DonDominio. Unrelated TXT, SPF, mail, webmail, FTP and database records were preserved.
 
@@ -66,6 +66,7 @@ MX, SPF, DKIM, DMARC, MTA-STS and TLS-RPT are published. Gmail accepted the cont
 - The VM disk has a daily `03:00 UTC` snapshot schedule with 14-day retention in `europe-west1`.
 - `upaidown-mail-offsite-backup.timer` and `upaidown-database-offsite-backup.timer` create separate encrypted GCS backups daily. Each run performs a non-destructive restore: mail is decrypted and structurally verified; PostgreSQL is restored into a temporary isolated database, checked and removed.
 - The NDA jurisdiction drafts and privacy notice remain unapproved; `EXTERNAL_PORTAL_ENABLED` stays `false` until counsel approval, verified email ownership, MFA and production SMTP are configured.
+- Controlled investor testing uses `WORKFLOW_TEST_PORTAL_ENABLED=true`. Set `WORKFLOW_TEST_FORCE_MANUAL_APPROVAL=false` to let an administrator choose immediate activation per invitation, while preserving the draft/legal-review labels and complete acceptance evidence.
 
 ## Required release gates
 

@@ -115,12 +115,12 @@ export const spanishExact: Record<string, string> = {
     "Las invitaciones, los visitantes individuales, las evidencias de NDA, las sesiones activas y los materiales de reunión se gestionan en un espacio de trabajo auditable.",
   "ADMINISTRATOR ACCESS": "ACCESO DE ADMINISTRADOR",
   "Sign in": "Iniciar sesión",
-  "Use administrator credentials. Production access requires MFA.":
-    "Utiliza credenciales de administrador. El acceso de producción requiere MFA.",
+  "Use administrator credentials. Enter an authenticator code only if MFA is enabled on your account.":
+    "Utiliza tus credenciales de administrador. Introduce el código del autenticador solo si tu cuenta tiene MFA activado.",
   Email: "Correo electrónico",
   Password: "Contraseña",
   "Authenticator code": "Código del autenticador",
-  "when enabled": "cuando esté habilitado",
+  "optional unless MFA is enabled": "opcional salvo que MFA esté activado",
   "VERIFYING…": "VERIFICANDO…",
   "ENTER PRIVATE PORTAL": "ENTRAR AL PORTAL PRIVADO",
   "The credentials or verification code are incorrect.":
@@ -177,7 +177,31 @@ export const spanishExact: Record<string, string> = {
   "Disclosing party:": "Parte divulgadora:",
   "Governing law:": "Ley aplicable:",
   "Privacy and access record": "Registro de privacidad y acceso",
+  "The invitation may be shared, but every person receives an independent record. Access is never inherited from another visitor’s password, cookie or email address.":
+    "La invitación puede compartirse, pero cada persona recibe un registro independiente. El acceso nunca se hereda de la contraseña, las cookies o el correo de otro visitante.",
+  "DRAFT FOR WORKFLOW TESTING": "BORRADOR PARA PRUEBAS DEL FLUJO",
+  "WORKFLOW TEST ONLY — this draft has not been approved by legal counsel and must be replaced before external use.":
+    "SOLO PRUEBA DEL FLUJO — este borrador no ha sido aprobado por un abogado y debe sustituirse antes de cualquier uso externo.",
+  "A single-use sign-in link was sent. Open it in this same browser to continue to the assigned NDA.":
+    "Se ha enviado un enlace de acceso de un solo uso. Ábrelo en este mismo navegador para continuar con el NDA asignado.",
+  "The link expires and does not replace the NDA, administrator approval or the client-bound portal session.":
+    "El enlace caduca y no sustituye el NDA, la aprobación del administrador ni la sesión del portal vinculada al dispositivo.",
+  "Review the assigned agreement, provide your business identity and apply your typed legal name as an electronic signature.":
+    "Revisa el acuerdo asignado, facilita tu identidad profesional y utiliza tu nombre legal escrito como firma electrónica.",
+  "I intend my typed name to be my electronic signature and consent to receive and retain this agreement and its evidence record electronically.":
+    "Declaro que mi nombre escrito constituye mi firma electrónica y consiento recibir y conservar electrónicamente este acuerdo y su registro de evidencias.",
+  "SIGNING & RECORDING…": "FIRMANDO Y REGISTRANDO…",
+  "SIGN NDA & CONTINUE": "FIRMAR EL NDA Y CONTINUAR",
+  "The system stores the assigned document version and hash, signatory data, affirmative intent, UTC timestamp, security evidence and an exact PDF copy. This is a simple electronic-signature workflow, not an advanced or qualified electronic signature.":
+    "El sistema conserva la versión y el hash del documento asignado, los datos del firmante, su consentimiento expreso, la marca temporal UTC, la evidencia de seguridad y una copia PDF exacta. Es un flujo de firma electrónica simple, no una firma avanzada ni cualificada.",
+  "Your acknowledgement and independent secure session have been recorded. Email delivery:":
+    "Tu reconocimiento y tu sesión segura independiente han quedado registrados. Entrega por correo:",
+  "Access remains bound to this browser session and network context. IP alone is never treated as identity.":
+    "El acceso permanece vinculado a esta sesión del navegador y a su contexto de red. La IP nunca se considera por sí sola una identidad.",
   "ADMIN CONTROL ROOM": "CENTRO DE CONTROL ADMINISTRATIVO",
+  "PRIVATE CONTROL ROOM": "CENTRO DE CONTROL PRIVADO",
+  "The project, meeting and private investor flow in one place.":
+    "El proyecto, la reunión y el flujo privado de inversores en un solo lugar.",
   "Project control": "Control del proyecto",
   Agenda: "Agenda",
   Tasks: "Tareas",
@@ -317,7 +341,7 @@ export const spanishExact: Record<string, string> = {
   Notice: "Aviso",
   Paragraphs: "Cláusulas",
   "CREATE DRAFT": "CREAR BORRADOR",
-  "LEGAL REVIEW": "REVISIÓN LEGAL",
+  "LEGAL REVIEW": "REVISIÓN JURÍDICA",
   APPROVED: "APROBADO",
   DRAFT: "BORRADOR",
   "Mail server": "Servidor de correo",
@@ -328,17 +352,21 @@ export const spanishExact: Record<string, string> = {
   Contact: "Contacto",
   "Next follow-up": "Próximo seguimiento",
   "ADD THREAD": "AÑADIR CONVERSACIÓN",
-  "Spanish controlled translation · Español": "Traducción controlada al español",
+  "Spanish controlled translation · Español":
+    "Traducción controlada al español",
   "Spanish title": "Título en español",
   "Spanish legal notice": "Aviso jurídico en español",
-  "Spanish agreement text · separate paragraphs with a blank line": "Texto del acuerdo en español · separa los párrafos con una línea en blanco",
+  "Spanish agreement text · separate paragraphs with a blank line":
+    "Texto del acuerdo en español · separa los párrafos con una línea en blanco",
   "Spanish agreement text": "Texto del acuerdo en español",
-  "Agreement text · separate paragraphs with a blank line": "Texto del acuerdo · separa los párrafos con una línea en blanco",
+  "Agreement text · separate paragraphs with a blank line":
+    "Texto del acuerdo · separa los párrafos con una línea en blanco",
   "Visible legal notice": "Aviso jurídico visible",
   "Required revision note": "Nota de revisión obligatoria",
   "SAVE NEW REVISION": "GUARDAR NUEVA REVISIÓN",
   "Revision history": "Historial de revisiones",
-  "Create a new independent NDA draft": "Crear un nuevo borrador de NDA independiente",
+  "Create a new independent NDA draft":
+    "Crear un nuevo borrador de NDA independiente",
   "CREATE CONTROLLED DRAFT": "CREAR BORRADOR CONTROLADO",
   "Public navigation": "Navegación pública",
   FIXED: "FIJO",

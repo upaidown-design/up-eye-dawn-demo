@@ -395,7 +395,10 @@ export function AdminLogin() {
         <div>
           <p className="secure-kicker">ADMINISTRATOR ACCESS</p>
           <h2>Sign in</h2>
-          <p>Use administrator credentials. Production access requires MFA.</p>
+          <p>
+            Use administrator credentials. Enter an authenticator code only if
+            MFA is enabled on your account.
+          </p>
         </div>
         {devToken && (
           <button
@@ -430,7 +433,7 @@ export function AdminLogin() {
             />
           </label>
           <label>
-            Authenticator code <small>when enabled</small>
+            Authenticator code <small>optional unless MFA is enabled</small>
             <input
               inputMode="numeric"
               autoComplete="one-time-code"
@@ -1173,7 +1176,16 @@ export function AdminPortal() {
       formElement.reset();
   };
   if (!briefing || !dashboard || !workspace || !team || !security)
-    return <Loading text={error || "Loading private control room…"} />;
+    return (
+      <main className="admin-portal admin-portal-loading">
+        <AdminNav logout={logout} />
+        <section className="admin-loading-context" aria-live="polite">
+          <p className="secure-kicker">PRIVATE CONTROL ROOM</p>
+          <h2>The project, meeting and private investor flow in one place.</h2>
+          <Loading text={error || "Loading private control room…"} />
+        </section>
+      </main>
+    );
   return (
     <main
       className={`admin-portal ${team.current.role === "VIEWER" ? "viewer" : ""}`}
