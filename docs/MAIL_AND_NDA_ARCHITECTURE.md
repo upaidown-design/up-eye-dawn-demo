@@ -29,11 +29,8 @@ The web application never receives mailbox credentials. The API holds a least-pr
 
 ## Remaining production gates
 
-- Choose/provision the mail VM and outbound relay; no purchase has been made automatically.
-- Set static IP and PTR, then publish verified MX/SPF/DKIM/DMARC/MTA-STS/TLS-RPT records.
-- Secure SMTP/IMAP certificates, mailbox/admin authentication and rate limits.
-- Create off-host encrypted backups and prove restoration.
-- Obtain counsel-approved NDA variants and privacy/retention policy.
-- Run deliverability, open-relay, TLS, JMAP authorization and end-to-end NDA delivery tests.
+Mail commissioning, DNS, TLS, open-relay checks, SMTP/IMAP application integration, Gmail transport acceptance and the encrypted off-site restore drill are complete. DMARC and MTA-STS remain intentionally in monitoring/testing modes until reports and delivery behavior justify enforcement.
+
+The remaining release gates are legal and identity controls: obtain counsel-approved NDA variants and privacy/retention policy, enroll every active owner/admin in MFA, enable the approved email-ownership provider, disable temporary developer access and complete mailbox-side placement checks. No application control may represent these approvals as complete automatically.
 
 Official implementation references: [Google Cloud sending mail](https://docs.cloud.google.com/compute/docs/tutorials/sending-mail), [Google Cloud PTR records](https://docs.cloud.google.com/compute/docs/instances/create-ptr-record), [Stalwart Docker installation](https://www.stalwart.email/docs/install/platform/docker/), [Stalwart DNS](https://www.stalwart.email/docs/install/dns/), [Stalwart JMAP/HTTP](https://www.stalwart.email/docs/http/), and [Roundcube Docker](https://github.com/roundcube/roundcubemail-docker).

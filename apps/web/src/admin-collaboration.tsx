@@ -3,6 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {QRCodeSVG} from 'qrcode.react';
 import {portalApi} from './portal-api';
+import {currentLocale} from './i18n';
 
 export type TeamMember = {id: string; email: string; display_name: string; role: 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER'; status: string; mfa_enabled: boolean; created_at: string; last_login_at: string | null; disabled_at: string | null};
 export type TeamInvitation = {id: string; email: string; display_name: string; role: string; status: string; created_at: string; expires_at: string};
@@ -16,7 +17,7 @@ export type CrmContact = {id: string; organisation_id: string; organisation_name
 export type MaterialItem = {id: string; title: string; material_type: string; version: string; language: string; classification: string; status: string; provenance: string; owner_name: string | null; gcs_object: string | null; external_url: string | null; approval_note: string | null; approved_by_name: string | null; notes: string; updated_at: string};
 
 const label = (value: string) => value.replaceAll('_', ' ');
-const when = (value?: string | null) => value ? new Date(value).toLocaleString() : '—';
+const when = (value?: string | null) => value ? new Date(value).toLocaleString(currentLocale()) : '—';
 const Badge = ({value}: {value: string}) => <em className={`portal-status ${value.toLowerCase()}`}>{label(value)}</em>;
 
 export function TeamView({team, reload, setError}: {team: Team; reload: () => Promise<void>; setError: (value: string) => void}) {
@@ -375,4 +376,3 @@ export function MaterialsView({role}: {role: string}) {
     </section>
   );
 }
-

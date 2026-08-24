@@ -1,5 +1,5 @@
 {
-  "version": "NDA-EU-LEGAL-REVIEW-2026-08-21",
+  "version": "NDA-EU-LEGAL-REVIEW-2026-08-24",
   "status": "LEGAL_REVIEW",
   "jurisdiction": "EU_EEA",
   "governingLaw": "TO_BE_SELECTED_BY_COUNSEL",
@@ -16,5 +16,21 @@
     "No intellectual-property licence, product warranty, investment commitment or obligation to proceed is created by disclosure of information. Information is provided for evaluation and may be incomplete or forward-looking.",
     "The confidentiality period, governing law, competent courts and complete registered particulars of the disclosing party are intentionally not asserted in this workflow draft and must be completed by qualified counsel before approval.",
     "By applying an electronic signature, the recipient confirms an intention to be bound by the approved agreement assigned to the invitation and consents to receiving and retaining the agreement and evidence record electronically."
-  ]
+  ],
+  "translations": {
+    "es": {
+      "title": "Acuerdo de confidencialidad para inversores de la UE/EEE — borrador para revisión jurídica",
+      "notice": "SE REQUIERE REVISIÓN JURÍDICA — un abogado debe aprobar la ley aplicable, la jurisdicción, los datos societarios, el plazo y la redacción definitiva antes de cualquier uso externo.",
+      "paragraphs": [
+        "El destinatario desea recibir información empresarial, técnica, de producto, financiera y comercial no pública únicamente para evaluar una posible inversión o relación comercial con la parte divulgadora.",
+        "El destinatario mantendrá segura la información confidencial, la utilizará únicamente para dicha evaluación y solo la comunicará a asesores o representantes que necesiten conocerla y estén sujetos a obligaciones de confidencialidad al menos igual de protectoras que este acuerdo.",
+        "La información confidencial no incluye la información que el destinatario pueda demostrar que conocía lícitamente sin restricciones, que se haga pública sin incumplimiento, que reciba lícitamente de un tercero sin deber de confidencialidad o que desarrolle de forma independiente sin utilizar la información confidencial.",
+        "Si una ley o autoridad competente exige la divulgación, el destinatario, cuando sea legalmente posible, lo notificará con prontitud y divulgará únicamente la información mínima exigida.",
+        "Previa solicitud escrita, el destinatario devolverá o destruirá de forma segura el material confidencial, salvo las copias conservadas por obligación legal, normas profesionales o procedimientos automáticos de copia de seguridad, que seguirán protegidas.",
+        "La divulgación de información no concede licencia de propiedad intelectual, garantía de producto, compromiso de inversión ni obligación de continuar. La información se facilita para su evaluación y puede ser incompleta o contener previsiones.",
+        "El plazo de confidencialidad, la ley aplicable, los tribunales competentes y los datos registrales completos de la parte divulgadora no se afirman deliberadamente en este borrador de flujo de trabajo y deberán ser completados por un abogado cualificado antes de su aprobación.",
+        "Al aplicar una firma electrónica, el destinatario confirma su intención de quedar obligado por el acuerdo aprobado asignado a la invitación y consiente en recibir y conservar electrónicamente el acuerdo y el registro de evidencias."
+      ]
+    }
+  }
 }

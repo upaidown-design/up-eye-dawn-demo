@@ -43,6 +43,7 @@ import {
 } from "./access-control";
 import { AdminRecoveryPage, TeamJoinPage } from "./admin-collaboration";
 import { PublicHome } from "./public-home";
+import { LanguageSwitcher, useLanguage } from "./i18n";
 const FieldScene3D = lazy(() =>
   import("./field-scene-3d").then((module) => ({
     default: module.FieldScene3D,
@@ -784,7 +785,7 @@ export function App() {
   const nav = useNavigate();
   const location = useLocation();
   const { s, connected, command } = useSimulation();
-  const [locale, setLocale] = useState<"en" | "es">("en");
+  const { language: locale } = useLanguage();
   const t = locale === "en" ? en : es;
   const isolated =
     location.pathname === "/" ||
@@ -817,6 +818,7 @@ export function App() {
   );
   return (
     <>
+      {isolated && <LanguageSwitcher />}
       {!isolated && (
         <header>
           <Link to="/" className="wordmark">
@@ -834,9 +836,7 @@ export function App() {
               {connected ? "CONNECTED" : "RECONNECTING"}
             </span>
             <b>{truth.demo_disclosures.environment}</b>
-            <button onClick={() => setLocale(locale === "en" ? "es" : "en")}>
-              {locale.toUpperCase()}
-            </button>
+            <LanguageSwitcher compact />
           </div>
         </header>
       )}

@@ -34,24 +34,25 @@ The rollout TTL is 10 minutes, the minimum exposed by DonDominio. Unrelated TXT,
 
 ## Transactional mail
 
-The production sender is reserved as `nda@upaidown.com`. Use one real mailbox for authenticated SMTP and create `privacy@upaidown.com` plus `nda-archive@upaidown.com` as aliases where the DonDominio plan permits it. The visitor is the direct recipient; the archive is sent as BCC and is therefore not disclosed.
+The commissioned mail server is isolated at `82.223.44.126`; it provides Postfix, Dovecot, OpenDKIM, Fail2Ban and Roundcube. The application uses authenticated STARTTLS submission and read-only IMAP. The visitor is the direct recipient; the archive is sent as BCC and is therefore not disclosed. Webmail is available at `https://webmail.upaidown.com`.
 
-DonDominio requires a mail or hosting plan before a mailbox can be created. Do not purchase a plan automatically. Once the plan and mailbox exist, apply the credentials without putting the password in shell history:
+To rotate the application mailbox credential without putting the password in shell history:
 
 ```bash
 read -s SMTP_PASSWORD_VALUE
 printf %s "$SMTP_PASSWORD_VALUE" | pnpm gcp:smtp:configure -- \
   --password-stdin \
-  --user nda@upaidown.com \
-  --archive nda-archive@upaidown.com \
+  --host mail.upaidown.com \
+  --user investors@upaidown.com \
+  --archive investors@upaidown.com \
   --reply-to privacy@upaidown.com \
   --apply-vm
 unset SMTP_PASSWORD_VALUE
 ```
 
-This creates a new `ued-production-env` version in Secret Manager, configures authenticated STARTTLS on `smtp.dondominio.com:587`, copies the complete environment to the VM with mode `0600`, and restarts the application service. It never prints the password.
+This creates a new `ued-production-env` version in Secret Manager, configures authenticated STARTTLS on port 587 and IMAP over TLS on port 993, copies the complete environment to the VM with mode `0600`, and restarts the application service. It never prints the password.
 
-After DonDominio activates mail, verify that MX, SPF, DKIM and DMARC match the provider's current control-panel values. Preserve the existing web records and do not create a second SPF record. External investor access remains disabled until a real NDA delivery reaches both the test recipient and the archive mailbox.
+MX, SPF, DKIM, DMARC, MTA-STS and TLS-RPT are published. Gmail accepted the controlled external transport test on 2026-08-24; placement still requires inbox-side observation. DMARC and MTA-STS remain in monitoring/testing modes until reports support enforcement.
 
 ## Security model
 
@@ -63,6 +64,7 @@ After DonDominio activates mail, verify that MX, SPF, DKIM and DMARC match the p
 - PostgreSQL is reachable only inside the Docker network.
 - HTTPS certificates and redirects are managed by Caddy after DNS propagation.
 - The VM disk has a daily `03:00 UTC` snapshot schedule with 14-day retention in `europe-west1`.
+- `upaidown-mail-offsite-backup.timer` and `upaidown-database-offsite-backup.timer` create separate encrypted GCS backups daily. Each run performs a non-destructive restore: mail is decrypted and structurally verified; PostgreSQL is restored into a temporary isolated database, checked and removed.
 - The NDA jurisdiction drafts and privacy notice remain unapproved; `EXTERNAL_PORTAL_ENABLED` stays `false` until counsel approval, verified email ownership, MFA and production SMTP are configured.
 
 ## Required release gates
@@ -71,7 +73,7 @@ After DonDominio activates mail, verify that MX, SPF, DKIM and DMARC match the p
 2. Approve privacy, retention and controller details.
 3. Configure administrator TOTP and require MFA.
 4. Server-verify the configured Google Identity Platform/Firebase email-link authentication.
-5. Configure an approved transactional SMTP provider and archive mailbox.
+5. Confirm mailbox-side receipt/placement and keep monitoring DMARC/TLS reports.
 6. Create production invitations individually; never ship a default invitation token.
 7. Test registration, shared-link use in a second browser, IP-change re-verification, NDA PDF delivery, revocation and audit export.
 
@@ -80,6 +82,7 @@ After DonDominio activates mail, verify that MX, SPF, DKIM and DMARC match the p
 ```bash
 gcloud compute ssh ued-prod-01 --zone=europe-west1-b --tunnel-through-iap
 sudo systemctl status up-eye-dawn
+sudo systemctl status upaidown-mail-offsite-backup.timer upaidown-database-offsite-backup.timer
 sudo ued-compose --env-file /etc/up-eye-dawn/app.env -f /opt/up-eye-dawn/current/infra/production/compose.yaml ps
 sudo ued-compose --env-file /etc/up-eye-dawn/app.env -f /opt/up-eye-dawn/current/infra/production/compose.yaml logs --tail=200
 ```

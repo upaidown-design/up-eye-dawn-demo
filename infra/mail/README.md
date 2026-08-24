@@ -23,9 +23,13 @@ Certificates for `mail.upaidown.com`, `webmail.upaidown.com` and `mta-sts.upaido
 2. PTR resolves to `server.aiworking.pro`, which resolves forward to the same IP. The branded canonical client hostname remains `mail.upaidown.com`.
 3. SMTP submission and IMAP require authenticated TLS; SMTP port 25 remains available for inbound MX delivery and open-relay tests fail closed.
 4. TLS covers SMTP, IMAP, webmail and MTA-STS. Certificate renewal has passed staging dry runs for both certificate lineages.
-5. Daily local backups, checksums and service monitoring are active. An off-host encrypted restore drill remains a production follow-up.
+5. Daily local backups and checksums are active. The application VM retrieves the latest archive through a forced-command, key-only SSH identity, encrypts it with AES-256/PBKDF2 using a key held in Secret Manager, uploads it to a private versioned GCS bucket and performs a non-destructive restore drill on every run.
 6. The application Secret Manager version contains `SMTP_*`, `MAIL_WEBMAIL_URL` and `MAIL_IMAP_*`; the React frontend never receives mailbox credentials.
-7. A production smoke test verifies authenticated submission, DKIM signing and read-only IMAP visibility. A controlled delivery test to an independent external mailbox is still required before relying on deliverability for an investor NDA.
+7. Production smoke tests verify authenticated submission, DKIM signing and read-only IMAP visibility. On 2026-08-24 Gmail accepted the controlled external test over TLS 1.3 with final SMTP status `250 2.0.0`; inbox/spam placement still requires mailbox-side observation.
+
+## Off-site backup
+
+`upaidown-mail-offsite-backup.timer` runs daily on `ued-prod-01`. The source server key is restricted to `/usr/local/sbin/export-upaidown-mail-backup`; it cannot open an interactive shell. Objects are stored under `gs://project-6ec58af7-91e9-4c25-870-ued-backups/mail/YYYY/MM/DD/`. The bucket enforces public-access prevention, uniform access, versioning, a 30-day retention period and lifecycle cleanup. The encryption key is `ued-mail-backup-encryption-key` in Secret Manager and is not stored in the repository.
 
 ## Production DNS names
 

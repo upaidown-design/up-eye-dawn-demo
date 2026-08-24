@@ -19,11 +19,13 @@ async function isolatedClient(name: string, ip = '198.51.100.10', storageState?:
   });
 }
 
-async function registerVisitor(client: APIRequestContext, token: string, email: string, fullName: string) {
+async function registerVisitor(client: APIRequestContext, token: string, email: string, fullName: string, language: 'en' | 'es' = 'en') {
   await body(await client.post('/api/v1/access/invitations/prepare', {data: {token}}), 200);
-  const document = await body(await client.get('/api/v1/access/document'), 200) as Record<string, unknown>;
+  const document = await body(await client.get(`/api/v1/access/document?lang=${language}`), 200) as Record<string, unknown>;
   expect(document.status).toBe('DRAFT_FOR_WORKFLOW_TESTING');
   expect((document.privacy as {legalStatus: string}).legalStatus).toBe('DRAFT');
+  expect(document.language).toBe(language);
+  if (language === 'es') expect(document.title).toBe('Reconocimiento de confidencialidad');
   expect((await client.post('/api/v1/access/email/start', {data: {email}})).status()).toBe(503);
   return body(await client.post('/api/v1/access/register', {data: {
     fullName,
@@ -36,6 +38,7 @@ async function registerVisitor(client: APIRequestContext, token: string, email: 
     ndaConfirmed: true,
     privacyConfirmed: true,
     signatureIntentConfirmed: true,
+    language,
   }}), 200) as Promise<Record<string, unknown>>;
 }
 
@@ -159,7 +162,7 @@ test('private portal workflows enforce identity, permissions, NDA and immutable 
   const investorToken = invitationToken(investorInvitation.shareUrl);
 
   const visitorOne = await isolatedClient('visitor-one', '203.0.113.10');
-  const firstRegistration = await registerVisitor(visitorOne, investorToken, 'first-investor@example.invalid', 'First Investor');
+  const firstRegistration = await registerVisitor(visitorOne, investorToken, 'first-investor@example.invalid', 'First Investor', 'es');
   expect(firstRegistration).toMatchObject({granted: false, reason: 'PENDING_APPROVAL', emailStatus: 'SENT'});
   const visitors = await body(await request.get('/api/v1/admin/visitors?search=first-investor%40example.invalid'), 200) as Array<{id: string; email: string}>;
   const firstVisitorId = visitors.find((item) => item.email === 'first-investor@example.invalid')?.id;

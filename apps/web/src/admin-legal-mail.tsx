@@ -1,37 +1,951 @@
-import type {FormEvent} from 'react';
-import {useEffect, useState} from 'react';
-import {portalApi as api} from './portal-api';
+import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
+import { portalApi as api } from "./portal-api";
+import { currentLocale } from "./i18n";
 
-type NdaSummary={id:string;version:string;title:string;legal_status:string;jurisdiction:string;governing_law:string;signature_profile:string;purpose:string;source_kind:string;content_sha256:string;created_at:string;updated_at:string;approved_at:string|null;acceptance_count:number;invitation_count:number;revision_number:number};
-type NdaDetail=NdaSummary&{content:{disclosingParty:string;notice:string;paragraphs:string[]};revisions:Array<{id:string;revision_number:number;legal_status:string;content_sha256:string;change_note:string;created_at:string}>};
-type MailThread={id:string;subject:string;contact_email:string;organisation:string;status:string;priority:string;next_follow_up_at:string|null;notes:string;assigned_to_name:string|null;updated_at:string;note_count:number};
-type MailThreadDetail=MailThread&{messages:Array<{id:string;direction:string;from_address:string;to_addresses:string[];cc_addresses:string[];subject:string;text_excerpt:string;occurred_at:string;delivery_status:string}>;threadNotes:Array<{id:string;body:string;created_by_name:string;created_at:string}>};
-type Delivery={id:string;kind:string;recipient:string;status:string;provider_message_id:string|null;created_at:string;sent_at:string|null;error_code:string|null;full_name:string|null;invitation_name:string|null};
-type MailData={mailbox:{configured:boolean;jmapConfigured:boolean;imapConfigured:boolean;webmailConfigured:boolean;webmailUrl:string|null;account:string|null;provider:string};counts:{open:number;due:number;waiting:number};threads:MailThread[];deliveries:Delivery[]};
+type NdaSummary = {
+  id: string;
+  version: string;
+  title: string;
+  legal_status: string;
+  jurisdiction: string;
+  governing_law: string;
+  signature_profile: string;
+  purpose: string;
+  source_kind: string;
+  content_sha256: string;
+  created_at: string;
+  updated_at: string;
+  approved_at: string | null;
+  acceptance_count: number;
+  invitation_count: number;
+  revision_number: number;
+};
+type NdaDetail = NdaSummary & {
+  content: {
+    disclosingParty: string;
+    notice: string;
+    paragraphs: string[];
+    translations?: {
+      es?: { title: string; notice: string; paragraphs: string[] };
+    };
+  };
+  revisions: Array<{
+    id: string;
+    revision_number: number;
+    legal_status: string;
+    content_sha256: string;
+    change_note: string;
+    created_at: string;
+  }>;
+};
+type MailThread = {
+  id: string;
+  subject: string;
+  contact_email: string;
+  organisation: string;
+  status: string;
+  priority: string;
+  next_follow_up_at: string | null;
+  notes: string;
+  assigned_to_name: string | null;
+  updated_at: string;
+  note_count: number;
+};
+type MailThreadDetail = MailThread & {
+  messages: Array<{
+    id: string;
+    direction: string;
+    from_address: string;
+    to_addresses: string[];
+    cc_addresses: string[];
+    subject: string;
+    text_excerpt: string;
+    occurred_at: string;
+    delivery_status: string;
+  }>;
+  threadNotes: Array<{
+    id: string;
+    body: string;
+    created_by_name: string;
+    created_at: string;
+  }>;
+};
+type Delivery = {
+  id: string;
+  kind: string;
+  recipient: string;
+  status: string;
+  provider_message_id: string | null;
+  created_at: string;
+  sent_at: string | null;
+  error_code: string | null;
+  full_name: string | null;
+  invitation_name: string | null;
+};
+type MailData = {
+  mailbox: {
+    configured: boolean;
+    jmapConfigured: boolean;
+    imapConfigured: boolean;
+    webmailConfigured: boolean;
+    webmailUrl: string | null;
+    account: string | null;
+    provider: string;
+  };
+  counts: { open: number; due: number; waiting: number };
+  threads: MailThread[];
+  deliveries: Delivery[];
+};
 
-const label=(value:string)=>value.replaceAll('_',' ').toLowerCase().replace(/(^|\s)\S/g,(letter)=>letter.toUpperCase());
-const date=(value:string|null)=>value?new Date(value).toLocaleString():'Not set';
-function Pill({value}:{value:string}){return <em className={`portal-status ${value.toLowerCase()}`}>{label(value)}</em>}
-
-export function NdaLibraryView({role}:{role:string}){
-  const [documents,setDocuments]=useState<NdaSummary[]>([]); const [selected,setSelected]=useState<NdaDetail|null>(null); const [error,setError]=useState(''); const [notice,setNotice]=useState(''); const canEdit=['OWNER','ADMIN'].includes(role);
-  const load=async(preferredId?:string)=>{try{const list=await api<NdaSummary[]>('/admin/nda-documents');setDocuments(list);const id=preferredId??selected?.id??list[0]?.id;if(id)setSelected(await api<NdaDetail>(`/admin/nda-documents/${id}`));setError('');}catch(reason){setError(label((reason as Error).message));}};
-  useEffect(()=>{void load();},[]);
-  const create=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();const formElement=event.currentTarget,form=new FormData(formElement);try{const result=await api<{id:string}>('/admin/nda-documents',{method:'POST',body:JSON.stringify({version:form.get('version'),title:form.get('title'),jurisdiction:form.get('jurisdiction'),governingLaw:form.get('governingLaw'),signatureProfile:'SIMPLE_ELECTRONIC_SIGNATURE_WORKFLOW',purpose:form.get('purpose'),disclosingParty:form.get('disclosingParty'),notice:form.get('notice'),paragraphs:String(form.get('paragraphs')).split(/\n\s*\n/).map(v=>v.trim()).filter(Boolean),changeNote:'Initial draft created in the NDA library'})});formElement.reset();setNotice('Draft created. It is not approved for external use.');await load(result.id);}catch(reason){setError(label((reason as Error).message));}};
-  const save=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!selected)return;const form=new FormData(event.currentTarget);try{await api(`/admin/nda-documents/${selected.id}`,{method:'PATCH',body:JSON.stringify({title:form.get('title'),jurisdiction:form.get('jurisdiction'),governingLaw:form.get('governingLaw'),signatureProfile:selected.signature_profile,purpose:form.get('purpose'),disclosingParty:form.get('disclosingParty'),notice:form.get('notice'),paragraphs:String(form.get('paragraphs')).split(/\n\s*\n/).map(v=>v.trim()).filter(Boolean),changeNote:form.get('changeNote')})});setNotice('New immutable revision saved.');await load(selected.id);}catch(reason){setError(label((reason as Error).message));}};
-  const clone=async()=>{if(!selected)return;const version=prompt('New unique version identifier');if(!version)return;const changeNote=prompt('Why is this variant being created?')||'Variant created for a new situation';try{const result=await api<{id:string}>(`/admin/nda-documents/${selected.id}/clone`,{method:'POST',body:JSON.stringify({version,changeNote})});setNotice('Independent draft cloned.');await load(result.id);}catch(reason){setError(label((reason as Error).message));}};
-  const changeStatus=async(status:string)=>{if(!selected)return;const changeNote=prompt('Reason for this legal workflow change');if(!changeNote)return;const approval=status==='APPROVED';const counselReference=approval?prompt('Legal counsel approval reference (required)')||'':'';if(approval&&!confirm('Confirm that you are the OWNER and counsel has approved this exact text and hash.'))return;try{await api(`/admin/nda-documents/${selected.id}/status`,{method:'POST',body:JSON.stringify({status,changeNote,approvalConfirmed:approval,counselReference})});setNotice(`Status changed to ${label(status)}.`);await load(selected.id);}catch(reason){setError(label((reason as Error).message));}};
-  const immutable=selected&&selected.legal_status!=='DRAFT_FOR_WORKFLOW_TESTING';
-  return <section className="admin-page"><header className="admin-page-heading"><div><p>VERSIONED LEGAL CONTENT</p><h2>NDA library & editor</h2></div><span>Drafts, situational variants, legal review and immutable evidence.</span></header>{error&&<p className="admin-error">{error}</p>}{notice&&<p className="admin-success">{notice}</p>}<div className="nda-library-layout"><aside className="nda-library-list"><header><h3>Documents</h3><span>{documents.length}</span></header>{documents.map(item=><button className={selected?.id===item.id?'active':''} key={item.id} onClick={()=>void load(item.id)}><span><b>{item.version}</b><small>{item.title}</small></span><Pill value={item.legal_status}/><small>{label(item.jurisdiction)} · {label(item.purpose)} · r{item.revision_number}</small></button>)}</aside><div className="nda-editor-area">{selected?<><div className="nda-editor-toolbar"><div><Pill value={selected.legal_status}/><Pill value={selected.purpose}/><span>{selected.acceptance_count} signatures · {selected.invitation_count} invitations</span></div>{canEdit&&<div><button onClick={()=>void clone()}>CLONE VARIANT</button>{selected.legal_status==='DRAFT_FOR_WORKFLOW_TESTING'&&<button onClick={()=>void changeStatus('LEGAL_REVIEW')}>SEND TO LEGAL REVIEW</button>}{selected.legal_status==='LEGAL_REVIEW'&&<><button onClick={()=>void changeStatus('DRAFT_FOR_WORKFLOW_TESTING')}>RETURN TO DRAFT</button>{role==='OWNER'&&<button onClick={()=>void changeStatus('APPROVED')}>RECORD COUNSEL APPROVAL</button>}</>}{selected.legal_status==='APPROVED'&&<button onClick={()=>void changeStatus('RETIRED')}>RETIRE</button>}</div>}</div><form className="nda-text-editor" key={`${selected.id}-${selected.updated_at}`} onSubmit={save}><div className="form-pair"><label>Title<input name="title" defaultValue={selected.title} disabled={!canEdit||Boolean(immutable)}/></label><label>Purpose<select name="purpose" defaultValue={selected.purpose} disabled={!canEdit||Boolean(immutable)}><option>GENERAL_INVESTOR</option><option>MUTUAL</option><option>ONE_WAY</option><option>TECHNICAL_DILIGENCE</option><option>FINANCIAL_DILIGENCE</option><option>STRATEGIC_PARTNER</option><option>PILOT_CUSTOMER</option><option>CUSTOM</option></select></label></div><div className="form-pair"><label>Jurisdiction<select name="jurisdiction" defaultValue={selected.jurisdiction} disabled={!canEdit||Boolean(immutable)}><option>EU_EEA</option><option>UNITED_STATES</option><option>UNSPECIFIED</option></select></label><label>Governing law<input name="governingLaw" defaultValue={selected.governing_law} disabled={!canEdit||Boolean(immutable)}/></label></div><label>Disclosing party<input name="disclosingParty" defaultValue={selected.content.disclosingParty} disabled={!canEdit||Boolean(immutable)}/></label><label>Visible legal notice<textarea name="notice" rows={3} defaultValue={selected.content.notice} disabled={!canEdit||Boolean(immutable)}/></label><label>Agreement text · separate paragraphs with a blank line<textarea className="legal-copy-editor" name="paragraphs" rows={22} defaultValue={selected.content.paragraphs.join('\n\n')} disabled={!canEdit||Boolean(immutable)}/></label>{canEdit&&!immutable&&<><label>Required revision note<input name="changeNote" minLength={3} required placeholder="Describe exactly what changed and why"/></label><button className="secure-primary">SAVE NEW REVISION</button></>}<small>Version {selected.version} · SHA-256 {selected.content_sha256}. Approved or signed documents cannot be edited; create a clone instead.</small></form><section className="revision-ledger"><h3>Revision history</h3>{selected.revisions.map(item=><article key={item.id}><b>r{item.revision_number}</b><Pill value={item.legal_status}/><span>{item.change_note}</span><code>{item.content_sha256.slice(0,16)}…</code><time>{date(item.created_at)}</time></article>)}</section></>:<p className="workspace-empty">No NDA documents found.</p>}</div></div>{canEdit&&<details className="nda-create-drawer"><summary>Create a new independent NDA draft</summary><form className="portal-form" onSubmit={create}><div className="form-pair"><label>Unique version<input name="version" required placeholder="NDA-US-PILOT-v1"/></label><label>Title<input name="title" required placeholder="Pilot programme confidentiality agreement"/></label></div><div className="form-pair"><label>Jurisdiction<select name="jurisdiction"><option>UNITED_STATES</option><option>EU_EEA</option><option>UNSPECIFIED</option></select></label><label>Purpose<select name="purpose"><option>GENERAL_INVESTOR</option><option>MUTUAL</option><option>ONE_WAY</option><option>TECHNICAL_DILIGENCE</option><option>FINANCIAL_DILIGENCE</option><option>STRATEGIC_PARTNER</option><option>PILOT_CUSTOMER</option><option>CUSTOM</option></select></label></div><label>Governing law<input name="governingLaw" required placeholder="TO_BE_SELECTED_BY_COUNSEL"/></label><label>Disclosing party<input name="disclosingParty" required placeholder="Legal entity name and address"/></label><label>Visible legal notice<textarea name="notice" rows={2} required placeholder="DRAFT — NOT APPROVED FOR EXTERNAL USE"/></label><label>Agreement text<textarea name="paragraphs" rows={12} required placeholder="Paragraph one…&#10;&#10;Paragraph two…"/></label><button className="secure-primary">CREATE CONTROLLED DRAFT</button></form></details>}</section>;
+const label = (value: string) =>
+  value
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/(^|\s)\S/g, (letter) => letter.toUpperCase());
+const date = (value: string | null) =>
+  value ? new Date(value).toLocaleString(currentLocale()) : "Not set";
+function Pill({ value }: { value: string }) {
+  return (
+    <em className={`portal-status ${value.toLowerCase()}`}>{label(value)}</em>
+  );
 }
 
-export function MailCenterView({role}:{role:string}){
-  const [data,setData]=useState<MailData|null>(null);const [selected,setSelected]=useState<MailThreadDetail|null>(null);const [error,setError]=useState('');const [syncing,setSyncing]=useState(false);const canEdit=role!=='VIEWER';const load=async()=>{try{setData(await api<MailData>('/admin/mail'));setError('');}catch(reason){setError(label((reason as Error).message));}};useEffect(()=>{void load();},[]);
-  const create=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();const element=event.currentTarget,form=new FormData(element);try{await api('/admin/mail/threads',{method:'POST',body:JSON.stringify({subject:form.get('subject'),contactEmail:form.get('contactEmail'),organisation:form.get('organisation'),priority:form.get('priority'),nextFollowUpAt:form.get('nextFollowUpAt')?new Date(String(form.get('nextFollowUpAt'))).toISOString():null,notes:form.get('notes')})});element.reset();await load();}catch(reason){setError(label((reason as Error).message));}};
-  const update=async(id:string,status:string)=>{try{await api(`/admin/mail/threads/${id}`,{method:'PATCH',body:JSON.stringify({status})});await load();}catch(reason){setError(label((reason as Error).message));}};
-  const openThread=async(id:string)=>{try{setSelected(await api<MailThreadDetail>(`/admin/mail/threads/${id}`));}catch(reason){setError(label((reason as Error).message));}};
-  const addNote=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!selected)return;const element=event.currentTarget,form=new FormData(element);try{await api(`/admin/mail/threads/${selected.id}/notes`,{method:'POST',body:JSON.stringify({body:form.get('body')})});element.reset();await openThread(selected.id);await load();}catch(reason){setError(label((reason as Error).message));}};
-  const syncMailbox=async()=>{setSyncing(true);try{await api('/admin/mail/sync',{method:'POST',body:'{}'});await load();setError('');}catch(reason){setError(label((reason as Error).message));}finally{setSyncing(false);}};
-  if(!data)return <section className="admin-page"><p>{error||'Loading mail center…'}</p></section>;
-  return <section className="admin-page"><header className="admin-page-heading"><div><p>COMMUNICATION & FOLLOW-UP</p><h2>Mail center</h2></div><div className="mail-header-actions">{data.mailbox.configured&&role!=='VIEWER'&&<button className="admin-download" disabled={syncing} onClick={()=>void syncMailbox()}>{syncing?'SYNCING…':'SYNC MAILBOX'}</button>}{data.mailbox.webmailUrl?<a className="admin-download" href={data.mailbox.webmailUrl} target="_blank" rel="noreferrer">OPEN PRIVATE WEBMAIL</a>:<Pill value="NOT_CONFIGURED"/>}</div></header>{error&&<p className="admin-error">{error}</p>}<div className="mail-readiness"><article><span>Mail server</span><b>{label(data.mailbox.provider)}</b><small>{data.mailbox.configured?`${data.mailbox.imapConfigured?'IMAP':'JMAP'} mailbox credentials installed`:'Pending secure commissioning'}</small></article><article><span>Webmail</span><b>{data.mailbox.webmailConfigured?'CONFIGURED':'PENDING'}</b><small>{data.mailbox.webmailUrl||'webmail.upaidown.com planned'}</small></article><article><span>Open follow-ups</span><strong>{data.counts.open}</strong></article><article><span>Due now</span><strong>{data.counts.due}</strong></article><article><span>Waiting reply</span><strong>{data.counts.waiting}</strong></article></div>{!data.mailbox.configured&&<div className="legal-warning"><b>MAILBOX NOT COMMISSIONED</b><p>The panel is ready for follow-up records and delivery evidence. Inbox synchronization remains disabled until the isolated server, TLS, DNS, PTR, backups and authenticated outbound relay pass acceptance tests.</p></div>}<div className="mail-center-layout">{canEdit&&<form className="portal-form" onSubmit={create}><h3>Add email follow-up</h3><label>Subject<input name="subject" required placeholder="Follow up · investor meeting"/></label><div className="form-pair"><label>Contact email<input name="contactEmail" type="email" placeholder="investor@fund.com"/></label><label>Organisation<input name="organisation"/></label></div><div className="form-pair"><label>Priority<select name="priority"><option>MEDIUM</option><option>HIGH</option><option>CRITICAL</option><option>LOW</option></select></label><label>Next follow-up<input name="nextFollowUpAt" type="datetime-local"/></label></div><label>Internal context<textarea name="notes" rows={5}/></label><button className="secure-primary">ADD FOLLOW-UP</button></form>}<section className="mail-thread-list"><header><h3>Follow-up queue</h3><span>{data.threads.length}</span></header>{data.threads.map(thread=><article key={thread.id}><div><Pill value={thread.status}/><Pill value={thread.priority}/></div><h3>{thread.subject}</h3><p>{thread.organisation||'No organisation'} · {thread.contact_email||'No contact email'}</p><small>Follow-up: {date(thread.next_follow_up_at)} · {thread.note_count} notes · {thread.assigned_to_name||'Unassigned'}</small><footer><button onClick={()=>void openThread(thread.id)}>OPEN CONVERSATION</button>{canEdit&&<><button onClick={()=>void update(thread.id,'IN_PROGRESS')}>IN PROGRESS</button><button onClick={()=>void update(thread.id,'WAITING_REPLY')}>WAITING</button><button onClick={()=>void update(thread.id,'CLOSED')}>CLOSE</button></>}</footer></article>)}{!data.threads.length&&<p className="workspace-empty">No email follow-ups yet.</p>}</section></div>{selected&&<section className="mail-conversation"><header><div><p>CONVERSATION</p><h3>{selected.subject}</h3></div><button onClick={()=>setSelected(null)}>CLOSE</button></header>{selected.messages.map(message=><article className={message.direction.toLowerCase()} key={message.id}><div><Pill value={message.direction}/><Pill value={message.delivery_status}/><time>{date(message.occurred_at)}</time></div><b>{message.from_address||'Unknown sender'}</b><small>To: {message.to_addresses.join(', ')||'—'}</small><p>{message.text_excerpt||'No text body was synchronized.'}</p></article>)}{!selected.messages.length&&<p className="workspace-empty">This follow-up has no synchronized messages yet. Use the private webmail for composition.</p>}{selected.threadNotes.map(note=><aside key={note.id}><b>{note.created_by_name}</b><p>{note.body}</p><time>{date(note.created_at)}</time></aside>)}{canEdit&&<form className="mail-note-form" onSubmit={addNote}><label>Internal follow-up note<textarea name="body" rows={3} required/></label><button>ADD NOTE</button></form>}</section>}<section className="delivery-ledger"><header><div><p>SYSTEM MESSAGES</p><h3>Delivery evidence</h3></div><span>{data.deliveries.length}</span></header><div className="portal-table-wrap"><table className="portal-table"><thead><tr><th>Recipient</th><th>Purpose</th><th>Related record</th><th>Created</th><th>Status</th><th>Provider ID</th></tr></thead><tbody>{data.deliveries.map(item=><tr key={item.id}><td>{item.recipient}</td><td>{label(item.kind)}</td><td>{item.full_name||item.invitation_name||'System'}</td><td>{date(item.created_at)}</td><td><Pill value={item.status}/>{item.error_code&&<small>{item.error_code}</small>}</td><td><code>{item.provider_message_id||'—'}</code></td></tr>)}</tbody></table></div></section></section>;
+export function NdaLibraryView({ role }: { role: string }) {
+  const [documents, setDocuments] = useState<NdaSummary[]>([]);
+  const [selected, setSelected] = useState<NdaDetail | null>(null);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const canEdit = ["OWNER", "ADMIN"].includes(role);
+  const load = async (preferredId?: string) => {
+    try {
+      const list = await api<NdaSummary[]>("/admin/nda-documents");
+      setDocuments(list);
+      const id = preferredId ?? selected?.id ?? list[0]?.id;
+      if (id) setSelected(await api<NdaDetail>(`/admin/nda-documents/${id}`));
+      setError("");
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  useEffect(() => {
+    void load();
+  }, []);
+  const create = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formElement = event.currentTarget,
+      form = new FormData(formElement);
+    try {
+      const result = await api<{ id: string }>("/admin/nda-documents", {
+        method: "POST",
+        body: JSON.stringify({
+          version: form.get("version"),
+          title: form.get("title"),
+          jurisdiction: form.get("jurisdiction"),
+          governingLaw: form.get("governingLaw"),
+          signatureProfile: "SIMPLE_ELECTRONIC_SIGNATURE_WORKFLOW",
+          purpose: form.get("purpose"),
+          disclosingParty: form.get("disclosingParty"),
+          notice: form.get("notice"),
+          paragraphs: String(form.get("paragraphs"))
+            .split(/\n\s*\n/)
+            .map((v) => v.trim())
+            .filter(Boolean),
+          translations: {
+            es: {
+              title: form.get("titleEs"),
+              notice: form.get("noticeEs"),
+              paragraphs: String(form.get("paragraphsEs"))
+                .split(/\n\s*\n/)
+                .map((v) => v.trim())
+                .filter(Boolean),
+            },
+          },
+          changeNote: "Initial draft created in the NDA library",
+        }),
+      });
+      formElement.reset();
+      setNotice("Draft created. It is not approved for external use.");
+      await load(result.id);
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const save = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selected) return;
+    const form = new FormData(event.currentTarget);
+    try {
+      await api(`/admin/nda-documents/${selected.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          title: form.get("title"),
+          jurisdiction: form.get("jurisdiction"),
+          governingLaw: form.get("governingLaw"),
+          signatureProfile: selected.signature_profile,
+          purpose: form.get("purpose"),
+          disclosingParty: form.get("disclosingParty"),
+          notice: form.get("notice"),
+          paragraphs: String(form.get("paragraphs"))
+            .split(/\n\s*\n/)
+            .map((v) => v.trim())
+            .filter(Boolean),
+          translations: {
+            es: {
+              title: form.get("titleEs"),
+              notice: form.get("noticeEs"),
+              paragraphs: String(form.get("paragraphsEs"))
+                .split(/\n\s*\n/)
+                .map((v) => v.trim())
+                .filter(Boolean),
+            },
+          },
+          changeNote: form.get("changeNote"),
+        }),
+      });
+      setNotice("New immutable revision saved.");
+      await load(selected.id);
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const clone = async () => {
+    if (!selected) return;
+    const version = prompt("New unique version identifier");
+    if (!version) return;
+    const changeNote =
+      prompt("Why is this variant being created?") ||
+      "Variant created for a new situation";
+    try {
+      const result = await api<{ id: string }>(
+        `/admin/nda-documents/${selected.id}/clone`,
+        { method: "POST", body: JSON.stringify({ version, changeNote }) },
+      );
+      setNotice("Independent draft cloned.");
+      await load(result.id);
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const changeStatus = async (status: string) => {
+    if (!selected) return;
+    const changeNote = prompt("Reason for this legal workflow change");
+    if (!changeNote) return;
+    const approval = status === "APPROVED";
+    const counselReference = approval
+      ? prompt("Legal counsel approval reference (required)") || ""
+      : "";
+    if (
+      approval &&
+      !confirm(
+        "Confirm that you are the OWNER and counsel has approved this exact text and hash.",
+      )
+    )
+      return;
+    try {
+      await api(`/admin/nda-documents/${selected.id}/status`, {
+        method: "POST",
+        body: JSON.stringify({
+          status,
+          changeNote,
+          approvalConfirmed: approval,
+          counselReference,
+        }),
+      });
+      setNotice(`Status changed to ${label(status)}.`);
+      await load(selected.id);
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const immutable =
+    selected && selected.legal_status !== "DRAFT_FOR_WORKFLOW_TESTING";
+  return (
+    <section className="admin-page">
+      <header className="admin-page-heading">
+        <div>
+          <p>VERSIONED LEGAL CONTENT</p>
+          <h2>NDA library & editor</h2>
+        </div>
+        <span>
+          Drafts, situational variants, legal review and immutable evidence.
+        </span>
+      </header>
+      {error && <p className="admin-error">{error}</p>}
+      {notice && <p className="admin-success">{notice}</p>}
+      <div className="nda-library-layout">
+        <aside className="nda-library-list">
+          <header>
+            <h3>Documents</h3>
+            <span>{documents.length}</span>
+          </header>
+          {documents.map((item) => (
+            <button
+              className={selected?.id === item.id ? "active" : ""}
+              key={item.id}
+              onClick={() => void load(item.id)}
+            >
+              <span>
+                <b>{item.version}</b>
+                <small>{item.title}</small>
+              </span>
+              <Pill value={item.legal_status} />
+              <small>
+                {label(item.jurisdiction)} · {label(item.purpose)} · r
+                {item.revision_number}
+              </small>
+            </button>
+          ))}
+        </aside>
+        <div className="nda-editor-area">
+          {selected ? (
+            <>
+              <div className="nda-editor-toolbar">
+                <div>
+                  <Pill value={selected.legal_status} />
+                  <Pill value={selected.purpose} />
+                  <span>
+                    {selected.acceptance_count} signatures ·{" "}
+                    {selected.invitation_count} invitations
+                  </span>
+                </div>
+                {canEdit && (
+                  <div>
+                    <button onClick={() => void clone()}>CLONE VARIANT</button>
+                    {selected.legal_status === "DRAFT_FOR_WORKFLOW_TESTING" && (
+                      <button onClick={() => void changeStatus("LEGAL_REVIEW")}>
+                        SEND TO LEGAL REVIEW
+                      </button>
+                    )}
+                    {selected.legal_status === "LEGAL_REVIEW" && (
+                      <>
+                        <button
+                          onClick={() =>
+                            void changeStatus("DRAFT_FOR_WORKFLOW_TESTING")
+                          }
+                        >
+                          RETURN TO DRAFT
+                        </button>
+                        {role === "OWNER" && (
+                          <button onClick={() => void changeStatus("APPROVED")}>
+                            RECORD COUNSEL APPROVAL
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {selected.legal_status === "APPROVED" && (
+                      <button onClick={() => void changeStatus("RETIRED")}>
+                        RETIRE
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              <form
+                className="nda-text-editor"
+                key={`${selected.id}-${selected.updated_at}`}
+                onSubmit={save}
+              >
+                <div className="form-pair">
+                  <label>
+                    Title
+                    <input
+                      name="title"
+                      defaultValue={selected.title}
+                      disabled={!canEdit || Boolean(immutable)}
+                    />
+                  </label>
+                  <label>
+                    Purpose
+                    <select
+                      name="purpose"
+                      defaultValue={selected.purpose}
+                      disabled={!canEdit || Boolean(immutable)}
+                    >
+                      <option>GENERAL_INVESTOR</option>
+                      <option>MUTUAL</option>
+                      <option>ONE_WAY</option>
+                      <option>TECHNICAL_DILIGENCE</option>
+                      <option>FINANCIAL_DILIGENCE</option>
+                      <option>STRATEGIC_PARTNER</option>
+                      <option>PILOT_CUSTOMER</option>
+                      <option>CUSTOM</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="form-pair">
+                  <label>
+                    Jurisdiction
+                    <select
+                      name="jurisdiction"
+                      defaultValue={selected.jurisdiction}
+                      disabled={!canEdit || Boolean(immutable)}
+                    >
+                      <option>EU_EEA</option>
+                      <option>UNITED_STATES</option>
+                      <option>UNSPECIFIED</option>
+                    </select>
+                  </label>
+                  <label>
+                    Governing law
+                    <input
+                      name="governingLaw"
+                      defaultValue={selected.governing_law}
+                      disabled={!canEdit || Boolean(immutable)}
+                    />
+                  </label>
+                </div>
+                <label>
+                  Disclosing party
+                  <input
+                    name="disclosingParty"
+                    defaultValue={selected.content.disclosingParty}
+                    disabled={!canEdit || Boolean(immutable)}
+                  />
+                </label>
+                <label>
+                  Visible legal notice
+                  <textarea
+                    name="notice"
+                    rows={3}
+                    defaultValue={selected.content.notice}
+                    disabled={!canEdit || Boolean(immutable)}
+                  />
+                </label>
+                <label>
+                  Agreement text · separate paragraphs with a blank line
+                  <textarea
+                    className="legal-copy-editor"
+                    name="paragraphs"
+                    rows={22}
+                    defaultValue={selected.content.paragraphs.join("\n\n")}
+                    disabled={!canEdit || Boolean(immutable)}
+                  />
+                </label>
+                <fieldset className="nda-translation-editor">
+                  <legend>Spanish controlled translation · Español</legend>
+                  <label>
+                    Spanish title
+                    <input
+                      name="titleEs"
+                      defaultValue={selected.content.translations?.es?.title ?? ""}
+                      disabled={!canEdit || Boolean(immutable)}
+                      required={!immutable}
+                    />
+                  </label>
+                  <label>
+                    Spanish legal notice
+                    <textarea
+                      name="noticeEs"
+                      rows={3}
+                      defaultValue={selected.content.translations?.es?.notice ?? ""}
+                      disabled={!canEdit || Boolean(immutable)}
+                      required={!immutable}
+                    />
+                  </label>
+                  <label>
+                    Spanish agreement text · separate paragraphs with a blank line
+                    <textarea
+                      className="legal-copy-editor"
+                      name="paragraphsEs"
+                      rows={22}
+                      defaultValue={selected.content.translations?.es?.paragraphs.join("\n\n") ?? ""}
+                      disabled={!canEdit || Boolean(immutable)}
+                      required={!immutable}
+                    />
+                  </label>
+                </fieldset>
+                {canEdit && !immutable && (
+                  <>
+                    <label>
+                      Required revision note
+                      <input
+                        name="changeNote"
+                        minLength={3}
+                        required
+                        placeholder="Describe exactly what changed and why"
+                      />
+                    </label>
+                    <button className="secure-primary">
+                      SAVE NEW REVISION
+                    </button>
+                  </>
+                )}
+                <small>
+                  Version {selected.version} · SHA-256 {selected.content_sha256}
+                  . Approved or signed documents cannot be edited; create a
+                  clone instead.
+                </small>
+              </form>
+              <section className="revision-ledger">
+                <h3>Revision history</h3>
+                {selected.revisions.map((item) => (
+                  <article key={item.id}>
+                    <b>r{item.revision_number}</b>
+                    <Pill value={item.legal_status} />
+                    <span>{item.change_note}</span>
+                    <code>{item.content_sha256.slice(0, 16)}…</code>
+                    <time>{date(item.created_at)}</time>
+                  </article>
+                ))}
+              </section>
+            </>
+          ) : (
+            <p className="workspace-empty">No NDA documents found.</p>
+          )}
+        </div>
+      </div>
+      {canEdit && (
+        <details className="nda-create-drawer">
+          <summary>Create a new independent NDA draft</summary>
+          <form className="portal-form" onSubmit={create}>
+            <div className="form-pair">
+              <label>
+                Unique version
+                <input name="version" required placeholder="NDA-US-PILOT-v1" />
+              </label>
+              <label>
+                Title
+                <input
+                  name="title"
+                  required
+                  placeholder="Pilot programme confidentiality agreement"
+                />
+              </label>
+            </div>
+            <div className="form-pair">
+              <label>
+                Jurisdiction
+                <select name="jurisdiction">
+                  <option>UNITED_STATES</option>
+                  <option>EU_EEA</option>
+                  <option>UNSPECIFIED</option>
+                </select>
+              </label>
+              <label>
+                Purpose
+                <select name="purpose">
+                  <option>GENERAL_INVESTOR</option>
+                  <option>MUTUAL</option>
+                  <option>ONE_WAY</option>
+                  <option>TECHNICAL_DILIGENCE</option>
+                  <option>FINANCIAL_DILIGENCE</option>
+                  <option>STRATEGIC_PARTNER</option>
+                  <option>PILOT_CUSTOMER</option>
+                  <option>CUSTOM</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Governing law
+              <input
+                name="governingLaw"
+                required
+                placeholder="TO_BE_SELECTED_BY_COUNSEL"
+              />
+            </label>
+            <label>
+              Disclosing party
+              <input
+                name="disclosingParty"
+                required
+                placeholder="Legal entity name and address"
+              />
+            </label>
+            <label>
+              Visible legal notice
+              <textarea
+                name="notice"
+                rows={2}
+                required
+                placeholder="DRAFT — NOT APPROVED FOR EXTERNAL USE"
+              />
+            </label>
+            <label>
+              Agreement text
+              <textarea
+                name="paragraphs"
+                rows={12}
+                required
+                placeholder="Paragraph one…&#10;&#10;Paragraph two…"
+              />
+            </label>
+            <fieldset className="nda-translation-editor">
+              <legend>Spanish controlled translation · Español</legend>
+              <label>
+                Spanish title
+                <input name="titleEs" required />
+              </label>
+              <label>
+                Spanish legal notice
+                <textarea name="noticeEs" rows={2} required />
+              </label>
+              <label>
+                Spanish agreement text
+                <textarea name="paragraphsEs" rows={12} required />
+              </label>
+            </fieldset>
+            <button className="secure-primary">CREATE CONTROLLED DRAFT</button>
+          </form>
+        </details>
+      )}
+    </section>
+  );
+}
+
+export function MailCenterView({ role }: { role: string }) {
+  const [data, setData] = useState<MailData | null>(null);
+  const [selected, setSelected] = useState<MailThreadDetail | null>(null);
+  const [error, setError] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const canEdit = role !== "VIEWER";
+  const load = async () => {
+    try {
+      setData(await api<MailData>("/admin/mail"));
+      setError("");
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  useEffect(() => {
+    void load();
+  }, []);
+  const create = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const element = event.currentTarget,
+      form = new FormData(element);
+    try {
+      await api("/admin/mail/threads", {
+        method: "POST",
+        body: JSON.stringify({
+          subject: form.get("subject"),
+          contactEmail: form.get("contactEmail"),
+          organisation: form.get("organisation"),
+          priority: form.get("priority"),
+          nextFollowUpAt: form.get("nextFollowUpAt")
+            ? new Date(String(form.get("nextFollowUpAt"))).toISOString()
+            : null,
+          notes: form.get("notes"),
+        }),
+      });
+      element.reset();
+      await load();
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const update = async (id: string, status: string) => {
+    try {
+      await api(`/admin/mail/threads/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+      await load();
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const openThread = async (id: string) => {
+    try {
+      setSelected(await api<MailThreadDetail>(`/admin/mail/threads/${id}`));
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const addNote = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selected) return;
+    const element = event.currentTarget,
+      form = new FormData(element);
+    try {
+      await api(`/admin/mail/threads/${selected.id}/notes`, {
+        method: "POST",
+        body: JSON.stringify({ body: form.get("body") }),
+      });
+      element.reset();
+      await openThread(selected.id);
+      await load();
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    }
+  };
+  const syncMailbox = async () => {
+    setSyncing(true);
+    try {
+      await api("/admin/mail/sync", { method: "POST", body: "{}" });
+      await load();
+      setError("");
+    } catch (reason) {
+      setError(label((reason as Error).message));
+    } finally {
+      setSyncing(false);
+    }
+  };
+  if (!data)
+    return (
+      <section className="admin-page">
+        <p>{error || "Loading mail center…"}</p>
+      </section>
+    );
+  return (
+    <section className="admin-page">
+      <header className="admin-page-heading">
+        <div>
+          <p>COMMUNICATION & FOLLOW-UP</p>
+          <h2>Mail center</h2>
+        </div>
+        <div className="mail-header-actions">
+          {data.mailbox.configured && role !== "VIEWER" && (
+            <button
+              className="admin-download"
+              disabled={syncing}
+              onClick={() => void syncMailbox()}
+            >
+              {syncing ? "SYNCING…" : "SYNC MAILBOX"}
+            </button>
+          )}
+          {data.mailbox.webmailUrl ? (
+            <a
+              className="admin-download"
+              href={data.mailbox.webmailUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              OPEN PRIVATE WEBMAIL
+            </a>
+          ) : (
+            <Pill value="NOT_CONFIGURED" />
+          )}
+        </div>
+      </header>
+      {error && <p className="admin-error">{error}</p>}
+      <div className="mail-readiness">
+        <article>
+          <span>Mail server</span>
+          <b>{label(data.mailbox.provider)}</b>
+          <small>
+            {data.mailbox.configured
+              ? `${data.mailbox.imapConfigured ? "IMAP" : "JMAP"} mailbox credentials installed`
+              : "Pending secure commissioning"}
+          </small>
+        </article>
+        <article>
+          <span>Webmail</span>
+          <b>{data.mailbox.webmailConfigured ? "CONFIGURED" : "PENDING"}</b>
+          <small>
+            {data.mailbox.webmailUrl || "webmail.upaidown.com planned"}
+          </small>
+        </article>
+        <article>
+          <span>Open follow-ups</span>
+          <strong>{data.counts.open}</strong>
+        </article>
+        <article>
+          <span>Due now</span>
+          <strong>{data.counts.due}</strong>
+        </article>
+        <article>
+          <span>Waiting reply</span>
+          <strong>{data.counts.waiting}</strong>
+        </article>
+      </div>
+      {!data.mailbox.configured && (
+        <div className="legal-warning">
+          <b>MAILBOX NOT COMMISSIONED</b>
+          <p>
+            The panel is ready for follow-up records and delivery evidence.
+            Inbox synchronization remains disabled until the isolated server,
+            TLS, DNS, PTR, backups and authenticated outbound relay pass
+            acceptance tests.
+          </p>
+        </div>
+      )}
+      <div className="mail-center-layout">
+        {canEdit && (
+          <form className="portal-form" onSubmit={create}>
+            <h3>Add email follow-up</h3>
+            <label>
+              Subject
+              <input
+                name="subject"
+                required
+                placeholder="Follow up · investor meeting"
+              />
+            </label>
+            <div className="form-pair">
+              <label>
+                Contact email
+                <input
+                  name="contactEmail"
+                  type="email"
+                  placeholder="investor@fund.com"
+                />
+              </label>
+              <label>
+                Organisation
+                <input name="organisation" />
+              </label>
+            </div>
+            <div className="form-pair">
+              <label>
+                Priority
+                <select name="priority">
+                  <option>MEDIUM</option>
+                  <option>HIGH</option>
+                  <option>CRITICAL</option>
+                  <option>LOW</option>
+                </select>
+              </label>
+              <label>
+                Next follow-up
+                <input name="nextFollowUpAt" type="datetime-local" />
+              </label>
+            </div>
+            <label>
+              Internal context
+              <textarea name="notes" rows={5} />
+            </label>
+            <button className="secure-primary">ADD FOLLOW-UP</button>
+          </form>
+        )}
+        <section className="mail-thread-list">
+          <header>
+            <h3>Follow-up queue</h3>
+            <span>{data.threads.length}</span>
+          </header>
+          {data.threads.map((thread) => (
+            <article key={thread.id}>
+              <div>
+                <Pill value={thread.status} />
+                <Pill value={thread.priority} />
+              </div>
+              <h3>{thread.subject}</h3>
+              <p>
+                {thread.organisation || "No organisation"} ·{" "}
+                {thread.contact_email || "No contact email"}
+              </p>
+              <small>
+                Follow-up: {date(thread.next_follow_up_at)} ·{" "}
+                {thread.note_count} notes ·{" "}
+                {thread.assigned_to_name || "Unassigned"}
+              </small>
+              <footer>
+                <button onClick={() => void openThread(thread.id)}>
+                  OPEN CONVERSATION
+                </button>
+                {canEdit && (
+                  <>
+                    <button
+                      onClick={() => void update(thread.id, "IN_PROGRESS")}
+                    >
+                      IN PROGRESS
+                    </button>
+                    <button
+                      onClick={() => void update(thread.id, "WAITING_REPLY")}
+                    >
+                      WAITING
+                    </button>
+                    <button onClick={() => void update(thread.id, "CLOSED")}>
+                      CLOSE
+                    </button>
+                  </>
+                )}
+              </footer>
+            </article>
+          ))}
+          {!data.threads.length && (
+            <p className="workspace-empty">No email follow-ups yet.</p>
+          )}
+        </section>
+      </div>
+      {selected && (
+        <section className="mail-conversation">
+          <header>
+            <div>
+              <p>CONVERSATION</p>
+              <h3>{selected.subject}</h3>
+            </div>
+            <button onClick={() => setSelected(null)}>CLOSE</button>
+          </header>
+          {selected.messages.map((message) => (
+            <article
+              className={message.direction.toLowerCase()}
+              key={message.id}
+            >
+              <div>
+                <Pill value={message.direction} />
+                <Pill value={message.delivery_status} />
+                <time>{date(message.occurred_at)}</time>
+              </div>
+              <b>{message.from_address || "Unknown sender"}</b>
+              <small>To: {message.to_addresses.join(", ") || "—"}</small>
+              <p>{message.text_excerpt || "No text body was synchronized."}</p>
+            </article>
+          ))}
+          {!selected.messages.length && (
+            <p className="workspace-empty">
+              This follow-up has no synchronized messages yet. Use the private
+              webmail for composition.
+            </p>
+          )}
+          {selected.threadNotes.map((note) => (
+            <aside key={note.id}>
+              <b>{note.created_by_name}</b>
+              <p>{note.body}</p>
+              <time>{date(note.created_at)}</time>
+            </aside>
+          ))}
+          {canEdit && (
+            <form className="mail-note-form" onSubmit={addNote}>
+              <label>
+                Internal follow-up note
+                <textarea name="body" rows={3} required />
+              </label>
+              <button>ADD NOTE</button>
+            </form>
+          )}
+        </section>
+      )}
+      <section className="delivery-ledger">
+        <header>
+          <div>
+            <p>SYSTEM MESSAGES</p>
+            <h3>Delivery evidence</h3>
+          </div>
+          <span>{data.deliveries.length}</span>
+        </header>
+        <div className="portal-table-wrap">
+          <table className="portal-table">
+            <thead>
+              <tr>
+                <th>Recipient</th>
+                <th>Purpose</th>
+                <th>Related record</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Provider ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.deliveries.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.recipient}</td>
+                  <td>{label(item.kind)}</td>
+                  <td>{item.full_name || item.invitation_name || "System"}</td>
+                  <td>{date(item.created_at)}</td>
+                  <td>
+                    <Pill value={item.status} />
+                    {item.error_code && <small>{item.error_code}</small>}
+                  </td>
+                  <td>
+                    <code>{item.provider_message_id || "—"}</code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  );
 }
