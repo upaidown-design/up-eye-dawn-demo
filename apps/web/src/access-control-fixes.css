@@ -746,6 +746,69 @@
 .admin-portal.viewer .notes-grid footer,
 .admin-portal.viewer .comment-thread form { display: none; }
 
+/* NDA authoring and mail follow-up workspace */
+.admin-success { max-width: 1440px; margin: 0 auto 14px; padding: 12px 18px; border: 1px solid rgba(82,217,194,.35); background: rgba(82,217,194,.07); color: var(--cyan); font: 700 10px var(--mono); }
+.nda-library-layout { display: grid; grid-template-columns: 330px minmax(0,1fr); gap: 14px; align-items: start; }
+.nda-library-list { display: grid; position: sticky; top: 156px; max-height: calc(100vh - 180px); overflow: auto; border: 1px solid var(--border); background: var(--surface); }
+.nda-library-list > header,.mail-thread-list > header { display: flex; justify-content: space-between; align-items: center; padding: 18px; border-bottom: 1px solid var(--border); }
+.nda-library-list h3,.mail-thread-list h3 { margin: 0; }
+.nda-library-list > button { display: grid; gap: 9px; width: 100%; padding: 16px 18px; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--text); text-align: left; }
+.nda-library-list > button.active { background: rgba(82,217,194,.09); box-shadow: inset 3px 0 var(--cyan); }
+.nda-library-list > button > span:first-child { display: grid; gap: 5px; }
+.nda-library-list small { color: var(--muted); font: 600 8px/1.5 var(--mono); }
+.nda-editor-area { min-width: 0; border: 1px solid var(--border); background: var(--surface); }
+.nda-editor-toolbar { display: flex; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(5,14,12,.72); }
+.nda-editor-toolbar > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.nda-editor-toolbar span { color: var(--muted); font: 650 9px var(--mono); }
+.nda-editor-toolbar button,.mail-thread-list footer button { padding: 8px 10px; border: 1px solid var(--border); background: transparent; color: var(--text); font: 750 8px var(--mono); }
+.nda-editor-toolbar button:hover,.mail-thread-list footer button:hover { border-color: var(--cyan); color: var(--cyan); }
+.nda-text-editor { display: grid; gap: 15px; padding: 26px; }
+.nda-text-editor label { display: grid; gap: 7px; color: var(--muted); font: 750 9px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.nda-text-editor input,.nda-text-editor select,.nda-text-editor textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); color: var(--text); font: 500 12px/1.55 var(--mono); }
+.nda-text-editor input:disabled,.nda-text-editor select:disabled,.nda-text-editor textarea:disabled { opacity: .72; cursor: not-allowed; }
+.nda-text-editor .legal-copy-editor { font: 15px/1.75 Georgia,serif; color: #dce9e2; resize: vertical; }
+.nda-text-editor > small { overflow-wrap: anywhere; color: var(--muted); font: 600 8px/1.6 var(--mono); }
+.revision-ledger { padding: 0 26px 26px; }
+.revision-ledger > article { display: grid; grid-template-columns: 35px 170px minmax(150px,1fr) 150px 170px; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); font-size: 10px; }
+.revision-ledger code,.revision-ledger time { color: var(--muted); font: 600 8px var(--mono); }
+.nda-create-drawer { margin-top: 14px; border: 1px solid var(--border); background: var(--surface); }
+.nda-create-drawer summary { padding: 18px 22px; cursor: pointer; color: var(--cyan); font: 750 10px var(--mono); }
+.nda-create-drawer form { max-width: none; border: 0; border-top: 1px solid var(--border); }
+.mail-readiness { display: grid; grid-template-columns: 1.4fr 1.4fr repeat(3,.7fr); gap: 1px; margin-bottom: 14px; border: 1px solid var(--border); background: var(--border); }
+.mail-readiness article { display: grid; gap: 7px; min-height: 105px; padding: 18px; background: var(--surface); }
+.mail-readiness span,.mail-readiness small { color: var(--muted); font: 650 8px var(--mono); }
+.mail-readiness strong { font-size: 34px; }
+.mail-center-layout { display: grid; grid-template-columns: 360px minmax(0,1fr); gap: 14px; align-items: start; margin-top: 14px; }
+.mail-thread-list { display: grid; border: 1px solid var(--border); background: var(--surface); }
+.mail-thread-list > article { padding: 18px; border-top: 1px solid var(--border); }
+.mail-thread-list > article > div,.mail-thread-list footer { display: flex; flex-wrap: wrap; gap: 7px; }
+.mail-thread-list > article h3 { margin: 12px 0 6px; font-size: 17px; }
+.mail-thread-list > article p,.mail-thread-list > article small { color: var(--muted); }
+.mail-thread-list footer { margin-top: 14px; }
+.delivery-ledger { margin-top: 20px; }
+.delivery-ledger > header { display: flex; justify-content: space-between; align-items: end; padding: 18px 0; }
+.delivery-ledger > header p { color: var(--cyan); font: 750 9px var(--mono); }
+.delivery-ledger > header h3 { margin: 4px 0; font-size: 24px; }
+.mail-header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.mail-header-actions button:disabled { opacity: .5; }
+.mail-conversation { margin-top: 20px; padding: 22px; border: 1px solid var(--border); background: var(--surface); }
+.mail-conversation > header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.mail-conversation > header p { color: var(--cyan); font: 750 9px var(--mono); }
+.mail-conversation > header h3 { margin: 4px 0; font-size: 24px; }
+.mail-conversation > header button { border: 1px solid var(--border); background: transparent; color: var(--muted); padding: 8px 10px; font: 750 8px var(--mono); }
+.mail-conversation > article { margin: 14px 0; padding: 18px; border: 1px solid var(--border); border-left: 3px solid var(--cyan); background: var(--bg); }
+.mail-conversation > article.outbound { border-left-color: var(--accent); }
+.mail-conversation > article > div { display: flex; gap: 8px; align-items: center; }
+.mail-conversation > article time { margin-left: auto; color: var(--muted); font: 600 8px var(--mono); }
+.mail-conversation > article b,.mail-conversation > article small { display: block; margin-top: 10px; }
+.mail-conversation > article small { color: var(--muted); }
+.mail-conversation > article p { white-space: pre-wrap; color: #c8d7d0; line-height: 1.65; }
+.mail-conversation > aside { display: grid; grid-template-columns: 150px 1fr auto; gap: 14px; padding: 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 10px; }
+.mail-note-form { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.mail-note-form label { display: grid; gap: 7px; color: var(--muted); font: 700 9px var(--mono); }
+.mail-note-form textarea { width: 100%; padding: 11px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.mail-note-form button { padding: 11px 13px; border: 1px solid var(--cyan); background: transparent; color: var(--cyan); font: 750 8px var(--mono); }
+
 @media (max-width: 1180px) {
   .control-grid { grid-template-columns: 1fr 1fr; }
   .note-preview { grid-column: 1 / 3; }
@@ -755,7 +818,9 @@
 }
 
 @media (max-width: 900px) {
-  .workspace-layout,.notes-layout,.team-layout,.decision-layout { grid-template-columns: 1fr; }
+  .workspace-layout,.notes-layout,.team-layout,.decision-layout,.nda-library-layout,.mail-center-layout { grid-template-columns: 1fr; }
+  .nda-library-list { position: static; max-height: 420px; }
+  .mail-readiness { grid-template-columns: 1fr 1fr; }
   .workspace-form { position: static; }
   .notes-grid { grid-template-columns: 1fr; }
   .meeting-materials { grid-template-columns: 1fr; }
@@ -772,4 +837,8 @@
   .team-ledger > article { grid-template-columns: 1fr auto; }
   .mfa-enrollment,.join-mfa { grid-template-columns: 1fr; }
   .comment-thread > p { grid-template-columns: 1fr; }
+  .nda-editor-toolbar { display: grid; }
+  .revision-ledger > article { grid-template-columns: 35px 1fr; }
+  .revision-ledger > article span,.revision-ledger > article code,.revision-ledger > article time { grid-column: 2; }
+  .mail-readiness { grid-template-columns: 1fr; }
 }

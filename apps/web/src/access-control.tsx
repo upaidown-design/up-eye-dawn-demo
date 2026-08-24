@@ -4,6 +4,7 @@ import {Link, Navigate, useLocation, useNavigate, useParams} from 'react-router-
 import {runtimeConfig} from './runtime-config';
 import {portalApi as api} from './portal-api';
 import {DecisionsView, InvestorCrmView, MaterialsView, MeetingKitView, TeamView, type ProjectComment, type ProjectDecision, type Team} from './admin-collaboration';
+import {MailCenterView, NdaLibraryView} from './admin-legal-mail';
 
 type AccessStatus = {granted: boolean; reason: string; role?: string; fullName?: string; email?: string};
 type NdaDocument = {
@@ -135,7 +136,7 @@ export function NdaAccessPage() {
 }
 
 function AdminNav({logout}: {logout: () => void}) {
-  return <><header className="admin-topbar"><div><p>UP AI DOWN · ADMIN CONFIDENTIAL</p><h1>Project & Investor Operations</h1></div><div><Link to="/investor">Open investor room</Link><button onClick={logout}>Sign out</button></div></header><nav className="admin-suite-nav"><Link to="/admin">Control room</Link><Link to="/admin/agenda">Agenda</Link><Link to="/admin/tasks">Tasks</Link><Link to="/admin/notes">Notes</Link><Link to="/admin/decisions">Decisions</Link><Link to="/admin/crm">Investor CRM</Link><Link to="/admin/materials">Materials</Link><Link to="/admin/meeting-kit">Editable meeting kit</Link><Link to="/admin/team">Team</Link><Link to="/admin/invitations">Registration</Link><Link to="/admin/visitors">Visitors</Link><Link to="/admin/nda">NDA ledger</Link><Link to="/admin/meeting">Reference kit</Link><Link to="/admin/security">Security</Link></nav></>;
+  return <><header className="admin-topbar"><div><p>UP AI DOWN · ADMIN CONFIDENTIAL</p><h1>Project & Investor Operations</h1></div><div><Link to="/investor">Open investor room</Link><button onClick={logout}>Sign out</button></div></header><nav className="admin-suite-nav"><Link to="/admin">Control room</Link><Link to="/admin/agenda">Agenda</Link><Link to="/admin/tasks">Tasks</Link><Link to="/admin/notes">Notes</Link><Link to="/admin/decisions">Decisions</Link><Link to="/admin/crm">Investor CRM</Link><Link to="/admin/mail">Mail center</Link><Link to="/admin/materials">Materials</Link><Link to="/admin/meeting-kit">Editable meeting kit</Link><Link to="/admin/team">Team</Link><Link to="/admin/invitations">Registration</Link><Link to="/admin/visitors">Visitors</Link><Link to="/admin/nda">NDA library</Link><Link to="/admin/nda-evidence">NDA evidence</Link><Link to="/admin/meeting">Reference kit</Link><Link to="/admin/security">Security</Link></nav></>;
 }
 
 function StatusPill({value}: {value: string}) { return <em className={`portal-status ${value.toLowerCase()}`}>{statusLabel(value)}</em>; }
@@ -172,12 +173,14 @@ export function AdminPortal() {
     {section === 'notes' && <NotesView notes={workspace.notes} createNote={createNote} update={(id, body) => void mutate(`/admin/notes/${id}`, 'PATCH', body)}/>}
     {section === 'decisions' && <DecisionsView decisions={workspace.decisions} comments={workspace.comments} team={team} mutate={mutate}/>}
     {section === 'crm' && <InvestorCrmView role={team.current.role}/>}
+    {section === 'mail' && <MailCenterView role={team.current.role}/>}
     {section === 'materials' && <MaterialsView role={team.current.role}/>}
     {section === 'meeting-kit' && <MeetingKitView role={team.current.role}/>}
     {section === 'team' && <TeamView team={team} reload={load} setError={setError}/>}
     {section === 'invitations' && <InvitationsView invitations={invitations} briefing={briefing} newLink={newLink} createInvitation={createInvitation} openInvitation={openInvitation} selected={selectedInvitation} close={() => setSelectedInvitation(null)} revoke={(id) => void reasonAction(`/admin/invitations/${id}/revoke`, 'Reason for revoking this invitation')}/>}
     {section === 'visitors' && <VisitorsView visitors={visitors} openVisitor={openVisitor} selected={selectedVisitor} close={() => setSelectedVisitor(null)} approve={approve} revoke={(id) => void reasonAction(`/admin/visitors/${id}/revoke`, 'Reason for revoking this visitor') } reverify={(id) => void api(`/admin/visitors/${id}/reverify`, {method: 'POST', body: '{}'}).then(load)}/>}
-    {section === 'nda' && <NdaLedger acceptances={acceptances} revoke={(id) => void reasonAction(`/admin/nda/${id}/revoke`, 'Reason for revoking this NDA acceptance')}/>}
+    {section === 'nda' && <NdaLibraryView role={team.current.role}/>}
+    {section === 'nda-evidence' && <NdaLedger acceptances={acceptances} revoke={(id) => void reasonAction(`/admin/nda/${id}/revoke`, 'Reason for revoking this NDA acceptance')}/>}
     {section === 'meeting' && <MeetingView briefing={briefing}/>}
     {section === 'security' && <SecurityView security={security} events={dashboard.recentActivity}/>}
   </main>;

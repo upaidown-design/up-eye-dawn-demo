@@ -100,6 +100,31 @@ test('private portal workflows enforce identity, permissions, NDA and immutable 
   expect(unsafeDistribution.status()).toBe(400);
   await body(await adminMutation(request, 'patch', `/api/v1/admin/materials/${material.id}`, {status: 'DISTRIBUTED', approvalNote: 'E2E approval only'}), 200);
 
+  const ndaVersion = `NDA-E2E-${Date.now()}`;
+  const ndaDocument = await body(await adminMutation(request, 'post', '/api/v1/admin/nda-documents', {
+    version: ndaVersion, title: 'E2E diligence NDA', jurisdiction: 'UNITED_STATES', governingLaw: 'E2E TEST ONLY',
+    signatureProfile: 'SIMPLE_ELECTRONIC_SIGNATURE_WORKFLOW', purpose: 'TECHNICAL_DILIGENCE', disclosingParty: 'UP AI DOWN E2E',
+    notice: 'E2E workflow draft. Not for external use.', paragraphs: ['First controlled paragraph.', 'Second controlled paragraph.'], changeNote: 'Initial E2E draft',
+  }), 201) as {id: string};
+  await body(await adminMutation(request, 'patch', `/api/v1/admin/nda-documents/${ndaDocument.id}`, {paragraphs: ['First controlled paragraph.', 'Second revised paragraph.'], changeNote: 'Verify revision history'}), 200);
+  const ndaDetail = await body(await request.get(`/api/v1/admin/nda-documents/${ndaDocument.id}`), 200) as {revisions: Array<{revision_number: number}>};
+  expect(ndaDetail.revisions.map((item) => item.revision_number)).toEqual([2, 1]);
+  await body(await adminMutation(request, 'post', `/api/v1/admin/nda-documents/${ndaDocument.id}/status`, {status: 'LEGAL_REVIEW', changeNote: 'Send through controlled review', approvalConfirmed: false, counselReference: ''}), 200);
+  const skippedReview = await adminMutation(request, 'post', `/api/v1/admin/nda-documents/${ndaDocument.id}/status`, {status: 'RETIRED', changeNote: 'Must fail', approvalConfirmed: false, counselReference: ''});
+  expect(skippedReview.status()).toBe(409);
+  await body(await adminMutation(request, 'post', `/api/v1/admin/nda-documents/${ndaDocument.id}/status`, {status: 'APPROVED', changeNote: 'E2E lifecycle only', approvalConfirmed: true, counselReference: 'E2E-NOT-LEGAL-APPROVAL'}), 200);
+  expect((await adminMutation(request, 'patch', `/api/v1/admin/nda-documents/${ndaDocument.id}`, {title: 'Must remain immutable', changeNote: 'Must fail'})).status()).toBe(409);
+  const clone = await body(await adminMutation(request, 'post', `/api/v1/admin/nda-documents/${ndaDocument.id}/clone`, {version: `${ndaVersion}-CLONE`, purpose: 'STRATEGIC_PARTNER', changeNote: 'Independent E2E variant'}), 201) as {id: string};
+  expect((await request.get(`/api/v1/admin/nda-documents/${clone.id}`)).status()).toBe(200);
+
+  const mailThread = await body(await adminMutation(request, 'post', '/api/v1/admin/mail/threads', {subject: 'E2E investor follow-up', contactEmail: 'followup@example.invalid', organisation: 'E2E Capital', priority: 'HIGH', nextFollowUpAt: expiresAt(), notes: 'Initial context'}), 201) as {id: string};
+  await body(await adminMutation(request, 'patch', `/api/v1/admin/mail/threads/${mailThread.id}`, {status: 'WAITING_REPLY'}), 200);
+  await body(await adminMutation(request, 'post', `/api/v1/admin/mail/threads/${mailThread.id}/notes`, {body: 'E2E internal follow-up note'}), 201);
+  const mailCenter = await body(await request.get('/api/v1/admin/mail'), 200) as {mailbox: {configured: boolean}; threads: Array<{id: string; status: string}>};
+  expect(mailCenter.mailbox.configured).toBe(false);
+  expect(mailCenter.threads.find((item) => item.id === mailThread.id)?.status).toBe('WAITING_REPLY');
+  expect((await adminMutation(request, 'post', '/api/v1/admin/mail/sync', {})).status()).toBe(503);
+
   const teamInvitation = await body(await adminMutation(request, 'post', '/api/v1/admin/team/invitations', {email: 'editor-e2e@example.invalid', displayName: 'E2E Editor', role: 'EDITOR', expiresAt: expiresAt()}), 201) as {shareUrl: string};
   const teamToken = invitationToken(teamInvitation.shareUrl);
   const teamClient = await isolatedClient('team-activation', '198.51.100.20');
@@ -184,6 +209,8 @@ test('private portal workflows enforce identity, permissions, NDA and immutable 
   await body(await adminMutation(request, 'patch', `/api/v1/admin/crm/contacts/${contact.id}`, {status: 'ARCHIVED'}), 200);
   await body(await adminMutation(request, 'patch', `/api/v1/admin/crm/organisations/${organisation.id}`, {status: 'ARCHIVED'}), 200);
   await body(await adminMutation(request, 'patch', `/api/v1/admin/materials/${material.id}`, {status: 'RETIRED'}), 200);
+  await body(await adminMutation(request, 'post', `/api/v1/admin/nda-documents/${ndaDocument.id}/status`, {status: 'RETIRED', changeNote: 'E2E cleanup', approvalConfirmed: false, counselReference: ''}), 200);
+  await body(await adminMutation(request, 'patch', `/api/v1/admin/mail/threads/${mailThread.id}`, {status: 'ARCHIVED'}), 200);
   await body(await adminMutation(request, 'patch', `/api/v1/admin/events/${event.id}`, {status: 'ARCHIVED'}), 200);
   await body(await adminMutation(request, 'patch', `/api/v1/admin/tasks/${task.id}`, {status: 'ARCHIVED'}), 200);
   await body(await adminMutation(request, 'patch', `/api/v1/admin/notes/${note.id}`, {status: 'ARCHIVED'}), 200);
