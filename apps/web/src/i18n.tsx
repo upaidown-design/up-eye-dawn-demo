@@ -363,6 +363,15 @@ export const spanishExact: Record<string, string> = {
   "RELATED TECHNOLOGY": "TECNOLOGÍA RELACIONADA",
   "The temporary DEV control exists only when a private fragment is supplied and is removed from browser history immediately. It creates a normal, audited, time-limited session bound to this network and browser.":
     "El control DEV temporal solo existe cuando se proporciona un fragmento privado y se elimina inmediatamente del historial del navegador. Crea una sesión normal, auditada, de duración limitada y vinculada a esta red y navegador.",
+  "Deterministic NDVI demonstration using synthetic data.":
+    "Demostración determinista de NDVI con datos sintéticos.",
+  "Farm, anomaly, soil readings and mission report are also synthetic or simulated.":
+    "La explotación, la anomalía, las lecturas del suelo y el informe de misión también son sintéticos o simulados.",
+  "System layers": "Capas del sistema",
+  "UP AI DOWN autonomous agricultural field intelligence concept":
+    "Concepto de inteligencia agrícola autónoma de campo de UP AI DOWN",
+  "Concept visualization of the Sentinel, rover and drone system in an agricultural field":
+    "Visualización conceptual del sistema Sentinel, rover y dron en una explotación agrícola",
 };
 
 const spanishTerms: Array<[string, string]> = [
