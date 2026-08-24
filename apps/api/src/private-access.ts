@@ -363,6 +363,8 @@ export async function registerPrivateAccess(
   const externalEnabled = env("EXTERNAL_PORTAL_ENABLED", "false") === "true";
   const workflowTestEnabled =
     env("WORKFLOW_TEST_PORTAL_ENABLED", "false") === "true";
+  const workflowTestForceManualApproval =
+    env("WORKFLOW_TEST_FORCE_MANUAL_APPROVAL", "true") === "true";
   const privacyStatus = env("PRIVACY_LEGAL_STATUS", "DRAFT");
   const adminMfaRequired = env("ADMIN_MFA_REQUIRED", "false") === "true";
   const emailVerificationProvider = env(
@@ -1439,6 +1441,7 @@ export async function registerPrivateAccess(
     version: string,
     acceptedAt: string,
     evidence: string,
+    language: "en" | "es",
     ids: { visitorId: string; invitationId: string; acceptanceId: string },
   ) => {
     const transport = mailTransport();
@@ -1456,6 +1459,7 @@ export async function registerPrivateAccess(
           acceptedAt,
           evidence,
           legalStatus: nda.status,
+          language,
         }),
       );
       await recordEmail(
@@ -1612,12 +1616,10 @@ export async function registerPrivateAccess(
       if (!trustedOrigin(request, reply)) return;
       const parsed = AcceptTeamInvitationBody.safeParse(request.body);
       if (!parsed.success)
-        return reply
-          .code(400)
-          .send({
-            error: "INVALID_TEAM_REGISTRATION",
-            issues: parsed.error.flatten(),
-          });
+        return reply.code(400).send({
+          error: "INVALID_TEAM_REGISTRATION",
+          issues: parsed.error.flatten(),
+        });
       const input = parsed.data;
       const client = await pool.connect();
       let userId = "";
@@ -1677,13 +1679,9 @@ export async function registerPrivateAccess(
       } catch (error) {
         await client.query("ROLLBACK");
         const typed = error as Error & { statusCode?: number };
-        return reply
-          .code(typed.statusCode ?? 500)
-          .send({
-            error: typed.statusCode
-              ? typed.message
-              : "TEAM_REGISTRATION_FAILED",
-          });
+        return reply.code(typed.statusCode ?? 500).send({
+          error: typed.statusCode ? typed.message : "TEAM_REGISTRATION_FAILED",
+        });
       } finally {
         client.release();
       }
@@ -1792,11 +1790,9 @@ export async function registerPrivateAccess(
       } catch (error) {
         await client.query("ROLLBACK");
         const typed = error as Error & { statusCode?: number };
-        return reply
-          .code(typed.statusCode ?? 500)
-          .send({
-            error: typed.statusCode ? typed.message : "RECOVERY_FAILED",
-          });
+        return reply.code(typed.statusCode ?? 500).send({
+          error: typed.statusCode ? typed.message : "RECOVERY_FAILED",
+        });
       } finally {
         client.release();
       }
@@ -2043,12 +2039,10 @@ export async function registerPrivateAccess(
       if (!trustedOrigin(request, reply)) return;
       const parsed = RegisterBody.safeParse(request.body);
       if (!parsed.success)
-        return reply
-          .code(400)
-          .send({
-            error: "INVALID_REGISTRATION",
-            issues: parsed.error.flatten(),
-          });
+        return reply.code(400).send({
+          error: "INVALID_REGISTRATION",
+          issues: parsed.error.flatten(),
+        });
       const context = await getRegistrationContext(request);
       if (!context)
         return reply.code(401).send({ error: "REGISTRATION_CONTEXT_REQUIRED" });
@@ -2246,11 +2240,9 @@ export async function registerPrivateAccess(
       } catch (error) {
         await client.query("ROLLBACK");
         const typed = error as Error & { statusCode?: number };
-        return reply
-          .code(typed.statusCode ?? 500)
-          .send({
-            error: typed.statusCode ? typed.message : "REGISTRATION_FAILED",
-          });
+        return reply.code(typed.statusCode ?? 500).send({
+          error: typed.statusCode ? typed.message : "REGISTRATION_FAILED",
+        });
       } finally {
         client.release();
       }
@@ -2266,6 +2258,7 @@ export async function registerPrivateAccess(
         context.version,
         acceptedAtUtc,
         evidence,
+        input.language,
         ids,
       );
       await pool.query(
@@ -2535,12 +2528,10 @@ export async function registerPrivateAccess(
     if (!admin) return;
     const parsed = CreateTeamInvitationBody.safeParse(request.body);
     if (!parsed.success)
-      return reply
-        .code(400)
-        .send({
-          error: "INVALID_TEAM_INVITATION",
-          issues: parsed.error.flatten(),
-        });
+      return reply.code(400).send({
+        error: "INVALID_TEAM_INVITATION",
+        issues: parsed.error.flatten(),
+      });
     const input = parsed.data;
     const email = normalizeEmail(input.email);
     if (
@@ -2588,14 +2579,12 @@ export async function registerPrivateAccess(
       { actorId: admin.admin_user_id, adminId: admin.admin_user_id },
       { teamInvitationId: id, emailHash: sha256(email), role: input.role },
     );
-    return reply
-      .code(201)
-      .send({
-        id,
-        shareUrl: `${publicBaseUrl}/demo/admin/join#token=${raw}`,
-        warning:
-          "This team invitation is shown once and requires individual MFA enrollment.",
-      });
+    return reply.code(201).send({
+      id,
+      shareUrl: `${publicBaseUrl}/demo/admin/join#token=${raw}`,
+      warning:
+        "This team invitation is shown once and requires individual MFA enrollment.",
+    });
   });
   app.post(
     "/api/v1/admin/team/invitations/:id/revoke",
@@ -2714,13 +2703,11 @@ export async function registerPrivateAccess(
       { actorId: admin.admin_user_id, adminId: admin.admin_user_id },
       { targetAdminId: id, resetId, emailHash: sha256(target.email) },
     );
-    return reply
-      .code(201)
-      .send({
-        shareUrl: `${publicBaseUrl}/demo/admin/recover#token=${raw}`,
-        warning:
-          "This recovery link rotates both the password and MFA factor and is shown once.",
-      });
+    return reply.code(201).send({
+      shareUrl: `${publicBaseUrl}/demo/admin/recover#token=${raw}`,
+      warning:
+        "This recovery link rotates both the password and MFA factor and is shown once.",
+    });
   });
   app.post("/api/v1/admin/mfa/begin", async (request, reply) => {
     const admin = await requireAdminMutation(request, reply);
@@ -2910,12 +2897,10 @@ export async function registerPrivateAccess(
     if (!admin) return;
     const parsed = UpdateProjectEventBody.safeParse(request.body);
     if (!parsed.success)
-      return reply
-        .code(400)
-        .send({
-          error: "INVALID_EVENT_UPDATE",
-          issues: parsed.error.flatten(),
-        });
+      return reply.code(400).send({
+        error: "INVALID_EVENT_UPDATE",
+        issues: parsed.error.flatten(),
+      });
     const id = (request.params as { id: string }).id;
     const input = parsed.data;
     const hasEndsAt = Object.hasOwn(input, "endsAt");
@@ -3235,12 +3220,10 @@ export async function registerPrivateAccess(
     if (!admin) return;
     const parsed = UpdateProjectDecisionBody.safeParse(request.body);
     if (!parsed.success)
-      return reply
-        .code(400)
-        .send({
-          error: "INVALID_DECISION_UPDATE",
-          issues: parsed.error.flatten(),
-        });
+      return reply.code(400).send({
+        error: "INVALID_DECISION_UPDATE",
+        issues: parsed.error.flatten(),
+      });
     const id = (request.params as { id: string }).id;
     const input = parsed.data;
     const hasOwner = Object.hasOwn(input, "ownerAdminId");
@@ -3372,9 +3355,10 @@ export async function registerPrivateAccess(
     const raw = randomOpaqueToken();
     const id = randomUUID();
     const publicId = `inv_${randomOpaqueToken(12)}`;
-    const manualApprovalRequired = workflowTestEnabled
-      ? true
-      : input.manualApprovalRequired;
+    const manualApprovalRequired =
+      workflowTestEnabled && workflowTestForceManualApproval
+        ? true
+        : input.manualApprovalRequired;
     await pool.query(
       `INSERT INTO private_portal.invitations(id,public_id,token_hash,name,description,organisation_name,intended_recipient_email,allowed_email_domain,policy,nda_document_id,status,created_by,valid_from,expires_at,max_registrations,manual_approval_required,scopes,metadata) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'ACTIVE',$11,$12,$13,$14,$15,$16,$17)`,
       [
@@ -3416,14 +3400,12 @@ export async function registerPrivateAccess(
       },
       { publicId, policy: input.policy, manualApprovalRequired },
     );
-    return reply
-      .code(201)
-      .send({
-        id,
-        publicId,
-        shareUrl: `${publicBaseUrl}/demo/access/${raw}`,
-        warning: "For security reasons this token will not be shown again.",
-      });
+    return reply.code(201).send({
+      id,
+      publicId,
+      shareUrl: `${publicBaseUrl}/demo/access/${raw}`,
+      warning: "For security reasons this token will not be shown again.",
+    });
   });
   app.get("/api/v1/admin/invitations/:id", async (request, reply) => {
     if (!(await requireAdmin(request, reply))) return;
@@ -3805,7 +3787,9 @@ export async function registerPrivateAccess(
       externalPortal: externalEnabled
         ? "ENABLED"
         : workflowTestEnabled
-          ? "WORKFLOW_TESTING"
+          ? workflowTestForceManualApproval
+            ? "WORKFLOW_TESTING_MANUAL_APPROVAL"
+            : "WORKFLOW_TESTING_CONTROLLED_ACCESS"
           : "DISABLED",
       ndaLegalStatus: `${ndaState.approved} APPROVED · ${ndaState.total} TOTAL`,
       privacyLegalStatus: privacyStatus,
@@ -3879,6 +3863,7 @@ export async function registerPrivateAccess(
     privacyStatus,
     externalEnabled,
     workflowTestEnabled,
+    workflowTestForceManualApproval,
     health: async () => ({
       database: (await pool.query("SELECT 1")).rowCount === 1 ? "ok" : "error",
       portal: "ok",

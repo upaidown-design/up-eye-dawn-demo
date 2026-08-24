@@ -115,12 +115,12 @@ export const spanishExact: Record<string, string> = {
     "Las invitaciones, los visitantes individuales, las evidencias de NDA, las sesiones activas y los materiales de reunión se gestionan en un espacio de trabajo auditable.",
   "ADMINISTRATOR ACCESS": "ACCESO DE ADMINISTRADOR",
   "Sign in": "Iniciar sesión",
-  "Use administrator credentials. Production access requires MFA.":
-    "Utiliza credenciales de administrador. El acceso de producción requiere MFA.",
+  "Use administrator credentials. Enter an authenticator code only if MFA is enabled on your account.":
+    "Utiliza tus credenciales de administrador. Introduce el código del autenticador solo si tu cuenta tiene MFA activado.",
   Email: "Correo electrónico",
   Password: "Contraseña",
   "Authenticator code": "Código del autenticador",
-  "when enabled": "cuando esté habilitado",
+  "optional unless MFA is enabled": "opcional salvo que MFA esté activado",
   "VERIFYING…": "VERIFICANDO…",
   "ENTER PRIVATE PORTAL": "ENTRAR AL PORTAL PRIVADO",
   "The credentials or verification code are incorrect.":
@@ -178,6 +178,9 @@ export const spanishExact: Record<string, string> = {
   "Governing law:": "Ley aplicable:",
   "Privacy and access record": "Registro de privacidad y acceso",
   "ADMIN CONTROL ROOM": "CENTRO DE CONTROL ADMINISTRATIVO",
+  "PRIVATE CONTROL ROOM": "CENTRO DE CONTROL PRIVADO",
+  "The project, meeting and private investor flow in one place.":
+    "El proyecto, la reunión y el flujo privado de inversores en un solo lugar.",
   "Project control": "Control del proyecto",
   Agenda: "Agenda",
   Tasks: "Tareas",
@@ -328,17 +331,21 @@ export const spanishExact: Record<string, string> = {
   Contact: "Contacto",
   "Next follow-up": "Próximo seguimiento",
   "ADD THREAD": "AÑADIR CONVERSACIÓN",
-  "Spanish controlled translation · Español": "Traducción controlada al español",
+  "Spanish controlled translation · Español":
+    "Traducción controlada al español",
   "Spanish title": "Título en español",
   "Spanish legal notice": "Aviso jurídico en español",
-  "Spanish agreement text · separate paragraphs with a blank line": "Texto del acuerdo en español · separa los párrafos con una línea en blanco",
+  "Spanish agreement text · separate paragraphs with a blank line":
+    "Texto del acuerdo en español · separa los párrafos con una línea en blanco",
   "Spanish agreement text": "Texto del acuerdo en español",
-  "Agreement text · separate paragraphs with a blank line": "Texto del acuerdo · separa los párrafos con una línea en blanco",
+  "Agreement text · separate paragraphs with a blank line":
+    "Texto del acuerdo · separa los párrafos con una línea en blanco",
   "Visible legal notice": "Aviso jurídico visible",
   "Required revision note": "Nota de revisión obligatoria",
   "SAVE NEW REVISION": "GUARDAR NUEVA REVISIÓN",
   "Revision history": "Historial de revisiones",
-  "Create a new independent NDA draft": "Crear un nuevo borrador de NDA independiente",
+  "Create a new independent NDA draft":
+    "Crear un nuevo borrador de NDA independiente",
   "CREATE CONTROLLED DRAFT": "CREAR BORRADOR CONTROLADO",
   "Public navigation": "Navegación pública",
   FIXED: "FIJO",
