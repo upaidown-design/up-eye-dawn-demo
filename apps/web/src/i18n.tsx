@@ -177,6 +177,27 @@ export const spanishExact: Record<string, string> = {
   "Disclosing party:": "Parte divulgadora:",
   "Governing law:": "Ley aplicable:",
   "Privacy and access record": "Registro de privacidad y acceso",
+  "The invitation may be shared, but every person receives an independent record. Access is never inherited from another visitor’s password, cookie or email address.":
+    "La invitación puede compartirse, pero cada persona recibe un registro independiente. El acceso nunca se hereda de la contraseña, las cookies o el correo de otro visitante.",
+  "DRAFT FOR WORKFLOW TESTING": "BORRADOR PARA PRUEBAS DEL FLUJO",
+  "WORKFLOW TEST ONLY — this draft has not been approved by legal counsel and must be replaced before external use.":
+    "SOLO PRUEBA DEL FLUJO — este borrador no ha sido aprobado por un abogado y debe sustituirse antes de cualquier uso externo.",
+  "A single-use sign-in link was sent. Open it in this same browser to continue to the assigned NDA.":
+    "Se ha enviado un enlace de acceso de un solo uso. Ábrelo en este mismo navegador para continuar con el NDA asignado.",
+  "The link expires and does not replace the NDA, administrator approval or the client-bound portal session.":
+    "El enlace caduca y no sustituye el NDA, la aprobación del administrador ni la sesión del portal vinculada al dispositivo.",
+  "Review the assigned agreement, provide your business identity and apply your typed legal name as an electronic signature.":
+    "Revisa el acuerdo asignado, facilita tu identidad profesional y utiliza tu nombre legal escrito como firma electrónica.",
+  "I intend my typed name to be my electronic signature and consent to receive and retain this agreement and its evidence record electronically.":
+    "Declaro que mi nombre escrito constituye mi firma electrónica y consiento recibir y conservar electrónicamente este acuerdo y su registro de evidencias.",
+  "SIGNING & RECORDING…": "FIRMANDO Y REGISTRANDO…",
+  "SIGN NDA & CONTINUE": "FIRMAR EL NDA Y CONTINUAR",
+  "The system stores the assigned document version and hash, signatory data, affirmative intent, UTC timestamp, security evidence and an exact PDF copy. This is a simple electronic-signature workflow, not an advanced or qualified electronic signature.":
+    "El sistema conserva la versión y el hash del documento asignado, los datos del firmante, su consentimiento expreso, la marca temporal UTC, la evidencia de seguridad y una copia PDF exacta. Es un flujo de firma electrónica simple, no una firma avanzada ni cualificada.",
+  "Your acknowledgement and independent secure session have been recorded. Email delivery:":
+    "Tu reconocimiento y tu sesión segura independiente han quedado registrados. Entrega por correo:",
+  "Access remains bound to this browser session and network context. IP alone is never treated as identity.":
+    "El acceso permanece vinculado a esta sesión del navegador y a su contexto de red. La IP nunca se considera por sí sola una identidad.",
   "ADMIN CONTROL ROOM": "CENTRO DE CONTROL ADMINISTRATIVO",
   "PRIVATE CONTROL ROOM": "CENTRO DE CONTROL PRIVADO",
   "The project, meeting and private investor flow in one place.":
@@ -320,7 +341,7 @@ export const spanishExact: Record<string, string> = {
   Notice: "Aviso",
   Paragraphs: "Cláusulas",
   "CREATE DRAFT": "CREAR BORRADOR",
-  "LEGAL REVIEW": "REVISIÓN LEGAL",
+  "LEGAL REVIEW": "REVISIÓN JURÍDICA",
   APPROVED: "APROBADO",
   DRAFT: "BORRADOR",
   "Mail server": "Servidor de correo",
