@@ -25,6 +25,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r test
       - run: pnpm financial:test
+      - run: pnpm gcp:smtp:test
       - run: pnpm truth:check
       - run: pnpm build
       - run: pnpm audit --audit-level high

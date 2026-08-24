@@ -183,6 +183,7 @@ dns_file="/root/upaidown-mail-dns.txt"
   echo "TXT upaidown.com v=spf1 ip4:82.223.44.126 include:spf.dondominio.com ~all"
   echo "TXT _dmarc.upaidown.com v=DMARC1; p=none; rua=mailto:dmarc@upaidown.com; adkim=s; aspf=s; pct=100"
   echo "TXT _smtp._tls.upaidown.com v=TLSRPTv1; rua=mailto:dmarc@upaidown.com"
+  echo "TXT _mta-sts.upaidown.com v=STSv1; id=20260824T000000Z"
   printf 'TXT default._domainkey.upaidown.com '
   tr -d '\n\t\r ' < "${key_dir}/default.txt" | sed -E 's/.*\("(.*)"\).*/\1/; s/""//g'
   echo

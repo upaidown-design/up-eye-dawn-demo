@@ -36,7 +36,8 @@ const password = readFileSync(0, 'utf8').replace(/[\r\n]+$/, '');
 if (password.length < 16 || /[\r\n]/.test(password)) throw new Error('SMTP password must contain at least 16 characters and no line breaks.');
 
 const run = (command, commandArgs, options = {}) => {
-  const result = spawnSync(command, commandArgs, {encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options});
+  const stdinMode = options.input === undefined ? 'ignore' : 'pipe';
+  const result = spawnSync(command, commandArgs, {encoding: 'utf8', stdio: [stdinMode, 'pipe', 'pipe'], ...options});
   if (result.status !== 0) throw new Error(`${command} failed: ${(result.stderr || '').trim()}`);
   return result.stdout;
 };

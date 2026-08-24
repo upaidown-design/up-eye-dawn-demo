@@ -27,6 +27,7 @@
     "demo:logs": "docker compose logs -f --tail=200",
     "demo:screenshot": "pnpm --filter @ued/web screenshot",
     "assert:insece": "node scripts/assert-insece-untouched.mjs",
+    "gcp:smtp:test": "node --test scripts/gcp/configure-production-smtp.test.mjs",
     "gcp:smtp:configure": "node scripts/gcp/configure-production-smtp.mjs"
   },
   "devDependencies": {

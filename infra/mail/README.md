@@ -11,43 +11,35 @@ The commissioned path reuses the isolated server's existing Postfix, Dovecot, Op
 - Application access: authenticated SMTP submission plus read-only IMAP synchronization performed by the API. Mailbox secrets never reach React.
 - The former Stalwart Compose files remain a reference design only and must not be deployed alongside the commissioned stack.
 
-This directory prepares a dedicated mailbox service; it does **not** claim that a production mail server is already commissioned. The application VM must not host the mail stack because mail protocols, reverse-proxy ports, memory, security posture and recovery requirements are independent.
+## Production status
 
-## Selected architecture
+The private mail service is commissioned on the isolated server at `82.223.44.126`. Postfix handles MX delivery and authenticated submission, Dovecot exposes TLS-only IMAP, OpenDKIM signs outbound messages, Roundcube provides webmail, and Nginx serves webmail plus the MTA-STS policy. The Google Cloud application connects through server-side SMTP and read-only IMAP settings stored in Secret Manager. The historical Stalwart Compose design remains undeployed reference material.
 
-- Stalwart `v0.16.0`: mailbox storage, SMTP submission, IMAP and JMAP.
-- Roundcube `1.7.3-apache`: conventional private webmail at `https://mail.upaidown.com`.
-- Caddy `2.10.2-alpine`: HTTPS for webmail and the JMAP endpoint.
-- The administrator portal reads mailbox state through a server-side JMAP service account. A JMAP token is never exposed to React.
-- Authenticated outbound relay on TCP 587/465. Google Cloud blocks general external destination TCP 25; inbound TCP 25 remains the MX delivery port.
+Certificates for `mail.upaidown.com`, `webmail.upaidown.com` and `mta-sts.upaidown.com` are managed by Certbot. Both renewal paths have passed staging dry runs. DMARC and MTA-STS intentionally begin in monitoring/testing modes; enforcement should only be raised after reviewing aggregate reports and delivery behavior.
 
-The Compose file is a reviewed deployment reference, not a one-command production shortcut. Stalwart's generated configuration must be locked down before exposing any protocol.
+## Commissioning controls
 
-## Required release sequence
+1. DNS publishes the three service addresses, MX, SPF, DKIM, DMARC, MTA-STS and TLS-RPT. The existing website records remain unchanged.
+2. PTR resolves to `server.aiworking.pro`, which resolves forward to the same IP. The branded canonical client hostname remains `mail.upaidown.com`.
+3. SMTP submission and IMAP require authenticated TLS; SMTP port 25 remains available for inbound MX delivery and open-relay tests fail closed.
+4. TLS covers SMTP, IMAP, webmail and MTA-STS. Certificate renewal has passed staging dry runs for both certificate lineages.
+5. Daily local backups, checksums and service monitoring are active. An off-host encrypted restore drill remains a production follow-up.
+6. The application Secret Manager version contains `SMTP_*`, `MAIL_WEBMAIL_URL` and `MAIL_IMAP_*`; the React frontend never receives mailbox credentials.
+7. A production smoke test verifies authenticated submission, DKIM signing and read-only IMAP visibility. A controlled delivery test to an independent external mailbox is still required before relying on deliverability for an investor NDA.
 
-1. Create a separate static-IP VM sized for mail and encrypted persistent storage.
-2. Verify `upaidown.com` in Google Cloud and assign PTR `mail.upaidown.com` to the static IP.
-3. Configure an authenticated outbound relay on port 587 or 465. Confirm bounce handling and envelope-from alignment.
-4. Install Stalwart, create the domain and mailboxes, disable public management routes, require TLS and strong passwords, and create a least-privilege JMAP service account for the application.
-5. Publish and verify MX, A/AAAA, SPF, DKIM, DMARC, MTA-STS and TLS-RPT. Start DMARC in monitoring mode before increasing enforcement.
-6. Install TLS certificates for SMTP/IMAP as well as HTTPS. The Caddy certificate alone does not secure ports 465/587/993.
-7. Configure encrypted off-host backups and run restore drills. Back up mailbox data, Stalwart configuration and the Roundcube database; do not back up plaintext secrets.
-8. Run open-relay, authentication throttling, TLS, deliverability, inbound/outbound, spam, malware, backup/restore and monitoring tests.
-9. Only then set these application variables: `MAIL_WEBMAIL_URL`, `MAIL_JMAP_URL`, `MAIL_JMAP_ACCOUNT`, `MAIL_JMAP_TOKEN`, plus the existing `SMTP_*` sender/archive values.
-
-## Proposed DNS names
+## Production DNS names
 
 | Name | Purpose | Exposure |
 |---|---|---|
-| `mail.upaidown.com` | MX hostname, IMAP/SMTP and Roundcube | Public, TLS only |
-| `jmap.upaidown.com` | Application mailbox API | Public TLS endpoint with token auth; management blocked |
+| `mail.upaidown.com` | MX hostname and canonical IMAP/SMTP endpoint | Public, TLS only |
+| `webmail.upaidown.com` | Roundcube webmail | Public HTTPS; mailbox authentication required |
 | `mta-sts.upaidown.com` | MTA-STS policy | Public HTTPS |
 
 Do not configure all four purchased domains as independent mail systems. Use `upaidown.com` as the canonical sending domain first; aliases can be added after SPF/DKIM/DMARC alignment is proven.
 
-## First mailbox set
+## Production mailbox set
 
-Suggested functional addresses are `admin@`, `investors@`, `nda@`, `privacy@`, `legal@` and `support@` on `upaidown.com`. Create named human accounts separately and use aliases/shared mailboxes for functions. Never share the administrator mailbox password among founders.
+`investors@upaidown.com` is the physical shared mailbox. `admin@`, `nda@`, `privacy@`, `legal@`, `support@`, `dmarc@`, `postmaster@` and `webmaster@` are functional aliases delivered to it. Named human accounts should be added separately rather than sharing the operational mailbox password among founders.
 
 ## Application boundary
 
