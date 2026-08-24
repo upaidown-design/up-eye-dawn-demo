@@ -13,14 +13,19 @@ const project = value('--project', 'project-6ec58af7-91e9-4c25-870');
 const secret = value('--secret', 'ued-production-env');
 const zone = value('--zone', 'europe-west1-b');
 const vm = value('--vm', 'ued-prod-01');
-const user = value('--user', 'nda@upaidown.com');
-const archive = value('--archive', 'nda-archive@upaidown.com');
+const host = value('--host', 'mail.upaidown.com');
+const imapHost = value('--imap-host', host);
+const webmailUrl = value('--webmail-url', 'https://webmail.upaidown.com');
+const user = value('--user', 'investors@upaidown.com');
+const from = value('--from', 'nda@upaidown.com');
+const archive = value('--archive', 'legal@upaidown.com');
 const replyTo = value('--reply-to', 'privacy@upaidown.com');
+const identities = value('--identities', 'investors@upaidown.com,nda@upaidown.com,privacy@upaidown.com,legal@upaidown.com,admin@upaidown.com,support@upaidown.com');
 
 for (const [label, candidate] of [['project', project], ['secret', secret], ['zone', zone], ['vm', vm]]) {
   if (!/^[a-z0-9][a-z0-9._-]*$/i.test(candidate)) throw new Error(`Invalid ${label}`);
 }
-for (const address of [user, archive, replyTo]) {
+for (const address of [user, from, archive, replyTo,...identities.split(',')]) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) throw new Error(`Invalid email address: ${address}`);
 }
 if (!has('--password-stdin')) {
@@ -38,16 +43,25 @@ const run = (command, commandArgs, options = {}) => {
 
 const current = run('gcloud', ['secrets', 'versions', 'access', 'latest', `--secret=${secret}`, `--project=${project}`]);
 const updates = new Map([
-  ['SMTP_HOST', 'smtp.dondominio.com'],
+  ['SMTP_HOST', host],
   ['SMTP_PORT', '587'],
   ['SMTP_SECURE', 'false'],
   ['SMTP_REQUIRE_TLS', 'true'],
   ['SMTP_USER', user],
   ['SMTP_PASSWORD', password],
-  ['SMTP_FROM', `UP AI DOWN <${user}>`],
+  ['SMTP_FROM', `UP AI DOWN <${from}>`],
   ['SMTP_REPLY_TO', replyTo],
   ['SMTP_ARCHIVE', archive],
   ['NDA_ARCHIVE_EMAIL', archive],
+  ['MAIL_SERVER_PROVIDER', 'POSTFIX_DOVECOT'],
+  ['MAIL_WEBMAIL_URL', webmailUrl],
+  ['MAIL_IMAP_HOST', imapHost],
+  ['MAIL_IMAP_PORT', '993'],
+  ['MAIL_IMAP_SECURE', 'true'],
+  ['MAIL_IMAP_TLS_SERVERNAME', imapHost],
+  ['MAIL_IMAP_ACCOUNT', user],
+  ['MAIL_IMAP_PASSWORD', password],
+  ['MAIL_IMAP_IDENTITIES', identities],
 ]);
 
 const seen = new Set();
@@ -61,7 +75,7 @@ for (const [key, setting] of updates) if (!seen.has(key)) lines.push(`${key}=${s
 const next = `${lines.join('\n')}\n`;
 
 run('gcloud', ['secrets', 'versions', 'add', secret, `--project=${project}`, '--data-file=-'], {input: next});
-console.log(`Created a new ${secret} version with authenticated STARTTLS SMTP settings.`);
+console.log(`Created a new ${secret} version with authenticated SMTP and IMAP settings.`);
 
 if (has('--apply-vm')) {
   const directory = mkdtempSync(join(tmpdir(), 'ued-smtp-'));

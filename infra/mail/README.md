@@ -1,5 +1,16 @@
 # UP AI DOWN private mail service
 
+## Implemented architecture
+
+The commissioned path reuses the isolated server's existing Postfix, Dovecot, OpenDKIM, Roundcube and Fail2Ban services. This avoids a second mail stack competing for ports or changing the unrelated applications already running on that host. The reproducible, idempotent provisioning script is `existing-server/provision-upaidown-mail.sh`.
+
+- Canonical domain: `upaidown.com`.
+- Shared operational mailbox: `investors@upaidown.com`.
+- Functional aliases: `admin@`, `nda@`, `privacy@`, `legal@`, `support@`, `dmarc@`, `postmaster@` and `webmaster@`.
+- Webmail: `https://webmail.upaidown.com`.
+- Application access: authenticated SMTP submission plus read-only IMAP synchronization performed by the API. Mailbox secrets never reach React.
+- The former Stalwart Compose files remain a reference design only and must not be deployed alongside the commissioned stack.
+
 This directory prepares a dedicated mailbox service; it does **not** claim that a production mail server is already commissioned. The application VM must not host the mail stack because mail protocols, reverse-proxy ports, memory, security posture and recovery requirements are independent.
 
 ## Selected architecture
@@ -40,4 +51,4 @@ Suggested functional addresses are `admin@`, `investors@`, `nda@`, `privacy@`, `
 
 ## Application boundary
 
-The portal's Mail Center is a CRM/follow-up and evidence layer. Roundcube remains the full composer and complete mailbox client. Once the four `MAIL_JMAP_*` settings are installed, an OWNER or ADMIN can synchronize the most recent 100 messages through JMAP and read normalized text conversations inside the panel. Attachments and active HTML are deliberately not imported. Synchronization remains fail-closed before server commissioning.
+The portal's Mail Center is a CRM/follow-up and evidence layer. Roundcube remains the full composer and complete mailbox client. With `MAIL_IMAP_*` settings installed, an OWNER or ADMIN can synchronize the most recent 100 INBOX messages and read normalized text conversations inside the panel. JMAP remains supported as an alternative. Attachments and active HTML are deliberately not imported. Synchronization remains fail-closed before server commissioning.
