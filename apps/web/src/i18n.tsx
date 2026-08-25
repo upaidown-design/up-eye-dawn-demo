@@ -203,6 +203,58 @@ export const spanishExact: Record<string, string> = {
     "El acceso permanece vinculado a esta sesión del navegador y a su contexto de red. La IP nunca se considera por sí sola una identidad.",
   "ADMIN CONTROL ROOM": "CENTRO DE CONTROL ADMINISTRATIVO",
   "PRIVATE CONTROL ROOM": "CENTRO DE CONTROL PRIVADO",
+  "ADMINISTRATOR WORKSPACE": "ESPACIO DE ADMINISTRACIÓN",
+  "Administrator workspace": "Espacio de administración",
+  "UP AI DOWN · ADMIN CONFIDENTIAL": "UP AI DOWN · ADMINISTRACIÓN CONFIDENCIAL",
+  "Project & Investor Operations": "Operaciones del proyecto y de inversores",
+  "UP AI DOWN": "UP AI DOWN",
+  "Private operations": "Operaciones privadas",
+  "Project management": "Gestión del proyecto",
+  "Investor operations": "Operaciones con inversores",
+  "Access and legal": "Acceso y área legal",
+  "Meeting and system": "Reunión y sistema",
+  "Control room": "Centro de control",
+  "Investor CRM": "CRM de inversores",
+  "Reference kit": "Kit de referencia",
+  "Authenticated workspace": "Espacio autenticado",
+  "Sign out": "Cerrar sesión",
+  "Expand menu": "Ampliar menú",
+  "Collapse menu": "Contraer menú",
+  "Open menu": "Abrir menú",
+  "View investor portal": "Ver portal de inversores",
+  "Prepare meeting": "Preparar reunión",
+  "Project status, priorities and recent activity.":
+    "Estado del proyecto, prioridades y actividad reciente.",
+  "Plan meetings, visits, travel and deadlines.":
+    "Planifica reuniones, visitas, viajes y plazos.",
+  "Assign work, priorities, owners and due dates.":
+    "Asigna trabajo, prioridades, responsables y vencimientos.",
+  "Capture project knowledge and investor context.":
+    "Conserva conocimiento del proyecto y contexto de inversores.",
+  "Record decisions, rationale and follow-up.":
+    "Registra decisiones, motivos y seguimiento.",
+  "Manage organisations, contacts and follow-up.":
+    "Gestiona organizaciones, contactos y seguimiento.",
+  "Review conversations and schedule follow-up.":
+    "Revisa conversaciones y programa seguimientos.",
+  "Control investor documents and distribution.":
+    "Controla documentos para inversores y su distribución.",
+  "Prepare agenda, presentation, speech and questions.":
+    "Prepara agenda, presentación, discurso y preguntas.",
+  "Manage partners, roles and secure access.":
+    "Gestiona socios, roles y accesos seguros.",
+  "Create controlled links for investor registration.":
+    "Crea enlaces controlados para registrar inversores.",
+  "Review identities, approvals and active access.":
+    "Revisa identidades, aprobaciones y accesos activos.",
+  "Create, edit and version NDA templates.":
+    "Crea, edita y versiona plantillas de NDA.",
+  "Inspect signed agreements and immutable evidence.":
+    "Consulta acuerdos firmados y evidencias inmutables.",
+  "Use the approved meeting run-of-show.":
+    "Utiliza el guion operativo aprobado para la reunión.",
+  "Review release gates, sessions and security events.":
+    "Revisa bloqueos de publicación, sesiones y eventos de seguridad.",
   "The project, meeting and private investor flow in one place.":
     "El proyecto, la reunión y el flujo privado de inversores en un solo lugar.",
   "Project control": "Control del proyecto",
@@ -220,6 +272,294 @@ export const spanishExact: Record<string, string> = {
   Meeting: "Reunión",
   Security: "Seguridad",
   "Mail center": "Centro de correo",
+  "CONTROL ROOM · LIVE DATA": "CENTRO DE CONTROL · DATOS EN DIRECTO",
+  "CONTROLLED RELEASE": "PUBLICACIÓN CONTROLADA",
+  "Investor release:": "Publicación para inversores:",
+  "Legal gates remain authoritative.":
+    "Los controles jurídicos siguen siendo obligatorios.",
+  "Open tasks": "Tareas abiertas",
+  Overdue: "Vencidas",
+  Upcoming: "Próximos eventos",
+  "Pinned notes": "Notas destacadas",
+  "Active invitations": "Invitaciones activas",
+  Approvals: "Aprobaciones",
+  "NDA accepted": "NDA aceptados",
+  TODO: "POR HACER",
+  BLOCKED: "BLOQUEADA",
+  CRITICAL: "CRÍTICA",
+  HIGH: "ALTA",
+  MEDIUM: "MEDIA",
+  LOW: "BAJA",
+  NOTICE: "AVISO",
+  WARNING: "ADVERTENCIA",
+  ADMIN: "ADMINISTRADOR",
+  "Portal owner": "Responsable del portal",
+  "Legal owner": "Responsable jurídico",
+  "Founding team": "Equipo fundador",
+  "Product owner": "Responsable de producto",
+  "Platform owner": "Responsable de plataforma",
+  "ADMIN DEV LOGIN SUCCESS": "ACCESO TEMPORAL DE ADMINISTRACIÓN CORRECTO",
+  "ADMIN LOGIN SUCCESS": "ACCESO DE ADMINISTRACIÓN CORRECTO",
+  NEXT: "PRÓXIMO",
+  EXECUTION: "EJECUCIÓN",
+  MEMORY: "MEMORIA",
+  "Priority tasks": "Tareas prioritarias",
+  Manage: "Gestionar",
+  "No upcoming events. Add the meeting, travel or deadline.":
+    "No hay próximos eventos. Añade una reunión, un viaje o un plazo.",
+  "No open tasks. Add the next project action.":
+    "No hay tareas abiertas. Añade la siguiente acción del proyecto.",
+  "Pin the notes that must stay visible to the team.":
+    "Destaca las notas que el equipo debe mantener visibles.",
+  "AUDIT LEDGER": "REGISTRO DE AUDITORÍA",
+  "Recent activity": "Actividad reciente",
+  events: "eventos",
+  "Enroll owner MFA before external release":
+    "Activar el MFA del propietario antes de la publicación externa",
+  "Approve NDA and privacy notice with counsel":
+    "Aprobar el NDA y el aviso de privacidad con asesoría jurídica",
+  "Run the full presentation rehearsal":
+    "Realizar el ensayo completo de la presentación",
+  "Truth-review the Spanish and English visual decks":
+    "Revisar la veracidad de las presentaciones visuales en español e inglés",
+  "Configure SMTP delivery and NDA archive":
+    "Configurar el envío SMTP y el archivo de NDA",
+  "New visual decks are reference material":
+    "Las nuevas presentaciones visuales son material de referencia",
+  "The two 10-page PDFs and overview JPEG contain useful narrative ideas, but include unverified specifications, autonomy claims and product geometries. Do not distribute them as validated evidence without review.":
+    "Los dos PDF de 10 páginas y el JPEG de resumen contienen ideas narrativas útiles, pero incluyen especificaciones, afirmaciones de autonomía y geometrías de producto no verificadas. No deben distribuirse como evidencia validada sin revisión.",
+  "External investor access remains gated":
+    "El acceso externo de inversores continúa restringido",
+  "The registration and NDA workflow is implemented, but external release stays disabled until legal/privacy approval, owner MFA and SMTP evidence delivery are complete.":
+    "El flujo de registro y NDA está implementado, pero la publicación externa seguirá desactivada hasta completar la aprobación legal y de privacidad, el MFA del propietario y la entrega de evidencias por SMTP.",
+  "01 · AGENDA": "01 · AGENDA",
+  "02 · VISIT": "02 · VISITA",
+  "04 · SPEECH": "04 · DISCURSO",
+  "05 · REFERENCE MATERIALS": "05 · MATERIALES DE REFERENCIA",
+  ACCEPTED: "ACEPTADO",
+  "Allowed domain": "Dominio permitido",
+  Any: "Cualquiera",
+  CANCELLED: "CANCELADO",
+  "COPY SECURE LINK": "COPIAR ENLACE SEGURO",
+  DONE: "COMPLETADA",
+  FINANCE: "FINANZAS",
+  GENERAL: "GENERAL",
+  Invitation: "Invitación",
+  "Invitation ≠ identity ≠ session": "Invitación ≠ identidad ≠ sesión",
+  LEGAL: "JURÍDICO",
+  "Loading private control room…": "Cargando el centro de control privado…",
+  "No additional detail.": "Sin detalles adicionales.",
+  "No invalidation reason": "Sin motivo de invalidación",
+  OTHER: "OTRO",
+  OWNER: "PROPIETARIO",
+  "Open the private invitation sent to you. Possessing another visitor’s browser session never grants access.":
+    "Abre la invitación privada que te enviaron. Disponer de la sesión del navegador de otro visitante nunca concede acceso.",
+  PIN: "DESTACAR",
+  PRODUCT: "PRODUCTO",
+  "Private control data could not be loaded.":
+    "No se pudieron cargar los datos del centro de control privado.",
+  RECENT: "RECIENTE",
+  RECORDED: "REGISTRADO",
+  REVERIFY: "REVERIFICAR",
+  REVOKE: "REVOCAR",
+  REVOKED: "REVOCADO",
+  "Reason for revoking this NDA acceptance":
+    "Motivo para revocar esta aceptación del NDA",
+  "Reason for revoking this invitation": "Motivo para revocar esta invitación",
+  "Reason for revoking this visitor": "Motivo para revocar este visitante",
+  Recipient: "Destinatario",
+  "Registration is not available for the details supplied.":
+    "El registro no está disponible para los datos facilitados.",
+  "Review every field. The typed acknowledgement must exactly match your full name.":
+    "Revisa todos los campos. La aceptación escrita debe coincidir exactamente con tu nombre completo.",
+  SCHEDULED: "PROGRAMADO",
+  "SECURE LINK · SHOWN ONCE": "ENLACE SEGURO · SE MUESTRA UNA SOLA VEZ",
+  SECURITY: "SEGURIDAD",
+  SENT: "ENVIADO",
+  TECHNICAL: "TÉCNICO",
+  "The email verification link is invalid or expired. Reopen the invitation and request a new link.":
+    "El enlace de verificación del correo no es válido o ha caducado. Vuelve a abrir la invitación y solicita otro enlace.",
+  "This email is not permitted by the invitation.":
+    "Este correo no está permitido por la invitación.",
+  UNKNOWN: "DESCONOCIDO",
+  UNPIN: "QUITAR DE DESTACADOS",
+  VIEWER: "LECTOR",
+  Version: "Versión",
+  Visitor: "Visitante",
+  "ACTIVATE INDIVIDUAL ACCOUNT": "ACTIVAR CUENTA INDIVIDUAL",
+  "ACTIVATING…": "ACTIVANDO…",
+  "ADD ITEM": "AÑADIR ELEMENTO",
+  "ADD ORGANISATION": "AÑADIR ORGANIZACIÓN",
+  "ADVANCE TO": "AVANZAR A",
+  ALTERNATIVES: "ALTERNATIVAS",
+  "Activate your account.": "Activa tu cuenta.",
+  "Add item": "Añadir elemento",
+  "Add organisation": "Añadir organización",
+  "Agenda, speech cues, questions and materials. Plain text only.":
+    "Agenda, indicaciones del discurso, preguntas y materiales. Solo texto sin formato.",
+  "Archive this item?": "¿Archivar este elemento?",
+  "Ask the portal owner for a new one-time recovery link.":
+    "Solicita al responsable del portal un nuevo enlace de recuperación de un solo uso.",
+  "Ask the portal owner for a new private team invitation.":
+    "Solicita al responsable del portal una nueva invitación privada para el equipo.",
+  "At least 14 characters with uppercase, lowercase, number and symbol.":
+    "Al menos 14 caracteres con mayúsculas, minúsculas, números y símbolos.",
+  "Body (plain text)": "Contenido (texto sin formato)",
+  Both: "Ambos",
+  "CONFIRM MFA": "CONFIRMAR MFA",
+  CONSEQUENCES: "CONSECUENCIAS",
+  CONTEXT: "CONTEXTO",
+  "COPY RECOVERY LINK": "COPIAR ENLACE DE RECUPERACIÓN",
+  "Checking invitation…": "Comprobando la invitación…",
+  "Checking recovery link…": "Comprobando el enlace de recuperación…",
+  Checklist: "Lista de comprobación",
+  Classification: "Clasificación",
+  "Concept render": "Render conceptual",
+  Contacts: "Contactos",
+  "Context, alternatives, outcome and consequences remain visible to every partner.":
+    "El contexto, las alternativas, el resultado y las consecuencias permanecen visibles para todos los socios.",
+  Corporate: "Corporativo",
+  "Create new credentials.": "Crea nuevas credenciales.",
+  DECIDED: "DECIDIDA",
+  DECISION: "DECISIÓN",
+  DILIGENCE: "DILIGENCIA",
+  DISABLE: "DESACTIVAR",
+  DISTRIBUTED: "DISTRIBUIDO",
+  Dataset: "Conjunto de datos",
+  Document: "Documento",
+  EDITOR: "EDITOR",
+  ENABLE: "ACTIVAR",
+  "Enroll your owner account before enabling external production access.":
+    "Activa la protección de tu cuenta de propietario antes de habilitar el acceso externo de producción.",
+  "Every partner receives an independent identity, MFA factor, permissions and audit trail.":
+    "Cada socio recibe una identidad, un factor MFA, permisos y un registro de auditoría independientes.",
+  "External URL (optional)": "URL externa (opcional)",
+  "Family office": "Family office",
+  Government: "Administración pública",
+  "INDIVIDUAL ACCOUNTS & ROLES": "CUENTAS Y ROLES INDIVIDUALES",
+  INTRO: "INTRODUCCIÓN",
+  Image: "Imagen",
+  "Individual account activation.": "Activación de cuenta individual.",
+  Language: "Idioma",
+  "Legal review": "Revisión jurídica",
+  "MARK DECIDED": "MARCAR COMO DECIDIDA",
+  "MATERIAL REGISTRY": "REGISTRO DE MATERIALES",
+  "MFA MISSING": "FALTA MFA",
+  "Material reference": "Referencia del material",
+  "New authenticator code": "Nuevo código del autenticador",
+  "New strong password": "Nueva contraseña segura",
+  "No country": "País no indicado",
+  "No items yet. Add agenda points, speech cues or questions.":
+    "Todavía no hay elementos. Añade puntos de agenda, indicaciones del discurso o preguntas.",
+  "No owner": "Sin responsable",
+  "No title": "Sin título",
+  "One identity, password, MFA factor and audit trail per person.":
+    "Una identidad, contraseña, factor MFA y registro de auditoría por persona.",
+  "Open document ↗": "Abrir documento ↗",
+  Order: "Orden",
+  "Organisations & Contacts": "Organizaciones y contactos",
+  Other: "Otro",
+  "PASSWORD + INDIVIDUAL MFA": "CONTRASEÑA + MFA INDIVIDUAL",
+  "PASSWORD + NEW MFA FACTOR": "CONTRASEÑA + NUEVO FACTOR MFA",
+  "PRIVATE TEAM LINK · SHOWN ONCE":
+    "ENLACE PRIVADO DEL EQUIPO · SE MUESTRA UNA SOLA VEZ",
+  PROPOSAL: "PROPUESTA",
+  PROPOSED: "PROPUESTA",
+  PROSPECT: "PROSPECTO",
+  Question: "Pregunta",
+  "RECOVERY LINK · SHOWN ONCE":
+    "ENLACE DE RECUPERACIÓN · SE MUESTRA UNA SOLA VEZ",
+  "REGISTER MATERIAL": "REGISTRAR MATERIAL",
+  "RESET ACCESS": "RESTABLECER ACCESO",
+  RETIRE: "RETIRAR",
+  RETIRED: "RETIRADO",
+  REVISIT: "REVISAR DE NUEVO",
+  "ROTATE PASSWORD & MFA": "CAMBIAR CONTRASEÑA Y MFA",
+  "ROTATING…": "CAMBIANDO…",
+  "Recover your identity": "Recupera tu identidad",
+  "Register material": "Registrar material",
+  "Retire this material?": "¿Retirar este material?",
+  "Rotate credentials securely.": "Cambia las credenciales de forma segura.",
+  "SAVING…": "GUARDANDO…",
+  "Scan this code in your authenticator app before submitting the form.":
+    "Escanea este código en tu aplicación de autenticación antes de enviar el formulario.",
+  "Scan this replacement factor in your authenticator app.":
+    "Escanea este factor de sustitución en tu aplicación de autenticación.",
+  "Scan with your authenticator app":
+    "Escanea con tu aplicación de autenticación",
+  "Secure your identity": "Protege tu identidad",
+  "Sort order": "Orden de clasificación",
+  "Speech cue": "Indicación del discurso",
+  Spreadsheet: "Hoja de cálculo",
+  Stage: "Fase",
+  "Strong password": "Contraseña segura",
+  "The owner-issued link is single-use and replaces both the password and authenticator factor.":
+    "El enlace emitido por el propietario es de un solo uso y sustituye tanto la contraseña como el factor de autenticación.",
+  "The previous sessions and MFA factor will be invalidated.":
+    "Las sesiones anteriores y el factor MFA quedarán invalidados.",
+  "The recipient creates a strong password and enrolls a unique TOTP factor before the account is activated.":
+    "El destinatario crea una contraseña segura y registra un factor TOTP único antes de activar la cuenta.",
+  "The secure recovery context is being validated.":
+    "Se está validando el contexto seguro de recuperación.",
+  "This invitation is being validated.": "Se está validando esta invitación.",
+  "Then enter the current six-digit code. The secret is not shown again after confirmation.":
+    "Después introduce el código actual de seis dígitos. El secreto no volverá a mostrarse tras la confirmación.",
+  Video: "Vídeo",
+  "Your account uses an individual authenticator factor.":
+    "Tu cuenta utiliza un factor de autenticación individual.",
+  "ADD FOLLOW-UP": "AÑADIR SEGUIMIENTO",
+  "ADD NOTE": "AÑADIR NOTA",
+  "Add email follow-up": "Añadir seguimiento por correo",
+  "Agreement text": "Texto del acuerdo",
+  "CLONE VARIANT": "CLONAR VARIANTE",
+  CLOSE: "CERRAR",
+  CLOSED: "CERRADO",
+  "COMMUNICATION & FOLLOW-UP": "COMUNICACIÓN Y SEGUIMIENTO",
+  CONFIGURED: "CONFIGURADO",
+  CONVERSATION: "CONVERSACIÓN",
+  CUSTOM: "PERSONALIZADO",
+  "Confirm that you are the OWNER and counsel has approved this exact text and hash.":
+    "Confirma que eres el PROPIETARIO y que la asesoría jurídica ha aprobado este texto y hash exactos.",
+  "Contact email": "Correo del contacto",
+  Documents: "Documentos",
+  "Due now": "Vence ahora",
+  "Follow-up queue": "Cola de seguimientos",
+  "IN PROGRESS": "EN CURSO",
+  "Independent draft cloned.": "Borrador independiente clonado.",
+  "Loading mail center…": "Cargando el centro de correo…",
+  "MAILBOX NOT COMMISSIONED": "BUZÓN NO HABILITADO",
+  MUTUAL: "MUTUO",
+  "NDA library & editor": "Biblioteca y editor de NDA",
+  "New immutable revision saved.": "Nueva revisión inmutable guardada.",
+  "New unique version identifier": "Nuevo identificador único de versión",
+  "No NDA documents found.": "No se encontraron documentos NDA.",
+  "No contact email": "Sin correo de contacto",
+  "No email follow-ups yet.": "Todavía no hay seguimientos por correo.",
+  "No organisation": "Sin organización",
+  "No text body was synchronized.": "No se sincronizó contenido de texto.",
+  "Not set": "Sin configurar",
+  "OPEN CONVERSATION": "ABRIR CONVERSACIÓN",
+  "OPEN PRIVATE WEBMAIL": "ABRIR WEBMAIL PRIVADO",
+  "Open follow-ups": "Seguimientos abiertos",
+  "Provider ID": "ID del proveedor",
+  "RETURN TO DRAFT": "DEVOLVER A BORRADOR",
+  "Reason for this legal workflow change":
+    "Motivo de este cambio en el flujo jurídico",
+  "Related record": "Registro relacionado",
+  "SEND TO LEGAL REVIEW": "ENVIAR A REVISIÓN JURÍDICA",
+  "SYNC MAILBOX": "SINCRONIZAR BUZÓN",
+  "SYNCING…": "SINCRONIZANDO…",
+  "SYSTEM MESSAGES": "MENSAJES DEL SISTEMA",
+  System: "Sistema",
+  "This follow-up has no synchronized messages yet. Use the private webmail for composition.":
+    "Este seguimiento todavía no tiene mensajes sincronizados. Utiliza el webmail privado para redactar.",
+  UNSPECIFIED: "SIN ESPECIFICAR",
+  "Unique version": "Versión única",
+  "Unknown sender": "Remitente desconocido",
+  "VERSIONED LEGAL CONTENT": "CONTENIDO JURÍDICO VERSIONADO",
+  WAITING: "EN ESPERA",
+  "Waiting reply": "Esperando respuesta",
+  Webmail: "Webmail",
   "PROJECT CALENDAR": "CALENDARIO DEL PROYECTO",
   "Meetings, visits, presentations, travel and deadlines.":
     "Reuniones, visitas, presentaciones, viajes y plazos.",
@@ -406,6 +746,8 @@ export const spanishExact: Record<string, string> = {
 };
 
 const spanishTerms: Array<[string, string]> = [
+  ["WORKFLOW_TESTING_CONTROLLED_ACCESS", "ACCESO CONTROLADO DE PRUEBAS"],
+  ["events", "eventos"],
   ["No decisions yet", "Aún no hay decisiones"],
   ["No notes yet", "Aún no hay notas"],
   ["No visitors registered yet", "Aún no hay visitantes registrados"],
@@ -567,6 +909,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(value);
   };
   useLayoutEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, language);
     void i18next.changeLanguage(language);
     document.documentElement.lang = language;
     document.documentElement.dataset.language = language;

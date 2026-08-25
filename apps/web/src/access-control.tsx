@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Link,
   Navigate,
+  NavLink,
   useLocation,
   useNavigate,
   useParams,
@@ -983,37 +984,238 @@ export function NdaAccessPage() {
   );
 }
 
-function AdminNav({ logout }: { logout: () => void }) {
+type AdminNavigationItem = {
+  to: string;
+  label: string;
+  mark: string;
+  description: string;
+};
+
+const adminNavigation: ReadonlyArray<{
+  label: string;
+  items: ReadonlyArray<AdminNavigationItem>;
+}> = [
+  {
+    label: "Overview",
+    items: [
+      {
+        to: "/admin",
+        label: "Control room",
+        mark: "CR",
+        description: "Project status, priorities and recent activity.",
+      },
+    ],
+  },
+  {
+    label: "Project management",
+    items: [
+      {
+        to: "/admin/agenda",
+        label: "Agenda",
+        mark: "AG",
+        description: "Plan meetings, visits, travel and deadlines.",
+      },
+      {
+        to: "/admin/tasks",
+        label: "Tasks",
+        mark: "TK",
+        description: "Assign work, priorities, owners and due dates.",
+      },
+      {
+        to: "/admin/notes",
+        label: "Notes",
+        mark: "NT",
+        description: "Capture project knowledge and investor context.",
+      },
+      {
+        to: "/admin/decisions",
+        label: "Decisions",
+        mark: "DC",
+        description: "Record decisions, rationale and follow-up.",
+      },
+    ],
+  },
+  {
+    label: "Investor operations",
+    items: [
+      {
+        to: "/admin/crm",
+        label: "Investor CRM",
+        mark: "CRM",
+        description: "Manage organisations, contacts and follow-up.",
+      },
+      {
+        to: "/admin/mail",
+        label: "Mail center",
+        mark: "ML",
+        description: "Review conversations and schedule follow-up.",
+      },
+      {
+        to: "/admin/materials",
+        label: "Materials",
+        mark: "MT",
+        description: "Control investor documents and distribution.",
+      },
+      {
+        to: "/admin/meeting-kit",
+        label: "Meeting kit",
+        mark: "MK",
+        description: "Prepare agenda, presentation, speech and questions.",
+      },
+    ],
+  },
+  {
+    label: "Access and legal",
+    items: [
+      {
+        to: "/admin/team",
+        label: "Team",
+        mark: "TM",
+        description: "Manage partners, roles and secure access.",
+      },
+      {
+        to: "/admin/invitations",
+        label: "Invitations",
+        mark: "IN",
+        description: "Create controlled links for investor registration.",
+      },
+      {
+        to: "/admin/visitors",
+        label: "Visitors",
+        mark: "VS",
+        description: "Review identities, approvals and active access.",
+      },
+      {
+        to: "/admin/nda",
+        label: "NDA library",
+        mark: "ND",
+        description: "Create, edit and version NDA templates.",
+      },
+      {
+        to: "/admin/nda-evidence",
+        label: "NDA evidence",
+        mark: "EV",
+        description: "Inspect signed agreements and immutable evidence.",
+      },
+    ],
+  },
+  {
+    label: "Meeting and system",
+    items: [
+      {
+        to: "/admin/meeting",
+        label: "Reference kit",
+        mark: "RF",
+        description: "Use the approved meeting run-of-show.",
+      },
+      {
+        to: "/admin/security",
+        label: "Security",
+        mark: "SC",
+        description: "Review release gates, sessions and security events.",
+      },
+    ],
+  },
+];
+
+const allAdminNavigation = adminNavigation.flatMap((group) => group.items);
+
+function AdminNav({
+  logout,
+  collapsed,
+  setCollapsed,
+}: {
+  logout: () => void;
+  collapsed: boolean;
+  setCollapsed: (value: boolean) => void;
+}) {
+  const location = useLocation();
+  const active =
+    allAdminNavigation.find((item) =>
+      item.to === "/admin"
+        ? location.pathname === "/admin"
+        : location.pathname.startsWith(item.to),
+    ) ?? allAdminNavigation[0]!;
+  const closeOnMobile = () => {
+    if (window.matchMedia("(max-width: 900px)").matches) setCollapsed(true);
+  };
   return (
     <>
+      <aside className="admin-sidebar" aria-label="Administrator workspace">
+        <header className="admin-sidebar-brand">
+          <div className="admin-product-mark" aria-hidden="true">
+            UD
+          </div>
+          <div>
+            <strong>UP AI DOWN</strong>
+            <span>Private operations</span>
+          </div>
+          <button
+            type="button"
+            className="admin-sidebar-collapse"
+            aria-label={collapsed ? "Expand menu" : "Collapse menu"}
+            aria-expanded={!collapsed}
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? "›" : "‹"}
+          </button>
+        </header>
+        <nav className="admin-suite-nav">
+          {adminNavigation.map((group) => (
+            <section key={group.label}>
+              <p>{group.label}</p>
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === "/admin"}
+                  onClick={closeOnMobile}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <span className="admin-nav-mark" aria-hidden="true">
+                    {item.mark}
+                  </span>
+                  <span className="admin-nav-copy">
+                    <b>{item.label}</b>
+                    <small>{item.description}</small>
+                  </span>
+                </NavLink>
+              ))}
+            </section>
+          ))}
+        </nav>
+        <footer className="admin-sidebar-footer">
+          <span>Authenticated workspace</span>
+          <button type="button" onClick={logout}>
+            Sign out
+          </button>
+        </footer>
+      </aside>
       <header className="admin-topbar">
-        <div>
-          <p>UP AI DOWN · ADMIN CONFIDENTIAL</p>
-          <h1>Project & Investor Operations</h1>
+        <button
+          type="button"
+          className="admin-mobile-menu"
+          onClick={() => setCollapsed(false)}
+          aria-label="Open menu"
+        >
+          <span aria-hidden="true" className="admin-menu-glyph">
+            <i />
+            <i />
+            <i />
+          </span>
+        </button>
+        <div className="admin-topbar-context">
+          <p>ADMINISTRATOR WORKSPACE</p>
+          <h1>{active.label}</h1>
+          <span>{active.description}</span>
         </div>
-        <div>
-          <Link to="/investor">Open investor room</Link>
-          <button onClick={logout}>Sign out</button>
+        <div className="admin-topbar-actions">
+          <Link to="/investor">View investor portal</Link>
+          <Link className="admin-topbar-primary" to="/admin/meeting-kit">
+            Prepare meeting
+          </Link>
         </div>
       </header>
-      <nav className="admin-suite-nav">
-        <Link to="/admin">Control room</Link>
-        <Link to="/admin/agenda">Agenda</Link>
-        <Link to="/admin/tasks">Tasks</Link>
-        <Link to="/admin/notes">Notes</Link>
-        <Link to="/admin/decisions">Decisions</Link>
-        <Link to="/admin/crm">Investor CRM</Link>
-        <Link to="/admin/mail">Mail center</Link>
-        <Link to="/admin/materials">Materials</Link>
-        <Link to="/admin/meeting-kit">Editable meeting kit</Link>
-        <Link to="/admin/team">Team</Link>
-        <Link to="/admin/invitations">Registration</Link>
-        <Link to="/admin/visitors">Visitors</Link>
-        <Link to="/admin/nda">NDA library</Link>
-        <Link to="/admin/nda-evidence">NDA evidence</Link>
-        <Link to="/admin/meeting">Reference kit</Link>
-        <Link to="/admin/security">Security</Link>
-      </nav>
     </>
   );
 }
@@ -1030,6 +1232,11 @@ export function AdminPortal() {
   const nav = useNavigate();
   const location = useLocation();
   const section = location.pathname.split("/")[2] || "dashboard";
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width: 900px)").matches
+      : false,
+  );
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -1197,8 +1404,14 @@ export function AdminPortal() {
   };
   if (!briefing || !dashboard || !workspace || !team || !security)
     return (
-      <main className="admin-portal admin-portal-loading">
-        <AdminNav logout={logout} />
+      <main
+        className={`admin-portal admin-portal-loading ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      >
+        <AdminNav
+          logout={logout}
+          collapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
+        />
         <section className="admin-loading-context" aria-live="polite">
           <p className="secure-kicker">PRIVATE CONTROL ROOM</p>
           <h2>The project, meeting and private investor flow in one place.</h2>
@@ -1208,9 +1421,13 @@ export function AdminPortal() {
     );
   return (
     <main
-      className={`admin-portal ${team.current.role === "VIEWER" ? "viewer" : ""}`}
+      className={`admin-portal ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${team.current.role === "VIEWER" ? "viewer" : ""}`}
     >
-      <AdminNav logout={logout} />
+      <AdminNav
+        logout={logout}
+        collapsed={sidebarCollapsed}
+        setCollapsed={setSidebarCollapsed}
+      />
       {team.current.role === "VIEWER" && (
         <div className="admin-readonly">
           READ-ONLY ROLE · Changes and security actions are disabled.
