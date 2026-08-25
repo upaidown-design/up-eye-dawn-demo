@@ -300,6 +300,19 @@ export const spanishExact: Record<string, string> = {
   "Platform owner": "Responsable de plataforma",
   "ADMIN DEV LOGIN SUCCESS": "ACCESO TEMPORAL DE ADMINISTRACIÓN CORRECTO",
   "ADMIN LOGIN SUCCESS": "ACCESO DE ADMINISTRACIÓN CORRECTO",
+  "ADMIN NETWORK CHANGED": "CAMBIO DE RED DE ADMINISTRACIÓN",
+  "ADMIN LOGOUT": "CIERRE DE SESIÓN DE ADMINISTRACIÓN",
+  "PROJECT TASK UPDATED": "TAREA DEL PROYECTO ACTUALIZADA",
+  "EMAIL VERIFICATION SENT": "VERIFICACIÓN DE CORREO ENVIADA",
+  "INVITATION OPENED": "INVITACIÓN ABIERTA",
+  "INVITATION REVOKED": "INVITACIÓN REVOCADA",
+  "NDA ACCEPTANCE REVOKED": "ACEPTACIÓN DEL NDA REVOCADA",
+  "REPORT DOWNLOADED": "INFORME DESCARGADO",
+  "SESSION CREATED": "SESIÓN CREADA",
+  "NDA ACCEPTED": "NDA ACEPTADO",
+  "REGISTRATION COMPLETED": "REGISTRO COMPLETADO",
+  "EMAIL VERIFIED": "CORREO VERIFICADO",
+  INFO: "INFORMACIÓN",
   NEXT: "PRÓXIMO",
   EXECUTION: "EJECUCIÓN",
   MEMORY: "MEMORIA",
@@ -324,6 +337,8 @@ export const spanishExact: Record<string, string> = {
     "Revisar la veracidad de las presentaciones visuales en español e inglés",
   "Configure SMTP delivery and NDA archive":
     "Configurar el envío SMTP y el archivo de NDA",
+  "Confirm New York meeting date, room and attendees":
+    "Confirmar la fecha, la sala y los asistentes de la reunión de Nueva York",
   "New visual decks are reference material":
     "Las nuevas presentaciones visuales son material de referencia",
   "The two 10-page PDFs and overview JPEG contain useful narrative ideas, but include unverified specifications, autonomy claims and product geometries. Do not distribute them as validated evidence without review.":
