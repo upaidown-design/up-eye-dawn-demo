@@ -317,6 +317,7 @@ export function AdminLogin() {
   const [password, setPassword] = useState("");
   const [mfaCode, setMfaCode] = useState("");
   const [devToken, setDevToken] = useState("");
+  const [publicTestAccess, setPublicTestAccess] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -352,6 +353,9 @@ export function AdminLogin() {
         if (session.authenticated) nav("/admin", { replace: true });
       })
       .catch(() => {});
+    api<{ available: boolean }>("/admin/dev-login/status")
+      .then(({ available }) => setPublicTestAccess(available))
+      .catch(() => setPublicTestAccess(false));
     return () => window.removeEventListener("hashchange", readPrivateFragment);
   }, []);
   const submit = async (event: FormEvent) => {
@@ -376,7 +380,7 @@ export function AdminLogin() {
     try {
       await api("/admin/dev-login", {
         method: "POST",
-        body: JSON.stringify({ token: devToken }),
+        body: JSON.stringify(devToken ? { token: devToken } : {}),
       });
       setDevToken("");
       nav("/admin", { replace: true });
@@ -417,14 +421,14 @@ export function AdminLogin() {
             MFA is enabled on your account.
           </p>
         </div>
-        {devToken && (
+        {(publicTestAccess || devToken) && (
           <button
             className="dev-account-helper"
             type="button"
             disabled={busy}
             onClick={() => void devLogin()}
           >
-            <b>TEST ACCESS · PRIVATE</b>
+            <b>TEST ACCESS · TEMPORARY</b>
             <span>Enter with one click — no password or code</span>
           </button>
         )}
@@ -472,9 +476,9 @@ export function AdminLogin() {
           </button>
         </form>
         <small>
-          The test button is activated only by the private administrator link.
-          It creates a normal, audited, time-limited session bound to this
-          network and browser; no password is stored in the page.
+          While temporary test mode is enabled, this button creates a normal,
+          audited, time-limited session bound to this network and browser. No
+          password is stored in the page.
         </small>
       </section>
     </main>

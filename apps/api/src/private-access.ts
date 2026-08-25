@@ -120,7 +120,9 @@ const LoginBody = z.object({
     .optional()
     .or(z.literal("")),
 });
-const DevLoginBody = z.object({ token: z.string().min(32).max(512) });
+const DevLoginBody = z.object({
+  token: z.string().min(32).max(512).optional(),
+});
 const PrepareBody = z.object({ token: z.string().min(32).max(256) });
 const EmailStartBody = z.object({ email: z.string().email().max(254) });
 const EmailCompleteBody = z.object({
@@ -391,6 +393,8 @@ export async function registerPrivateAccess(
   );
   const devLoginEnabled =
     env("TEMP_ADMIN_DEV_LOGIN_ENABLED", "false") === "true";
+  const devLoginPublicButtonEnabled =
+    env("TEMP_ADMIN_DEV_LOGIN_PUBLIC_BUTTON_ENABLED", "false") === "true";
   const devLoginToken = env("TEMP_ADMIN_DEV_LOGIN_TOKEN");
   const devLoginExpiresAt = env("TEMP_ADMIN_DEV_LOGIN_EXPIRES_AT");
   const devLoginExpiry = devLoginExpiresAt ? Date.parse(devLoginExpiresAt) : 0;
@@ -1515,6 +1519,7 @@ export async function registerPrivateAccess(
     request: FastifyRequest,
     reply: FastifyReply,
     eventType = "ADMIN_LOGIN_SUCCESS",
+    auditMetadata: Record<string, unknown> = {},
   ) => {
     await pool.query(
       "UPDATE private_portal.admin_sessions SET status='INVALIDATED',invalidated_at=now(),invalidation_reason='ROTATED' WHERE admin_user_id=$1 AND status='ACTIVE'",
@@ -1552,6 +1557,7 @@ export async function registerPrivateAccess(
       actorId: user.id,
       adminId: user.id,
       sessionId,
+      ...auditMetadata,
     });
     return {
       authenticated: true,
@@ -1570,6 +1576,21 @@ export async function registerPrivateAccess(
     return payload;
   });
 
+  const devLoginAvailable = () =>
+    devLoginEnabled &&
+    devLoginExpiry > Date.now() &&
+    devLoginToken.length >= 32;
+  app.get(
+    "/api/v1/admin/dev-login/status",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async () => ({
+      available: devLoginAvailable() && devLoginPublicButtonEnabled,
+      expiresAt:
+        devLoginAvailable() && devLoginPublicButtonEnabled
+          ? devLoginExpiresAt
+          : undefined,
+    }),
+  );
   app.post(
     "/api/v1/admin/team-invitations/prepare",
     { config: { rateLimit: { max: 10, timeWindow: "15 minutes" } } },
@@ -2426,14 +2447,18 @@ export async function registerPrivateAccess(
     async (request, reply) => {
       if (!trustedOrigin(request, reply)) return;
       const parsed = DevLoginBody.safeParse(request.body);
-      const available =
-        devLoginEnabled &&
-        devLoginExpiry > Date.now() &&
-        devLoginToken.length >= 32;
+      const available = devLoginAvailable();
+      const publicTestAccess =
+        available && devLoginPublicButtonEnabled && parsed.success;
+      const privateTokenAccess =
+        available &&
+        parsed.success &&
+        Boolean(parsed.data.token) &&
+        safeEqual(parsed.data.token ?? "", devLoginToken);
       if (
         !available ||
         !parsed.success ||
-        !safeEqual(parsed.data.token, devLoginToken)
+        (!publicTestAccess && !privateTokenAccess)
       ) {
         await audit(
           "ADMIN_DEV_LOGIN_FAILURE",
@@ -2456,6 +2481,12 @@ export async function registerPrivateAccess(
         request,
         reply,
         "ADMIN_DEV_LOGIN_SUCCESS",
+        {
+          accessMode: publicTestAccess
+            ? "PUBLIC_TEMPORARY_TEST_BUTTON"
+            : "PRIVATE_TEMPORARY_TOKEN",
+          expiresAt: devLoginExpiresAt,
+        },
       );
     },
   );
@@ -3801,7 +3832,11 @@ export async function registerPrivateAccess(
           ? "INCOMPLETE"
           : "NOT_CONFIGURED",
       temporaryDevAccess:
-        devLoginEnabled && devLoginExpiry > Date.now() ? "ENABLED" : "DISABLED",
+        devLoginEnabled && devLoginExpiry > Date.now()
+          ? devLoginPublicButtonEnabled
+            ? "PUBLIC_TEST_BUTTON"
+            : "PRIVATE_TOKEN"
+          : "DISABLED",
       https: cookieSecure ? "REQUIRED" : "LOCAL_HTTP",
       secureCookies: cookieSecure,
       trustedProxy: "CONTROLLED_NGINX_ONLY",
