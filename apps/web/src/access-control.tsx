@@ -311,6 +311,7 @@ function Loading({ text }: { text: string }) {
 }
 
 export function AdminLogin() {
+  const devTokenSessionKey = "ued-private-test-access";
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -326,11 +327,22 @@ export function AdminLogin() {
       const privateToken = fragment.get("dev") ?? "";
       if (privateToken) {
         setDevToken(privateToken);
+        try {
+          window.sessionStorage.setItem(devTokenSessionKey, privateToken);
+        } catch {
+          // The private fragment still works when browser storage is disabled.
+        }
         window.history.replaceState(
           null,
           "",
           `${window.location.pathname}${window.location.search}`,
         );
+      } else {
+        try {
+          setDevToken(window.sessionStorage.getItem(devTokenSessionKey) ?? "");
+        } catch {
+          // Keep the regular credential form available.
+        }
       }
     };
     readPrivateFragment();
@@ -369,6 +381,11 @@ export function AdminLogin() {
       setDevToken("");
       nav("/admin", { replace: true });
     } catch {
+      try {
+        window.sessionStorage.removeItem(devTokenSessionKey);
+      } catch {
+        // Nothing else is required when browser storage is disabled.
+      }
       setDevToken("");
       setError(
         "The temporary private access is invalid, expired or already disabled.",
@@ -407,8 +424,8 @@ export function AdminLogin() {
             disabled={busy}
             onClick={() => void devLogin()}
           >
-            <b>TEMP DEV · PRIVATE</b>
-            <span>Create a time-limited owner session</span>
+            <b>TEST ACCESS · PRIVATE</b>
+            <span>Enter with one click — no password or code</span>
           </button>
         )}
         <form onSubmit={submit}>
@@ -455,10 +472,9 @@ export function AdminLogin() {
           </button>
         </form>
         <small>
-          The temporary DEV control exists only when a private fragment is
-          supplied and is removed from browser history immediately. It creates a
-          normal, audited, time-limited session bound to this network and
-          browser.
+          The test button is activated only by the private administrator link.
+          It creates a normal, audited, time-limited session bound to this
+          network and browser; no password is stored in the page.
         </small>
       </section>
     </main>

@@ -8,6 +8,20 @@ const fallback=process.env.E2E_UPDATE_FALLBACKS==='true'
   :resolve(import.meta.dirname,'../test-results/audit-artifacts/new-york-2026');
 const runId='run_new_york_001';
 
+test('private test link exposes a one-click audited administrator session',async({page})=>{
+  await page.goto('/demo/admin/login#dev=e2e-private-one-click-owner-access-2026-only');
+  await expect(page).toHaveURL(/\/demo\/admin\/login$/);
+  const testAccess=page.getByRole('button',{name:/TEST ACCESS · PRIVATE/i});
+  await expect(testAccess).toBeVisible();
+  await expect(page.getByLabel('Email')).toHaveValue('');
+  await expect(page.getByLabel('Password')).toHaveValue('');
+  await testAccess.click();
+  await expect(page).toHaveURL(/\/demo\/admin$/);
+  await expect(page.getByRole('heading',{name:/project, meeting and private investor flow/i})).toBeVisible({timeout:45_000});
+  const session=await page.request.get('/api/v1/admin/session').then(response=>response.json());
+  expect(session).toMatchObject({authenticated:true,email:'e2e-owner@example.invalid',role:'OWNER',mfa:false});
+});
+
 test('New York critical path is healthy, resettable and repeatable',async({page})=>{
   test.setTimeout(300_000);
   await mkdir(fallback,{recursive:true});

@@ -51,7 +51,9 @@ services:
       SMTP_SECURE: "false"
       SMTP_FROM: UP AI DOWN E2E <nda@example.invalid>
       SMTP_ARCHIVE: archive@example.invalid
-      TEMP_ADMIN_DEV_LOGIN_ENABLED: "false"
+      TEMP_ADMIN_DEV_LOGIN_ENABLED: "true"
+      TEMP_ADMIN_DEV_LOGIN_TOKEN: e2e-private-one-click-owner-access-2026-only
+      TEMP_ADMIN_DEV_LOGIN_EXPIRES_AT: "2099-12-31T23:59:59Z"
       DEFAULT_INVITE_TOKEN: ""
     healthcheck:
       {
