@@ -43,11 +43,19 @@ test("translates the complete investor email-verification instructions", () => {
 test("translates administrator navigation, collaboration and legal workflows", () => {
   const cases = [
     ["Project management", "Gestión del proyecto"],
-    ["Prepare agenda, presentation, speech and questions.", "Prepara agenda, presentación, discurso y preguntas."],
+    [
+      "Prepare agenda, presentation, speech and questions.",
+      "Prepara agenda, presentación, discurso y preguntas.",
+    ],
     ["ACTIVATE INDIVIDUAL ACCOUNT", "ACTIVAR CUENTA INDIVIDUAL"],
     ["MATERIAL REGISTRY", "REGISTRO DE MATERIALES"],
     ["NDA library & editor", "Biblioteca y editor de NDA"],
     ["OPEN PRIVATE WEBMAIL", "ABRIR WEBMAIL PRIVADO"],
+    ["PROJECT TASK UPDATED", "TAREA DEL PROYECTO ACTUALIZADA"],
+    [
+      "Confirm New York meeting date, room and attendees",
+      "Confirmar la fecha, la sala y los asistentes de la reunión de Nueva York",
+    ],
     ["WORKFLOW_TESTING_CONTROLLED_ACCESS", "ACCESO CONTROLADO DE PRUEBAS"],
   ] as const;
   for (const [english, spanish] of cases)
