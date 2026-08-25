@@ -120,7 +120,7 @@ export const spanishExact: Record<string, string> = {
   Email: "Correo electrónico",
   Password: "Contraseña",
   "Authenticator code": "Código del autenticador",
-  "TEST ACCESS · PRIVATE": "ACCESO DE PRUEBAS · PRIVADO",
+  "TEST ACCESS · TEMPORARY": "ACCESO DE PRUEBAS · TEMPORAL",
   "Enter with one click — no password or code":
     "Entra con un clic, sin contraseña ni código",
   "optional unless MFA is enabled": "opcional salvo que MFA esté activado",
@@ -392,8 +392,8 @@ export const spanishExact: Record<string, string> = {
   DEMO_SIMULATION: "SIMULACIÓN DE DEMOSTRACIÓN",
   CONCEPT: "CONCEPTO",
   "RELATED TECHNOLOGY": "TECNOLOGÍA RELACIONADA",
-  "The test button is activated only by the private administrator link. It creates a normal, audited, time-limited session bound to this network and browser; no password is stored in the page.":
-    "El botón de pruebas solo se activa mediante el enlace privado de administración. Crea una sesión normal, auditada, de duración limitada y vinculada a esta red y navegador; la página no almacena ninguna contraseña.",
+  "While temporary test mode is enabled, this button creates a normal, audited, time-limited session bound to this network and browser. No password is stored in the page.":
+    "Mientras el modo temporal de pruebas esté activo, este botón crea una sesión normal, auditada, de duración limitada y vinculada a esta red y navegador. La página no almacena ninguna contraseña.",
   "Deterministic NDVI demonstration using synthetic data.":
     "Demostración determinista de NDVI con datos sintéticos.",
   "Farm, anomaly, soil readings and mission report are also synthetic or simulated.":

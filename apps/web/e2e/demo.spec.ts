@@ -8,10 +8,10 @@ const fallback=process.env.E2E_UPDATE_FALLBACKS==='true'
   :resolve(import.meta.dirname,'../test-results/audit-artifacts/new-york-2026');
 const runId='run_new_york_001';
 
-test('private test link exposes a one-click audited administrator session',async({page})=>{
-  await page.goto('/demo/admin/login#dev=e2e-private-one-click-owner-access-2026-only');
+test('normal admin login exposes the temporary one-click audited session',async({page})=>{
+  await page.goto('/demo/admin/login');
   await expect(page).toHaveURL(/\/demo\/admin\/login$/);
-  const testAccess=page.getByRole('button',{name:/TEST ACCESS · PRIVATE/i});
+  const testAccess=page.getByRole('button',{name:/TEST ACCESS · TEMPORARY/i});
   await expect(testAccess).toBeVisible();
   await expect(page.getByLabel('Email')).toHaveValue('');
   await expect(page.getByLabel('Password')).toHaveValue('');
