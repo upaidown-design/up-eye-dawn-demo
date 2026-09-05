@@ -1,6 +1,7 @@
 import{test,expect}from'@playwright/test';
 import{mkdir}from'node:fs/promises';
 import{resolve}from'node:path';
+import{loginAsTestAdmin}from'./portal-test-helpers';
 
 const output=resolve(import.meta.dirname,'../../../assets/meeting-fallback/new-york-2026/data-visualization');
 const runId='run_new_york_001';
@@ -11,6 +12,7 @@ test('professional data visualization views render without clipping',async({page
   const errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+  await loginAsTestAdmin(page);
   const check=async(path:string,title:string,file:string)=>{
     await page.goto(`/demo${path}`);
     await expect(page.getByRole('heading',{name:title})).toBeVisible();

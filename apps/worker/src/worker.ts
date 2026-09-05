@@ -1,1 +1,2 @@
-console.log(JSON.stringify({level:'info',service:'worker',message:'NDVI/report worker ready in deterministic fallback mode'}));setInterval(()=>{},60_000);
+import{workerStatus}from'./status.js';
+console.log(JSON.stringify({level:'info',...workerStatus,message:'NDVI/report worker ready in deterministic fallback mode'}));setInterval(()=>{},60_000);

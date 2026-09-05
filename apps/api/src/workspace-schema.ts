@@ -35,7 +35,7 @@ export const UpdateProjectEventBody = z.object({
   status: EventStatus.optional(),
   priority: Priority.optional(),
   ownerName: z.string().trim().max(160).optional(),
-});
+}).refine((value) => !value.startsAt || !value.endsAt || new Date(value.endsAt) > new Date(value.startsAt), {message: 'End must be after start', path: ['endsAt']});
 
 // ── Project Tasks ──────────────────────────────────────────────────────────────
 

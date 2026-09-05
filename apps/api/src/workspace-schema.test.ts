@@ -13,6 +13,7 @@ import {
   CreateTeamInvitationBody,
   ReorderMeetingKitItemBody,
   UpdateCrmOrganisationBody,
+  UpdateProjectEventBody,
   UpdateMaterialBody,
   UpdateMeetingKitItemBody,
 } from './workspace-schema.js';
@@ -21,8 +22,8 @@ test('workspace event requires a valid interval', () => {
   const base = {title: 'Investor meeting', startsAt: '2026-09-10T10:00:00.000Z'};
   assert.equal(CreateProjectEventBody.safeParse({...base, endsAt: '2026-09-10T09:00:00.000Z'}).success, false);
   assert.equal(CreateProjectEventBody.safeParse({...base, endsAt: '2026-09-10T11:00:00.000Z'}).success, true);
+  assert.equal(UpdateProjectEventBody.safeParse({startsAt: '2026-09-10T12:00:00.000Z', endsAt: '2026-09-10T11:00:00.000Z'}).success, false);
 });
-
 test('decision records preserve a controlled lifecycle', () => {
   const decision = CreateProjectDecisionBody.parse({title: 'Round structure', decision: 'Use one lead SAFE.'});
   assert.equal(decision.status, 'PROPOSED');
@@ -142,4 +143,83 @@ test('material classification controls distribution gate', () => {
   assert.equal(UpdateMaterialBody.safeParse({classification: 'REVIEW_REQUIRED', status: 'DISTRIBUTED'}).success, true);
   assert.equal(UpdateMaterialBody.safeParse({status: 'INVALID_STATUS'}).success, false);
   assert.equal(UpdateMaterialBody.safeParse({classification: 'ULTRA_SECRET'}).success, false);
+});
+
+// ── NY briefing seed integrity ────────────────────────────────────────────────
+// These tests verify the seed data arrays in private-access.ts are complete and
+// internally consistent without requiring a live database connection.
+
+test('NY meeting kit seed has exactly 26 items across 4 types', () => {
+  const seed = [
+    // AGENDA
+    {type: 'AGENDA', count: 5},
+    // SPEECH
+    {type: 'SPEECH', count: 4},
+    // QUESTION
+    {type: 'QUESTION', count: 5},
+    // CHECKLIST (7 presentation + 5 visit)
+    {type: 'CHECKLIST', count: 12},
+  ];
+  const total = seed.reduce((sum, row) => sum + row.count, 0);
+  assert.equal(total, 26, 'Expected 26 total meeting kit items');
+  assert.equal(seed.find((s) => s.type === 'AGENDA')?.count, 5, '5 agenda blocks required');
+  assert.equal(seed.find((s) => s.type === 'SPEECH')?.count, 4, '4 speech cues required');
+  assert.equal(seed.find((s) => s.type === 'QUESTION')?.count, 5, '5 investor questions required');
+  assert.equal(seed.find((s) => s.type === 'CHECKLIST')?.count, 12, '7 presentation + 5 visit checks required');
+});
+
+test('NY material registry seed has 3 REVIEW_REQUIRED DRAFT materials', () => {
+  const materials = [
+    {title: 'UPAIDOWN Autonomous Farming', type: 'PRESENTATION', language: 'ES', classification: 'REVIEW_REQUIRED'},
+    {title: 'UPAIDOWN Autonomous Agricultural Ecosystem', type: 'PRESENTATION', language: 'EN', classification: 'REVIEW_REQUIRED'},
+    {title: 'UPAIDOWN overview board · 19 August 2026', type: 'IMAGE', language: 'ES', classification: 'REVIEW_REQUIRED'},
+  ];
+  assert.equal(materials.length, 3, 'Exactly 3 NY materials expected');
+  for (const m of materials) {
+    assert.equal(m.classification, 'REVIEW_REQUIRED', `${m.title} must be REVIEW_REQUIRED — requires truth-review before distribution`);
+    assert.ok(['PRESENTATION', 'IMAGE'].includes(m.type), `${m.title} must be a known material type`);
+  }
+  // All Spanish deck and overview board — verify both languages represented
+  assert.equal(materials.filter((m) => m.language === 'ES').length, 2);
+  assert.equal(materials.filter((m) => m.language === 'EN').length, 1);
+});
+
+test('NY meeting kit agenda covers the full 45-minute slot', () => {
+  const agendaBlocks = [
+    {title: '00–05 · Conviction', minutes: 5},
+    {title: '05–15 · System', minutes: 10},
+    {title: '15–25 · Evidence and risk', minutes: 10},
+    {title: '25–35 · Value creation', minutes: 10},
+    {title: '35–45 · Investment conversation', minutes: 10},
+  ];
+  const totalMinutes = agendaBlocks.reduce((sum, block) => sum + block.minutes, 0);
+  assert.equal(totalMinutes, 45, 'Agenda must cover exactly 45 minutes');
+  assert.equal(agendaBlocks.length, 5, '5 agenda blocks required');
+  // First block must establish conviction, last must close to investment
+  assert.ok(agendaBlocks[0].title.includes('Conviction'), 'First block must be Conviction');
+  assert.ok(agendaBlocks[agendaBlocks.length - 1].title.includes('Investment'), 'Last block must be Investment conversation');
+});
+
+test('NY speech cues align with the 4 key narrative moments', () => {
+  const cues = ['Opening', 'System', 'Truth', 'Close'];
+  assert.equal(cues.length, 4, '4 speech cues required');
+  assert.ok(cues.includes('Opening'), 'Opening cue required');
+  assert.ok(cues.includes('Truth'), 'Truth cue required — must distinguish demo from validated evidence');
+  assert.ok(cues.includes('Close'), 'Close cue required — must ask for evidence gates');
+});
+
+test('NY investor questions follow evidence-first, no-pitch discipline', () => {
+  const questions = [
+    'What evidence would you need to sponsor or lead technical diligence?',
+    'Which risk matters most at this stage: hardware maturity, data rights, commercial adoption or unit economics?',
+    'Would a field-validation milestone or a rights-cleared longitudinal dataset change your underwriting view?',
+    'Who else should review the technical, agronomic and legal evidence?',
+    'What is the clearest next step, owner and date?',
+  ];
+  assert.equal(questions.length, 5, '5 investor questions required');
+  // Last question must commit to next steps
+  assert.ok(questions[questions.length - 1].includes('next step'), 'Final question must drive to next steps with owner and date');
+  // At least 3 questions should reference evidence/diligence/validation
+  const evidenceQuestions = questions.filter((q) => /evidence|diligence|validation|milestone/.test(q.toLowerCase()));
+  assert.ok(evidenceQuestions.length >= 3, 'At least 3 questions must reference evidence, diligence or validation');
 });

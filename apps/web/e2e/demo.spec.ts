@@ -1,6 +1,7 @@
 import{test,expect}from'@playwright/test';
 import{mkdir,copyFile}from'node:fs/promises';
 import{resolve}from'node:path';
+import{loginAsTestAdmin}from'./portal-test-helpers';
 
 const fallback=resolve(import.meta.dirname,'../../../assets/meeting-fallback/new-york-2026');
 const runId='run_new_york_001';
@@ -13,6 +14,8 @@ test('New York critical path is healthy, resettable and repeatable',async({page,
   await page.route(/^https?:\/\//,route=>{const url=new URL(route.request().url());if(url.hostname==='127.0.0.1'||url.hostname==='localhost')return route.continue();externalRequests.push(url.href);return route.abort('internetdisconnected')});
   page.on('pageerror',error=>browserErrors.push(error.message));
   page.on('console',message=>{if(message.type()==='error')browserErrors.push(message.text())});
+
+  await loginAsTestAdmin(page);
 
   const health=await request.get('/api/v1/health/live');
   expect(health.ok()).toBeTruthy();
