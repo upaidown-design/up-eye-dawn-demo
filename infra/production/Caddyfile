@@ -14,10 +14,28 @@
   reverse_proxy gateway:8088
 }
 
-upaidown.com, www.upaidown.com, demo.upaidown.com {
+upaidown.com, www.upaidown.com {
+  @investor_portal path /demo/access* /demo/investor* /demo/financials* /demo/round-decision*
+  redir @investor_portal https://upaidown.pro{uri} permanent
   import ued_proxy
 }
 
-upaidown.app, www.upaidown.app, upaidown.pro, www.upaidown.pro, upaidown.es, www.upaidown.es {
+demo.upaidown.com, upaidown.pro, www.upaidown.pro {
+  import ued_proxy
+}
+
+upaidown.app, www.upaidown.app {
+  encode zstd gzip
+  header {
+    -Server
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "same-origin"
+    X-Frame-Options "SAMEORIGIN"
+  }
+  reverse_proxy perfex_app:80
+}
+
+upaidown.es, www.upaidown.es {
   redir https://upaidown.com{uri} permanent
 }

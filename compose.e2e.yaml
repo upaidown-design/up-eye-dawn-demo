@@ -1,23 +1,17 @@
 name: up-eye-dawn-e2e
 services:
   gateway:
-    build: { context: ., dockerfile: infra/docker/gateway.Dockerfile }
+    build: {context: ., dockerfile: infra/docker/gateway.Dockerfile}
     ports: ["127.0.0.1:8090:8088"]
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../docs/investor-meeting-new-york-2026/web:/srv/investor:ro
     depends_on:
-      api: { condition: service_healthy }
-    healthcheck:
-      {
-        test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8088/demo/admin/login"],
-        interval: 5s,
-        timeout: 2s,
-        retries: 20,
-      }
+      api: {condition: service_healthy}
+    healthcheck: {test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8088/demo/admin/login"], interval: 5s, timeout: 2s, retries: 20}
 
   api:
-    build: { context: ., dockerfile: infra/docker/api.Dockerfile }
-    ports: ["127.0.0.1:4011:4010"]
+    build: {context: ., dockerfile: infra/docker/api.Dockerfile}
     environment:
       API_PORT: 4010
       DATABASE_URL: postgresql://ued:ued_test@postgres:5432/ued_test
@@ -26,7 +20,6 @@ services:
       PUBLIC_BASE_URL: http://127.0.0.1:8090
       EXTERNAL_PORTAL_ENABLED: "false"
       WORKFLOW_TEST_PORTAL_ENABLED: "true"
-      WORKFLOW_TEST_FORCE_MANUAL_APPROVAL: "false"
       EMAIL_VERIFICATION_PROVIDER: NONE
       ADMIN_EMAIL: e2e-owner@example.invalid
       ADMIN_PASSWORD_HASH: scrypt:f3aedcced133a559d394f2e94dd1798b:a8506ec550d85fde3cd86d07207c3b3f25e5a5f34b209ab369652e5cf944d565d0c82b4868c62311795406ab44aa503eadf6efe39f510197bfe7b09f731a84e2
@@ -51,56 +44,33 @@ services:
       SMTP_SECURE: "false"
       SMTP_FROM: UP AI DOWN E2E <nda@example.invalid>
       SMTP_ARCHIVE: archive@example.invalid
-      TEMP_ADMIN_DEV_LOGIN_ENABLED: "true"
-      TEMP_ADMIN_DEV_LOGIN_PUBLIC_BUTTON_ENABLED: "true"
-      TEMP_ADMIN_DEV_LOGIN_TOKEN: e2e-private-one-click-owner-access-2026-only
-      TEMP_ADMIN_DEV_LOGIN_EXPIRES_AT: "2099-12-31T23:59:59Z"
+      TEMP_ADMIN_DEV_LOGIN_ENABLED: "false"
       DEFAULT_INVITE_TOKEN: ""
-    healthcheck:
-      {
-        test:
-          ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/api/v1/health/live"],
-        interval: 5s,
-        timeout: 2s,
-        retries: 20,
-      }
+    healthcheck: {test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/api/v1/health/live"], interval: 5s, timeout: 2s, retries: 20}
     depends_on:
-      postgres: { condition: service_healthy }
-      redis: { condition: service_healthy }
-      mailpit: { condition: service_started }
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      mailpit: {condition: service_started}
 
   worker:
-    build: { context: ., dockerfile: infra/docker/api.Dockerfile }
+    build: {context: ., dockerfile: infra/docker/api.Dockerfile}
     command: ["node", "--import", "tsx", "apps/worker/src/worker.ts"]
-    depends_on: { redis: { condition: service_healthy } }
+    depends_on: {redis: {condition: service_healthy}}
 
   postgres:
     image: postgis/postgis:17-3.5-alpine
     platform: linux/amd64
-    environment:
-      { POSTGRES_USER: ued, POSTGRES_PASSWORD: ued_test, POSTGRES_DB: ued_test }
+    environment: {POSTGRES_USER: ued, POSTGRES_PASSWORD: ued_test, POSTGRES_DB: ued_test}
     volumes: ["ued_e2e_pg:/var/lib/postgresql/data"]
-    healthcheck:
-      {
-        test: ["CMD-SHELL", "pg_isready -U ued -d ued_test"],
-        interval: 3s,
-        timeout: 3s,
-        retries: 20,
-      }
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U ued -d ued_test"], interval: 3s, timeout: 3s, retries: 20}
 
   redis:
     image: redis:8.2.1-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no"]
-    healthcheck:
-      {
-        test: ["CMD", "redis-cli", "ping"],
-        interval: 3s,
-        timeout: 2s,
-        retries: 20,
-      }
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 3s, timeout: 2s, retries: 20}
 
   mailpit:
     image: axllent/mailpit:v1.27.7
     ports: ["127.0.0.1:8026:8025"]
 
-volumes: { ued_e2e_pg: {} }
+volumes: {ued_e2e_pg: {}}
