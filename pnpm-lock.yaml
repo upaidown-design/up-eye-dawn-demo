@@ -73,6 +73,43 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  apps/field-cinema:
+    dependencies:
+      echarts:
+        specifier: 6.1.0
+        version: 6.1.0
+      react:
+        specifier: 19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: 19.2.7
+        version: 19.2.7(react@19.2.7)
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: 19.2.2
+        version: 19.2.2(@types/react@19.2.2)
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
+      '@vitejs/plugin-react':
+        specifier: 6.0.5
+        version: 6.0.5(vite@8.1.5(@types/node@24.10.0)(tsx@4.20.6))
+      tsx:
+        specifier: 4.20.6
+        version: 4.20.6
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vite:
+        specifier: 8.1.5
+        version: 8.1.5(@types/node@24.10.0)(tsx@4.20.6)
+
   apps/web:
     dependencies:
       '@react-three/drei':
@@ -90,6 +127,9 @@ importers:
       echarts:
         specifier: ^6.1.0
         version: 6.1.0
+      i18next:
+        specifier: ^26.4.2
+        version: 26.4.2(typescript@5.9.3)
       maplibre-gl:
         specifier: 6.1.0
         version: 6.1.0
@@ -820,6 +860,14 @@ packages:
 
   hls.js@1.7.0:
     resolution: {integrity: sha512-NnQpT6Z//+2IB2qovSUbKbrlXY1MOpi0JynZ9L2NNOuTJiNCyMSQj9k2laEj1v7CxU/Hb8oTWR98eT3mVpPQVQ==}
+
+  i18next@26.4.2:
+    resolution: {integrity: sha512-RX+R0VLg13IbvRuJSxnqykUFS9vQZTl8wYpWPCIUDWVrSGjsQywB5Y+pjzrkboxGAuYfJZVH1InFTdgBdxq6ug==}
+    peerDependencies:
+      typescript: ^5 || ^6 || ^7
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -2033,6 +2081,10 @@ snapshots:
   helmet@8.3.0: {}
 
   hls.js@1.7.0: {}
+
+  i18next@26.4.2(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   ieee754@1.2.1: {}
 

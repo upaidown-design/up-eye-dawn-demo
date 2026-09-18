@@ -10,7 +10,6 @@ import "./chart-experience.css";
 import "./field-scene-3d.css";
 import "./access-control.css";
 import "./access-control-fixes.css";
-import "./responsive.css";
 import { App } from "./app";
 import { LanguageProvider } from "./i18n";
 
