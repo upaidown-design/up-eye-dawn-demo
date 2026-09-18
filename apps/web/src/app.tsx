@@ -786,6 +786,7 @@ export function App() {
   const t = locale === "en" ? en : es;
   const isolated =
     location.pathname === "/" ||
+    location.pathname === "/field-cinema" ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/access");
   useEffect(() => {
@@ -822,6 +823,7 @@ export function App() {
           </Link>
           <nav>
             <Link to="/investor">{t.demo}</Link>
+            <Link to="/field-cinema">Demo 3D</Link>
             <Link to="/investor-financials">Capital</Link>
             <Link to="/analytics/ndvi/ndvi-001">Analytics</Link>
             <Link to="/mission-control">{t.operator}</Link>
@@ -840,6 +842,7 @@ export function App() {
       )}
       <Routes>
         <Route path="/" element={<PublicHome />} />
+        <Route path="/field-cinema" element={secure(<iframe title="UPAIDOWN · Field Cinema" src="/demo/field-cinema/index.html" allow="fullscreen" style={{display:"block",width:"100%",height:"100dvh",border:0}} />)} />
         <Route
           path="/preflight"
           element={secure(<Preflight start={start} t={t} />)}

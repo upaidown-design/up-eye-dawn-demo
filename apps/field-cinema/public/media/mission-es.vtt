@@ -1,0 +1,44 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:12.000
+Un campo conectado: observación aérea, presencia fija e
+inspección terrestre.
+
+00:00:12.000 --> 00:00:28.000
+Station eleva el mástil, abre la bahía y prepara la plataforma
+de tijera.
+
+00:00:28.000 --> 00:00:57.000
+El dron despega y recorre la parcela. Las cámaras y las lecturas
+son simuladas.
+
+00:00:57.000 --> 00:01:12.000
+El NDVI utiliza bandas roja y NIR sintéticas. Las diferencias
+orientan la inspección.
+
+00:01:12.000 --> 00:01:34.000
+WALL-AI despliega su dron para inspeccionar el entorno local con
+RGB y térmica.
+
+00:01:34.000 --> 00:01:50.000
+Primera muestra INSECE: humedad, temperatura, pH, conductividad
+y N/P/K.
+
+00:01:50.000 --> 00:02:06.000
+Las cámaras del robot observan el entorno durante el recorrido
+al segundo punto.
+
+00:02:06.000 --> 00:02:22.000
+El robot se detiene, introduce la sonda y registra la segunda
+muestra.
+
+00:02:22.000 --> 00:02:40.000
+WALL-AI recorre otra zona del viñedo con las cámaras a bordo.
+
+00:02:40.000 --> 00:02:56.000
+Tercera muestra: siete parámetros vinculados a su posición y
+momento.
+
+00:02:56.000 --> 00:03:13.000
+El robot regresa con la sonda recogida. Tres muestras e imágenes
+quedan listas para revisión.
