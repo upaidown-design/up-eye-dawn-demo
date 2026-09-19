@@ -158,7 +158,7 @@ export function PublicHome() {
     }
   ];
 
-  const clip = clips[preview];
+  const clip = clips[preview] ?? clips[0]!;
 
   const metrics = [
     { symbol: 'H₂O', name: t('Humedad Volumétrica', 'Soil Moisture'), unit: '%', digits: 1, min: 20, max: 35, optMin: 22, optMax: 30 },
@@ -745,7 +745,8 @@ export function PublicHome() {
 
               <div className="ph-gauges-grid" aria-live="polite">
                 {metrics.map((m, idx) => {
-                  const val = samples[sample].values[idx];
+                  const currentSample = samples[sample] ?? samples[0]!;
+                  const val = currentSample.values[idx] ?? 0;
                   const pct = Math.min(100, Math.max(0, ((val - m.min) / (m.max - m.min)) * 100));
                   const isOptimal = val >= m.optMin && val <= m.optMax;
 
